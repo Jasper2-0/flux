@@ -1,6 +1,27 @@
-# Flux Examples Package
-# Note: The flux crates (flux-core, flux-operators, flux-graph, flux-macros)
-# are registered as members in the parent CME workspace.
+# Flux Workspace
+# A reactive dataflow library for operator graphs
+
+[workspace]
+members = [
+    "flux-core",
+    "flux-operators",
+    "flux-graph",
+    "flux-macros",
+]
+resolver = "2"
+
+[workspace.dependencies]
+# Internal crates
+flux-core = { path = "flux-core" }
+flux-operators = { path = "flux-operators" }
+flux-graph = { path = "flux-graph" }
+flux-macros = { path = "flux-macros" }
+
+# External dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+thiserror = "1.0"
 
 [package]
 name = "flux-examples"
@@ -68,10 +89,6 @@ name = "13_bypass_system"
 path = "examples/13_bypass_system.rs"
 
 [[example]]
-name = "14_eval_context"
-path = "examples/14_eval_context.rs"
-
-[[example]]
 name = "15_playback_settings"
 path = "examples/15_playback_settings.rs"
 
@@ -80,9 +97,25 @@ name = "16_enhanced_serialization"
 path = "examples/16_enhanced_serialization.rs"
 
 [[example]]
-name = "17_resource_management"
-path = "examples/17_resource_management.rs"
-
-[[example]]
 name = "18_phase3_operators"
 path = "examples/18_phase3_operators.rs"
+
+[[example]]
+name = "19_auto_conversion"
+path = "examples/19_auto_conversion.rs"
+
+[[example]]
+name = "20_trigger_system"
+path = "examples/20_trigger_system.rs"
+
+[[example]]
+name = "21_compiled_execution"
+path = "examples/21_compiled_execution.rs"
+
+[[example]]
+name = "22_undo_redo"
+path = "examples/22_undo_redo.rs"
+
+[[example]]
+name = "23_flow_control"
+path = "examples/23_flow_control.rs"

@@ -60,6 +60,7 @@ name = "flux-operators"
 version = "0.1.0"
 dependencies = [
  "flux-core",
+ "flux-macros",
  "serde",
 ]
 
