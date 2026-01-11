@@ -1,0 +1,11 @@
+[package]
+name = "flux-operators"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Operator implementations for the Flux operator graph system"
+
+[dependencies]
+flux-core.workspace = true
+flux-macros.workspace = true
+serde.workspace = true

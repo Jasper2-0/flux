@@ -1,0 +1,88 @@
+# Flux Examples Package
+# Note: The flux crates (flux-core, flux-operators, flux-graph, flux-macros)
+# are registered as members in the parent CME workspace.
+
+[package]
+name = "flux-examples"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+flux-core.workspace = true
+flux-operators.workspace = true
+flux-graph.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[[example]]
+name = "01_basic_arithmetic"
+path = "examples/01_basic_arithmetic.rs"
+
+[[example]]
+name = "02_sine_wave"
+path = "examples/02_sine_wave.rs"
+
+[[example]]
+name = "03_multi_input_sum"
+path = "examples/03_multi_input_sum.rs"
+
+[[example]]
+name = "04_compare_operator"
+path = "examples/04_compare_operator.rs"
+
+[[example]]
+name = "05_vec3_composition"
+path = "examples/05_vec3_composition.rs"
+
+[[example]]
+name = "06_type_validation"
+path = "examples/06_type_validation.rs"
+
+[[example]]
+name = "07_json_serialization"
+path = "examples/07_json_serialization.rs"
+
+[[example]]
+name = "08_composite_operators"
+path = "examples/08_composite_operators.rs"
+
+[[example]]
+name = "09_operator_registry"
+path = "examples/09_operator_registry.rs"
+
+[[example]]
+name = "10_animation_system"
+path = "examples/10_animation_system.rs"
+
+[[example]]
+name = "11_symbol_instance"
+path = "examples/11_symbol_instance.rs"
+
+[[example]]
+name = "12_dirty_flag_system"
+path = "examples/12_dirty_flag_system.rs"
+
+[[example]]
+name = "13_bypass_system"
+path = "examples/13_bypass_system.rs"
+
+[[example]]
+name = "14_eval_context"
+path = "examples/14_eval_context.rs"
+
+[[example]]
+name = "15_playback_settings"
+path = "examples/15_playback_settings.rs"
+
+[[example]]
+name = "16_enhanced_serialization"
+path = "examples/16_enhanced_serialization.rs"
+
+[[example]]
+name = "17_resource_management"
+path = "examples/17_resource_management.rs"
+
+[[example]]
+name = "18_phase3_operators"
+path = "examples/18_phase3_operators.rs"
