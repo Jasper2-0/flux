@@ -81,7 +81,7 @@ fn main() {
 Documentation is provided through:
 
 - **Rustdoc** - Run `cargo doc --open` for API documentation
-- **Examples** - 21 annotated examples covering all major features (see below)
+- **Examples** - 27 annotated examples covering all major features (see below)
 - **Source comments** - Extensive doc comments throughout the codebase
 
 ### Key Concepts
@@ -94,7 +94,7 @@ Documentation is provided through:
 
 ## Examples
 
-21 examples demonstrate Flux concepts:
+27 examples demonstrate Flux concepts:
 
 ```bash
 # Fundamentals
@@ -125,6 +125,14 @@ cargo run --example 20_trigger_system      # Event triggers
 cargo run --example 21_compiled_execution  # Compiled graph execution
 cargo run --example 22_undo_redo           # Command pattern undo/redo
 cargo run --example 23_flow_control        # Loops and conditionals
+
+# Showcase Examples
+cargo run --example 24_procedural_terrain  # FBM noise terrain generation
+cargo run --example 25_spring_physics      # Chained spring physics simulation
+cargo run --example 26_color_wheel         # HSV color pipeline & harmony
+cargo run --example 27_diamond_dependency  # Fan-out/fan-in caching patterns
+cargo run --example 28_state_machine       # Trigger-based finite state machine
+cargo run --example 29_performance_benchmark --release  # Graph scaling benchmarks
 ```
 
 ## Operator Categories
