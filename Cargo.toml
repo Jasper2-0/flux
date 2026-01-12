@@ -119,3 +119,27 @@ path = "examples/22_undo_redo.rs"
 [[example]]
 name = "23_flow_control"
 path = "examples/23_flow_control.rs"
+
+[[example]]
+name = "24_procedural_terrain"
+path = "examples/24_procedural_terrain.rs"
+
+[[example]]
+name = "25_spring_physics"
+path = "examples/25_spring_physics.rs"
+
+[[example]]
+name = "26_color_wheel"
+path = "examples/26_color_wheel.rs"
+
+[[example]]
+name = "27_diamond_dependency"
+path = "examples/27_diamond_dependency.rs"
+
+[[example]]
+name = "28_state_machine"
+path = "examples/28_state_machine.rs"
+
+[[example]]
+name = "29_performance_benchmark"
+path = "examples/29_performance_benchmark.rs"
