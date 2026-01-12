@@ -576,6 +576,252 @@ impl OperatorMeta for ListMapOp {
 }
 
 // ============================================================================
+// ListFilter Operator
+// ============================================================================
+
+pub struct ListFilterOp {
+    id: Id,
+    inputs: [InputPort; 3],
+    outputs: [OutputPort; 1],
+}
+
+impl ListFilterOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("List"),
+                InputPort::float("Threshold", 0.0),
+                InputPort::int("Mode", 0), // 0=GT, 1=LT, 2=GTE, 3=LTE
+            ],
+            outputs: [OutputPort::float_list("Filtered")],
+        }
+    }
+}
+
+impl Default for ListFilterOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListFilterOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListFilter" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let list = get_list(&self.inputs[0], get_input);
+        let threshold = get_float(&self.inputs[1], get_input);
+        let mode = get_int(&self.inputs[2], get_input);
+
+        let result: Vec<f32> = list.into_iter().filter(|&v| {
+            match mode {
+                0 => v > threshold,   // GT
+                1 => v < threshold,   // LT
+                2 => v >= threshold,  // GTE
+                3 => v <= threshold,  // LTE
+                _ => v > threshold,   // Default to GT
+            }
+        }).collect();
+
+        self.outputs[0].value = Value::FloatList(result);
+    }
+}
+
+impl OperatorMeta for ListFilterOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Filter list elements by threshold comparison" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("List")),
+            1 => Some(PortMeta::new("Threshold")),
+            2 => Some(PortMeta::new("Mode")), // 0=GT, 1=LT, 2=GTE, 3=LTE
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Filtered").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+// ============================================================================
+// ListConcat Operator
+// ============================================================================
+
+pub struct ListConcatOp {
+    id: Id,
+    inputs: [InputPort; 2],
+    outputs: [OutputPort; 1],
+}
+
+impl ListConcatOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("ListA"),
+                InputPort::float_list("ListB"),
+            ],
+            outputs: [OutputPort::float_list("Combined")],
+        }
+    }
+}
+
+impl Default for ListConcatOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListConcatOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListConcat" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let list_a = get_list(&self.inputs[0], get_input);
+        let list_b = get_list(&self.inputs[1], get_input);
+
+        let mut result = list_a;
+        result.extend(list_b);
+
+        self.outputs[0].value = Value::FloatList(result);
+    }
+}
+
+impl OperatorMeta for ListConcatOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Concatenate two lists" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("ListA")),
+            1 => Some(PortMeta::new("ListB")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Combined").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+// ============================================================================
+// ListSlice Operator
+// ============================================================================
+
+pub struct ListSliceOp {
+    id: Id,
+    inputs: [InputPort; 3],
+    outputs: [OutputPort; 1],
+}
+
+impl ListSliceOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("List"),
+                InputPort::int("Start", 0),
+                InputPort::int("End", i32::MAX), // i32::MAX means end of list
+            ],
+            outputs: [OutputPort::float_list("Slice")],
+        }
+    }
+}
+
+impl Default for ListSliceOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListSliceOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListSlice" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let list = get_list(&self.inputs[0], get_input);
+        let start = get_int(&self.inputs[1], get_input);
+        let end = get_int(&self.inputs[2], get_input);
+
+        let len = list.len() as i32;
+        if len == 0 {
+            self.outputs[0].value = Value::FloatList(vec![]);
+            return;
+        }
+
+        // Handle negative indices (Python-style)
+        // For start: -1 means last element, -2 means second-to-last, etc.
+        let start_idx = if start < 0 {
+            (len + start).max(0) as usize
+        } else {
+            (start as usize).min(list.len())
+        };
+
+        // For end: negative indices wrap from end (Python-style)
+        // -1 means last element position (exclusive = up to but not including last)
+        // Use i32::MAX (or any large positive) for "to the end"
+        let end_idx = if end < 0 {
+            (len + end).max(0) as usize
+        } else {
+            (end as usize).min(list.len())
+        };
+
+        let result = if start_idx < end_idx {
+            list[start_idx..end_idx].to_vec()
+        } else {
+            vec![]
+        };
+
+        self.outputs[0].value = Value::FloatList(result);
+    }
+}
+
+impl OperatorMeta for ListSliceOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Extract a slice from list (supports negative indices)" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("List")),
+            1 => Some(PortMeta::new("Start")), // Negative = from end
+            2 => Some(PortMeta::new("End")),   // Exclusive; negative = from end
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Slice").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+// ============================================================================
 // Registration
 // ============================================================================
 
@@ -658,6 +904,36 @@ pub fn register(registry: &OperatorRegistry) {
             description: "Scale and offset list values",
         },
         || capture_meta(ListMapOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListFilter",
+            category: "List",
+            description: "Filter list by threshold",
+        },
+        || capture_meta(ListFilterOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListConcat",
+            category: "List",
+            description: "Concatenate two lists",
+        },
+        || capture_meta(ListConcatOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListSlice",
+            category: "List",
+            description: "Extract slice from list",
+        },
+        || capture_meta(ListSliceOp::new()),
     );
 }
 
@@ -750,6 +1026,105 @@ mod tests {
             assert!((result[0] - 12.0).abs() < 0.001);
             assert!((result[1] - 14.0).abs() < 0.001);
             assert!((result[2] - 16.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_filter() {
+        let mut op = ListFilterOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::FloatList(vec![1.0, 5.0, 2.0, 8.0, 3.0]);
+        op.inputs[1].default = Value::Float(3.0); // Threshold
+        op.inputs[2].default = Value::Int(0); // Mode: GT (greater than)
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 2);
+            assert!((result[0] - 5.0).abs() < 0.001);
+            assert!((result[1] - 8.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+
+        // Test LT mode
+        op.inputs[2].default = Value::Int(1); // Mode: LT (less than)
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 2);
+            assert!((result[0] - 1.0).abs() < 0.001);
+            assert!((result[1] - 2.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_concat() {
+        let mut op = ListConcatOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::FloatList(vec![1.0, 2.0]);
+        op.inputs[1].default = Value::FloatList(vec![3.0, 4.0, 5.0]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 5);
+            assert!((result[0] - 1.0).abs() < 0.001);
+            assert!((result[1] - 2.0).abs() < 0.001);
+            assert!((result[2] - 3.0).abs() < 0.001);
+            assert!((result[3] - 4.0).abs() < 0.001);
+            assert!((result[4] - 5.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_slice() {
+        let mut op = ListSliceOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::FloatList(vec![10.0, 20.0, 30.0, 40.0, 50.0]);
+
+        // Slice [1:3] -> [20, 30]
+        op.inputs[1].default = Value::Int(1);
+        op.inputs[2].default = Value::Int(3);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 2);
+            assert!((result[0] - 20.0).abs() < 0.001);
+            assert!((result[1] - 30.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+
+        // Negative index: [-2:-1] -> last element excluding the very last
+        // Actually [-2:-1] in Python means [index -2 to -1) = [40]
+        op.inputs[1].default = Value::Int(-2);
+        op.inputs[2].default = Value::Int(-1);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 1);
+            assert!((result[0] - 40.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+
+        // First 3 elements: [0:3]
+        op.inputs[1].default = Value::Int(0);
+        op.inputs[2].default = Value::Int(3);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 3);
+            assert!((result[0] - 10.0).abs() < 0.001);
+            assert!((result[2] - 30.0).abs() < 0.001);
         } else {
             panic!("Expected FloatList");
         }

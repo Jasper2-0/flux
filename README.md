@@ -81,7 +81,7 @@ fn main() {
 Documentation is provided through:
 
 - **Rustdoc** - Run `cargo doc --open` for API documentation
-- **Examples** - 27 annotated examples covering all major features (see below)
+- **Examples** - 28 annotated examples covering all major features (see below)
 - **Source comments** - Extensive doc comments throughout the codebase
 
 ### Key Concepts
@@ -94,7 +94,7 @@ Documentation is provided through:
 
 ## Examples
 
-27 examples demonstrate Flux concepts:
+28 examples demonstrate Flux concepts:
 
 ```bash
 # Fundamentals
@@ -133,6 +133,7 @@ cargo run --example 26_color_wheel         # HSV color pipeline & harmony
 cargo run --example 27_diamond_dependency  # Fan-out/fan-in caching patterns
 cargo run --example 28_state_machine       # Trigger-based finite state machine
 cargo run --example 29_performance_benchmark --release  # Graph scaling benchmarks
+cargo run --example 30_list_processing        # List operators in graph context
 ```
 
 ## Operator Categories
@@ -146,7 +147,7 @@ cargo run --example 29_performance_benchmark --release  # Graph scaling benchmar
 | Flow | 14 | Switch, Select, Gate, Loop, ForEach, Delay, Counter, Trigger |
 | Logic | 13 | And, Or, Not, Compare, IntAdd, IntClamp, IntToFloat |
 | String | 8 | StringConcat, Format, Split, Contains, FloatToString |
-| List | 8 | FloatList, ListGet, ListSum, ListAverage, ListMap |
+| List | 11 | FloatList, ListGet, ListSum, ListAverage, ListMap, ListFilter, ListSlice, ListConcat |
 | Utility | 6 | Print, Passthrough, Comment, TypeOf, IsConnected |
 
 ## Design Philosophy

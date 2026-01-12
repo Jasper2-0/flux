@@ -143,3 +143,7 @@ path = "examples/28_state_machine.rs"
 [[example]]
 name = "29_performance_benchmark"
 path = "examples/29_performance_benchmark.rs"
+
+[[example]]
+name = "30_list_processing"
+path = "examples/30_list_processing.rs"

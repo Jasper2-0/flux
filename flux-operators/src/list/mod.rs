@@ -1,6 +1,7 @@
-//! List operators (8 total)
+//! List operators (11 total)
 //! - FloatList, ListLength, ListGet, ListSum
 //! - ListAverage, ListMin, ListMax, ListMap
+//! - ListFilter, ListConcat, ListSlice
 
 use crate::registry::OperatorRegistry;
 
