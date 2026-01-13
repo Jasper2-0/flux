@@ -10,10 +10,13 @@
 mod color;
 mod gradient;
 mod matrix;
+mod ops;
 
 pub use color::Color;
 pub use gradient::{Gradient, GradientStop};
 pub use matrix::Matrix4;
+
+// Re-export ops module items (the std::ops impls are automatic)
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -42,7 +45,12 @@ pub enum Value {
     // Collections
     FloatList(Vec<f32>),
     IntList(Vec<i32>),
+    BoolList(Vec<bool>),
+    Vec2List(Vec<[f32; 2]>),
     Vec3List(Vec<[f32; 3]>),
+    Vec4List(Vec<[f32; 4]>),
+    ColorList(Vec<Color>),
+    StringList(Vec<String>),
 }
 
 impl Value {
@@ -61,7 +69,12 @@ impl Value {
             Value::Matrix4(_) => ValueType::Matrix4,
             Value::FloatList(_) => ValueType::FloatList,
             Value::IntList(_) => ValueType::IntList,
+            Value::BoolList(_) => ValueType::BoolList,
+            Value::Vec2List(_) => ValueType::Vec2List,
             Value::Vec3List(_) => ValueType::Vec3List,
+            Value::Vec4List(_) => ValueType::Vec4List,
+            Value::ColorList(_) => ValueType::ColorList,
+            Value::StringList(_) => ValueType::StringList,
         }
     }
 
@@ -180,6 +193,46 @@ impl Value {
         }
     }
 
+    /// Try to get as bool list
+    pub fn as_bool_list(&self) -> Option<&[bool]> {
+        match self {
+            Value::BoolList(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Try to get as vec2 list
+    pub fn as_vec2_list(&self) -> Option<&[[f32; 2]]> {
+        match self {
+            Value::Vec2List(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Try to get as vec4 list
+    pub fn as_vec4_list(&self) -> Option<&[[f32; 4]]> {
+        match self {
+            Value::Vec4List(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Try to get as color list
+    pub fn as_color_list(&self) -> Option<&[Color]> {
+        match self {
+            Value::ColorList(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Try to get as string list
+    pub fn as_string_list(&self) -> Option<&[String]> {
+        match self {
+            Value::StringList(v) => Some(v),
+            _ => None,
+        }
+    }
+
     // ========== Type Coercion ==========
 
     /// Attempt to coerce this value to the target type
@@ -225,6 +278,85 @@ impl Value {
             (Value::Float(f), ValueType::String) => Some(Value::String(f.to_string())),
             (Value::Bool(b), ValueType::String) => Some(Value::String(b.to_string())),
 
+            // ========== Collection Coercions ==========
+
+            // Scalar → List (wrap as single-element list)
+            (Value::Float(f), ValueType::FloatList) => Some(Value::FloatList(vec![*f])),
+            (Value::Int(i), ValueType::IntList) => Some(Value::IntList(vec![*i])),
+            (Value::Bool(b), ValueType::BoolList) => Some(Value::BoolList(vec![*b])),
+            (Value::Vec2(v), ValueType::Vec2List) => Some(Value::Vec2List(vec![*v])),
+            (Value::Vec3(v), ValueType::Vec3List) => Some(Value::Vec3List(vec![*v])),
+            (Value::Vec4(v), ValueType::Vec4List) => Some(Value::Vec4List(vec![*v])),
+            (Value::Color(c), ValueType::ColorList) => Some(Value::ColorList(vec![*c])),
+            (Value::String(s), ValueType::StringList) => Some(Value::StringList(vec![s.clone()])),
+
+            // IntList ↔ FloatList (element-wise conversion)
+            (Value::IntList(il), ValueType::FloatList) => {
+                Some(Value::FloatList(il.iter().map(|i| *i as f32).collect()))
+            }
+            (Value::FloatList(fl), ValueType::IntList) => {
+                Some(Value::IntList(fl.iter().map(|f| *f as i32).collect()))
+            }
+
+            // ColorList ↔ Vec4List (isomorphic)
+            (Value::ColorList(cl), ValueType::Vec4List) => {
+                Some(Value::Vec4List(cl.iter().map(|c| c.to_array()).collect()))
+            }
+            (Value::Vec4List(vl), ValueType::ColorList) => {
+                Some(Value::ColorList(vl.iter().map(|v| Color::from_array(*v)).collect()))
+            }
+
+            // Vec3List → FloatList (flatten xyz, xyz, xyz...)
+            (Value::Vec3List(vl), ValueType::FloatList) => {
+                let flattened: Vec<f32> = vl.iter().flat_map(|v| vec![v[0], v[1], v[2]]).collect();
+                Some(Value::FloatList(flattened))
+            }
+
+            // FloatList → Vec3List (group by 3, truncate remainder)
+            (Value::FloatList(fl), ValueType::Vec3List) => {
+                let vec3s: Vec<[f32; 3]> = fl
+                    .chunks(3)
+                    .filter(|c| c.len() == 3)
+                    .map(|c| [c[0], c[1], c[2]])
+                    .collect();
+                Some(Value::Vec3List(vec3s))
+            }
+
+            // Vec2List → FloatList (flatten xy, xy, xy...)
+            (Value::Vec2List(vl), ValueType::FloatList) => {
+                let flattened: Vec<f32> = vl.iter().flat_map(|v| vec![v[0], v[1]]).collect();
+                Some(Value::FloatList(flattened))
+            }
+
+            // FloatList → Vec2List (group by 2, truncate remainder)
+            (Value::FloatList(fl), ValueType::Vec2List) => {
+                let vec2s: Vec<[f32; 2]> = fl
+                    .chunks(2)
+                    .filter(|c| c.len() == 2)
+                    .map(|c| [c[0], c[1]])
+                    .collect();
+                Some(Value::Vec2List(vec2s))
+            }
+
+            // Vec4List → FloatList (flatten xyzw, xyzw, xyzw...)
+            (Value::Vec4List(vl), ValueType::FloatList) => {
+                let flattened: Vec<f32> = vl
+                    .iter()
+                    .flat_map(|v| vec![v[0], v[1], v[2], v[3]])
+                    .collect();
+                Some(Value::FloatList(flattened))
+            }
+
+            // FloatList → Vec4List (group by 4, truncate remainder)
+            (Value::FloatList(fl), ValueType::Vec4List) => {
+                let vec4s: Vec<[f32; 4]> = fl
+                    .chunks(4)
+                    .filter(|c| c.len() == 4)
+                    .map(|c| [c[0], c[1], c[2], c[3]])
+                    .collect();
+                Some(Value::Vec4List(vec4s))
+            }
+
             // No valid conversion
             _ => None,
         }
@@ -257,7 +389,12 @@ impl fmt::Display for Value {
             Value::Matrix4(_) => write!(f, "Matrix4"),
             Value::FloatList(v) => write!(f, "FloatList[{}]", v.len()),
             Value::IntList(v) => write!(f, "IntList[{}]", v.len()),
+            Value::BoolList(v) => write!(f, "BoolList[{}]", v.len()),
+            Value::Vec2List(v) => write!(f, "Vec2List[{}]", v.len()),
             Value::Vec3List(v) => write!(f, "Vec3List[{}]", v.len()),
+            Value::Vec4List(v) => write!(f, "Vec4List[{}]", v.len()),
+            Value::ColorList(v) => write!(f, "ColorList[{}]", v.len()),
+            Value::StringList(v) => write!(f, "StringList[{}]", v.len()),
         }
     }
 }
@@ -345,7 +482,12 @@ pub enum ValueType {
     Matrix4,
     FloatList,
     IntList,
+    BoolList,
+    Vec2List,
     Vec3List,
+    Vec4List,
+    ColorList,
+    StringList,
 }
 
 /// Type categories for polymorphic inputs.
@@ -382,6 +524,8 @@ pub enum TypeCategory {
     List,
     /// Matrix types: Matrix4
     Matrix,
+    /// Types that support arithmetic operations (+, -, *, /): Float, Int, Vec2, Vec3, Vec4, Color
+    Arithmetic,
     /// Any type (accepts all)
     Any,
 }
@@ -402,7 +546,12 @@ impl ValueType {
             ValueType::Matrix4 => Value::Matrix4(Matrix4::IDENTITY),
             ValueType::FloatList => Value::FloatList(Vec::new()),
             ValueType::IntList => Value::IntList(Vec::new()),
+            ValueType::BoolList => Value::BoolList(Vec::new()),
+            ValueType::Vec2List => Value::Vec2List(Vec::new()),
             ValueType::Vec3List => Value::Vec3List(Vec::new()),
+            ValueType::Vec4List => Value::Vec4List(Vec::new()),
+            ValueType::ColorList => Value::ColorList(Vec::new()),
+            ValueType::StringList => Value::StringList(Vec::new()),
         }
     }
 
@@ -437,6 +586,29 @@ impl ValueType {
                 | (ValueType::Int, ValueType::String)
                 | (ValueType::Float, ValueType::String)
                 | (ValueType::Bool, ValueType::String)
+                // Scalar → List
+                | (ValueType::Float, ValueType::FloatList)
+                | (ValueType::Int, ValueType::IntList)
+                | (ValueType::Bool, ValueType::BoolList)
+                | (ValueType::Vec2, ValueType::Vec2List)
+                | (ValueType::Vec3, ValueType::Vec3List)
+                | (ValueType::Vec4, ValueType::Vec4List)
+                | (ValueType::Color, ValueType::ColorList)
+                | (ValueType::String, ValueType::StringList)
+                // IntList ↔ FloatList
+                | (ValueType::IntList, ValueType::FloatList)
+                | (ValueType::FloatList, ValueType::IntList)
+                // ColorList ↔ Vec4List
+                | (ValueType::ColorList, ValueType::Vec4List)
+                | (ValueType::Vec4List, ValueType::ColorList)
+                // VecNList → FloatList (flatten)
+                | (ValueType::Vec2List, ValueType::FloatList)
+                | (ValueType::Vec3List, ValueType::FloatList)
+                | (ValueType::Vec4List, ValueType::FloatList)
+                // FloatList → VecNList (group)
+                | (ValueType::FloatList, ValueType::Vec2List)
+                | (ValueType::FloatList, ValueType::Vec3List)
+                | (ValueType::FloatList, ValueType::Vec4List)
         )
     }
 
@@ -460,8 +632,22 @@ impl ValueType {
             TypeCategory::Numeric => matches!(self, Self::Float | Self::Int),
             TypeCategory::Vector => matches!(self, Self::Vec2 | Self::Vec3 | Self::Vec4),
             TypeCategory::ColorLike => matches!(self, Self::Color | Self::Vec4 | Self::Vec3),
-            TypeCategory::List => matches!(self, Self::FloatList | Self::IntList | Self::Vec3List),
+            TypeCategory::List => matches!(
+                self,
+                Self::FloatList
+                    | Self::IntList
+                    | Self::BoolList
+                    | Self::Vec2List
+                    | Self::Vec3List
+                    | Self::Vec4List
+                    | Self::ColorList
+                    | Self::StringList
+            ),
             TypeCategory::Matrix => matches!(self, Self::Matrix4),
+            TypeCategory::Arithmetic => matches!(
+                self,
+                Self::Float | Self::Int | Self::Vec2 | Self::Vec3 | Self::Vec4 | Self::Color
+            ),
             TypeCategory::Any => true,
         }
     }
@@ -498,6 +684,9 @@ impl ValueType {
         if self.is_in_category(TypeCategory::Matrix) {
             cats.push(TypeCategory::Matrix);
         }
+        if self.is_in_category(TypeCategory::Arithmetic) {
+            cats.push(TypeCategory::Arithmetic);
+        }
 
         cats
     }
@@ -518,7 +707,12 @@ impl fmt::Display for ValueType {
             ValueType::Matrix4 => write!(f, "Matrix4"),
             ValueType::FloatList => write!(f, "FloatList"),
             ValueType::IntList => write!(f, "IntList"),
+            ValueType::BoolList => write!(f, "BoolList"),
+            ValueType::Vec2List => write!(f, "Vec2List"),
             ValueType::Vec3List => write!(f, "Vec3List"),
+            ValueType::Vec4List => write!(f, "Vec4List"),
+            ValueType::ColorList => write!(f, "ColorList"),
+            ValueType::StringList => write!(f, "StringList"),
         }
     }
 }
@@ -648,27 +842,31 @@ mod tests {
 
     #[test]
     fn test_categories_method() {
-        // Float is only numeric
+        // Float is numeric and arithmetic
         let float_cats = ValueType::Float.categories();
-        assert_eq!(float_cats.len(), 1);
+        assert_eq!(float_cats.len(), 2);
         assert!(float_cats.contains(&TypeCategory::Numeric));
+        assert!(float_cats.contains(&TypeCategory::Arithmetic));
 
-        // Vec4 is both vector and color-like
+        // Vec4 is vector, color-like, and arithmetic
         let vec4_cats = ValueType::Vec4.categories();
-        assert_eq!(vec4_cats.len(), 2);
+        assert_eq!(vec4_cats.len(), 3);
         assert!(vec4_cats.contains(&TypeCategory::Vector));
         assert!(vec4_cats.contains(&TypeCategory::ColorLike));
+        assert!(vec4_cats.contains(&TypeCategory::Arithmetic));
 
-        // Vec3 is also both vector and color-like
+        // Vec3 is vector, color-like, and arithmetic
         let vec3_cats = ValueType::Vec3.categories();
-        assert_eq!(vec3_cats.len(), 2);
+        assert_eq!(vec3_cats.len(), 3);
         assert!(vec3_cats.contains(&TypeCategory::Vector));
         assert!(vec3_cats.contains(&TypeCategory::ColorLike));
+        assert!(vec3_cats.contains(&TypeCategory::Arithmetic));
 
-        // Color is only color-like
+        // Color is color-like and arithmetic
         let color_cats = ValueType::Color.categories();
-        assert_eq!(color_cats.len(), 1);
+        assert_eq!(color_cats.len(), 2);
         assert!(color_cats.contains(&TypeCategory::ColorLike));
+        assert!(color_cats.contains(&TypeCategory::Arithmetic));
 
         // String has no categories (besides Any which we don't include)
         let string_cats = ValueType::String.categories();

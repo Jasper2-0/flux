@@ -553,7 +553,7 @@ where
 /// This registers all operators with captured `PortMeta` so that UI code can
 /// access input port metadata (ranges, labels, units) without downcasting.
 pub fn create_default_registry() -> OperatorRegistry {
-    use crate::builtin::{AddOp, CompareMode, CompareOp, ConstantOp, MultiplyOp, ScopeOp, SineWaveOp};
+    use crate::builtin::{CompareMode, CompareOp, ConstantOp, ScopeOp, SineWaveOp};
 
     let registry = OperatorRegistry::new();
 
@@ -586,26 +586,7 @@ pub fn create_default_registry() -> OperatorRegistry {
         || capture_meta(SineWaveOp::new()),
     );
 
-    // Add and Multiply are in builtin, not math/arithmetic
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Add",
-            category: "Math",
-            description: "Adds two values together",
-        },
-        || capture_meta(AddOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Multiply",
-            category: "Math",
-            description: "Multiplies two values together",
-        },
-        || capture_meta(MultiplyOp::new()),
-    );
+    // Add and Multiply are now registered in math/arithmetic.rs as polymorphic operators
 
     // Compare has parameter-based construction (mode enum)
     registry.register_with_params(

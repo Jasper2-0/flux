@@ -368,10 +368,15 @@ impl Operator for TypeOfOp {
             Value::Vec4(_) => "Vec4",
             Value::Color(_) => "Color",
             Value::Gradient(_) => "Gradient",
+            Value::Matrix4(_) => "Matrix4",
             Value::FloatList(_) => "FloatList",
             Value::IntList(_) => "IntList",
-            Value::Matrix4(_) => "Matrix4",
+            Value::BoolList(_) => "BoolList",
+            Value::Vec2List(_) => "Vec2List",
             Value::Vec3List(_) => "Vec3List",
+            Value::Vec4List(_) => "Vec4List",
+            Value::ColorList(_) => "ColorList",
+            Value::StringList(_) => "StringList",
         };
         self.outputs[0].set_string(type_name);
     }

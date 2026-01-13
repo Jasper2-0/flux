@@ -1,10 +1,19 @@
 //! List operators: FloatList, ListLength, ListGet, ListSum, ListAverage, ListMin, ListMax, ListMap
+//!
+//! ## Polymorphic vs Type-Specific
+//!
+//! **Polymorphic operators** (work with any list type):
+//! - ListLength, ListGet, ListSlice, ListConcat, ListReverse, ListFirst, ListLast
+//!
+//! **Type-specific operators** (require specific element types):
+//! - FloatList (creation), ListSum, ListAverage, ListMin, ListMax, ListMap, ListFilter
 
 use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
+use flux_core::value::{Color, ValueType};
 use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
@@ -24,6 +33,7 @@ fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
     }
 }
 
+/// Get float list (legacy helper for FloatList-specific operators)
 fn get_list(input: &InputPort, get_input: InputResolver) -> Vec<f32> {
     match input.connection {
         Some((node_id, output_idx)) => {
@@ -39,6 +49,210 @@ fn get_list(input: &InputPort, get_input: InputResolver) -> Vec<f32> {
             Value::Float(f) => vec![*f],
             _ => Vec::new(),
         },
+    }
+}
+
+// ============================================================================
+// Polymorphic List Helpers
+// ============================================================================
+
+/// Get any list value (for polymorphic operators)
+fn get_any_list(input: &InputPort, get_input: InputResolver) -> Value {
+    match input.connection {
+        Some((node_id, output_idx)) => get_input(node_id, output_idx),
+        None => input.default.clone(),
+    }
+}
+
+/// Get length of any list type
+fn list_length(value: &Value) -> usize {
+    match value {
+        Value::FloatList(l) => l.len(),
+        Value::IntList(l) => l.len(),
+        Value::BoolList(l) => l.len(),
+        Value::Vec2List(l) => l.len(),
+        Value::Vec3List(l) => l.len(),
+        Value::Vec4List(l) => l.len(),
+        Value::ColorList(l) => l.len(),
+        Value::StringList(l) => l.len(),
+        // Scalars are treated as single-element lists for compatibility
+        Value::Float(_) | Value::Int(_) | Value::Bool(_) => 1,
+        Value::Vec2(_) | Value::Vec3(_) | Value::Vec4(_) | Value::Color(_) | Value::String(_) => 1,
+        _ => 0,
+    }
+}
+
+/// Get element at index from any list type (returns Value)
+fn list_get(value: &Value, index: i32) -> Value {
+    let len = list_length(value);
+    if len == 0 {
+        return value.value_type().default_value();
+    }
+
+    // Handle negative indexing
+    let idx = if index < 0 {
+        (len as i32 + index).max(0) as usize
+    } else {
+        index as usize
+    };
+
+    if idx >= len {
+        return value.value_type().default_value();
+    }
+
+    match value {
+        Value::FloatList(l) => Value::Float(l.get(idx).copied().unwrap_or(0.0)),
+        Value::IntList(l) => Value::Int(l.get(idx).copied().unwrap_or(0)),
+        Value::BoolList(l) => Value::Bool(l.get(idx).copied().unwrap_or(false)),
+        Value::Vec2List(l) => Value::Vec2(l.get(idx).copied().unwrap_or([0.0, 0.0])),
+        Value::Vec3List(l) => Value::Vec3(l.get(idx).copied().unwrap_or([0.0, 0.0, 0.0])),
+        Value::Vec4List(l) => Value::Vec4(l.get(idx).copied().unwrap_or([0.0, 0.0, 0.0, 0.0])),
+        Value::ColorList(l) => Value::Color(l.get(idx).copied().unwrap_or(Color::BLACK)),
+        Value::StringList(l) => Value::String(l.get(idx).cloned().unwrap_or_default()),
+        // Scalars return themselves at index 0
+        Value::Float(f) if idx == 0 => Value::Float(*f),
+        Value::Int(i) if idx == 0 => Value::Int(*i),
+        Value::Bool(b) if idx == 0 => Value::Bool(*b),
+        Value::Vec2(v) if idx == 0 => Value::Vec2(*v),
+        Value::Vec3(v) if idx == 0 => Value::Vec3(*v),
+        Value::Vec4(v) if idx == 0 => Value::Vec4(*v),
+        Value::Color(c) if idx == 0 => Value::Color(*c),
+        Value::String(s) if idx == 0 => Value::String(s.clone()),
+        _ => value.value_type().default_value(),
+    }
+}
+
+/// Slice any list type (returns same list type)
+fn list_slice(value: &Value, start: i32, end: i32) -> Value {
+    let len = list_length(value) as i32;
+    if len == 0 {
+        return value.clone();
+    }
+
+    // Handle negative indices (Python-style)
+    let start_idx = if start < 0 {
+        (len + start).max(0) as usize
+    } else {
+        (start as usize).min(len as usize)
+    };
+
+    let end_idx = if end < 0 {
+        (len + end).max(0) as usize
+    } else {
+        (end as usize).min(len as usize)
+    };
+
+    if start_idx >= end_idx {
+        // Return empty list of same type
+        return match value {
+            Value::FloatList(_) => Value::FloatList(vec![]),
+            Value::IntList(_) => Value::IntList(vec![]),
+            Value::BoolList(_) => Value::BoolList(vec![]),
+            Value::Vec2List(_) => Value::Vec2List(vec![]),
+            Value::Vec3List(_) => Value::Vec3List(vec![]),
+            Value::Vec4List(_) => Value::Vec4List(vec![]),
+            Value::ColorList(_) => Value::ColorList(vec![]),
+            Value::StringList(_) => Value::StringList(vec![]),
+            _ => value.clone(),
+        };
+    }
+
+    match value {
+        Value::FloatList(l) => Value::FloatList(l[start_idx..end_idx].to_vec()),
+        Value::IntList(l) => Value::IntList(l[start_idx..end_idx].to_vec()),
+        Value::BoolList(l) => Value::BoolList(l[start_idx..end_idx].to_vec()),
+        Value::Vec2List(l) => Value::Vec2List(l[start_idx..end_idx].to_vec()),
+        Value::Vec3List(l) => Value::Vec3List(l[start_idx..end_idx].to_vec()),
+        Value::Vec4List(l) => Value::Vec4List(l[start_idx..end_idx].to_vec()),
+        Value::ColorList(l) => Value::ColorList(l[start_idx..end_idx].to_vec()),
+        Value::StringList(l) => Value::StringList(l[start_idx..end_idx].to_vec()),
+        _ => value.clone(),
+    }
+}
+
+/// Concatenate two lists of the same type
+fn list_concat(a: &Value, b: &Value) -> Value {
+    match (a, b) {
+        (Value::FloatList(la), Value::FloatList(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb);
+            Value::FloatList(result)
+        }
+        (Value::IntList(la), Value::IntList(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb);
+            Value::IntList(result)
+        }
+        (Value::BoolList(la), Value::BoolList(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb);
+            Value::BoolList(result)
+        }
+        (Value::Vec2List(la), Value::Vec2List(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb);
+            Value::Vec2List(result)
+        }
+        (Value::Vec3List(la), Value::Vec3List(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb);
+            Value::Vec3List(result)
+        }
+        (Value::Vec4List(la), Value::Vec4List(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb);
+            Value::Vec4List(result)
+        }
+        (Value::ColorList(la), Value::ColorList(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb);
+            Value::ColorList(result)
+        }
+        (Value::StringList(la), Value::StringList(lb)) => {
+            let mut result = la.clone();
+            result.extend(lb.iter().cloned());
+            Value::StringList(result)
+        }
+        // Cross-type: try coercion or return first list
+        _ => {
+            // Attempt to coerce b to a's type
+            if let Some(coerced) = b.coerce_to(a.value_type()) {
+                list_concat(a, &coerced)
+            } else {
+                a.clone()
+            }
+        }
+    }
+}
+
+/// Reverse any list type
+fn list_reverse(value: &Value) -> Value {
+    match value {
+        Value::FloatList(l) => Value::FloatList(l.iter().rev().copied().collect()),
+        Value::IntList(l) => Value::IntList(l.iter().rev().copied().collect()),
+        Value::BoolList(l) => Value::BoolList(l.iter().rev().copied().collect()),
+        Value::Vec2List(l) => Value::Vec2List(l.iter().rev().copied().collect()),
+        Value::Vec3List(l) => Value::Vec3List(l.iter().rev().copied().collect()),
+        Value::Vec4List(l) => Value::Vec4List(l.iter().rev().copied().collect()),
+        Value::ColorList(l) => Value::ColorList(l.iter().rev().copied().collect()),
+        Value::StringList(l) => Value::StringList(l.iter().rev().cloned().collect()),
+        _ => value.clone(),
+    }
+}
+
+/// Get output type for element extraction from a list type
+fn element_type_for_list(list_type: ValueType) -> ValueType {
+    match list_type {
+        ValueType::FloatList => ValueType::Float,
+        ValueType::IntList => ValueType::Int,
+        ValueType::BoolList => ValueType::Bool,
+        ValueType::Vec2List => ValueType::Vec2,
+        ValueType::Vec3List => ValueType::Vec3,
+        ValueType::Vec4List => ValueType::Vec4,
+        ValueType::ColorList => ValueType::Color,
+        ValueType::StringList => ValueType::String,
+        // For non-list types (scalar passthrough), return the same type
+        other => other,
     }
 }
 
@@ -122,7 +336,7 @@ impl OperatorMeta for FloatListOp {
 }
 
 // ============================================================================
-// ListLength Operator
+// ListLength Operator (Polymorphic)
 // ============================================================================
 
 pub struct ListLengthOp {
@@ -135,6 +349,7 @@ impl ListLengthOp {
     pub fn new() -> Self {
         Self {
             id: Id::new(),
+            // Use FloatList as default, but accepts any list via TypeCategory::List
             inputs: [InputPort::float_list("List")],
             outputs: [OutputPort::int("Length")],
         }
@@ -158,15 +373,15 @@ impl Operator for ListLengthOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let list = get_list(&self.inputs[0], get_input);
-        self.outputs[0].set_int(list.len() as i32);
+        let list_value = get_any_list(&self.inputs[0], get_input);
+        self.outputs[0].set_int(list_length(&list_value) as i32);
     }
 }
 
 impl OperatorMeta for ListLengthOp {
     fn category(&self) -> &'static str { "List" }
     fn category_color(&self) -> [f32; 4] { category_colors::LIST }
-    fn description(&self) -> &'static str { "Get the length of a list" }
+    fn description(&self) -> &'static str { "Get the length of any list type" }
     fn input_meta(&self, index: usize) -> Option<PortMeta> {
         match index {
             0 => Some(PortMeta::new("List")),
@@ -182,13 +397,13 @@ impl OperatorMeta for ListLengthOp {
 }
 
 // ============================================================================
-// ListGet Operator
+// ListGet Operator (Polymorphic)
 // ============================================================================
 
 pub struct ListGetOp {
     id: Id,
     inputs: [InputPort; 2],
-    outputs: [OutputPort; 1],
+    outputs: Vec<OutputPort>,
 }
 
 impl ListGetOp {
@@ -199,7 +414,8 @@ impl ListGetOp {
                 InputPort::float_list("List"),
                 InputPort::int("Index", 0),
             ],
-            outputs: [OutputPort::float("Value")],
+            // Dynamic output type based on input list type
+            outputs: vec![OutputPort::float("Value")],
         }
     }
 }
@@ -221,25 +437,25 @@ impl Operator for ListGetOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let list = get_list(&self.inputs[0], get_input);
+        let list_value = get_any_list(&self.inputs[0], get_input);
         let index = get_int(&self.inputs[1], get_input);
 
-        // Handle negative indexing from end
-        let idx = if index < 0 {
-            (list.len() as i32 + index).max(0) as usize
-        } else {
-            index as usize
-        };
+        // Use polymorphic list_get
+        let value = list_get(&list_value, index);
 
-        let value = list.get(idx).copied().unwrap_or(0.0);
-        self.outputs[0].set_float(value);
+        // Update output type if needed and set value
+        let elem_type = element_type_for_list(list_value.value_type());
+        if self.outputs[0].value_type != elem_type {
+            self.outputs[0] = OutputPort::new("Value", elem_type);
+        }
+        self.outputs[0].value = value;
     }
 }
 
 impl OperatorMeta for ListGetOp {
     fn category(&self) -> &'static str { "List" }
     fn category_color(&self) -> [f32; 4] { category_colors::LIST }
-    fn description(&self) -> &'static str { "Get value at index from list" }
+    fn description(&self) -> &'static str { "Get value at index from any list (supports negative indexing)" }
     fn input_meta(&self, index: usize) -> Option<PortMeta> {
         match index {
             0 => Some(PortMeta::new("List")),
@@ -655,13 +871,13 @@ impl OperatorMeta for ListFilterOp {
 }
 
 // ============================================================================
-// ListConcat Operator
+// ListConcat Operator (Polymorphic)
 // ============================================================================
 
 pub struct ListConcatOp {
     id: Id,
     inputs: [InputPort; 2],
-    outputs: [OutputPort; 1],
+    outputs: Vec<OutputPort>,
 }
 
 impl ListConcatOp {
@@ -672,7 +888,7 @@ impl ListConcatOp {
                 InputPort::float_list("ListA"),
                 InputPort::float_list("ListB"),
             ],
-            outputs: [OutputPort::float_list("Combined")],
+            outputs: vec![OutputPort::float_list("Combined")],
         }
     }
 }
@@ -694,20 +910,23 @@ impl Operator for ListConcatOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let list_a = get_list(&self.inputs[0], get_input);
-        let list_b = get_list(&self.inputs[1], get_input);
+        let list_a = get_any_list(&self.inputs[0], get_input);
+        let list_b = get_any_list(&self.inputs[1], get_input);
 
-        let mut result = list_a;
-        result.extend(list_b);
+        let result = list_concat(&list_a, &list_b);
 
-        self.outputs[0].value = Value::FloatList(result);
+        // Update output type if needed
+        if self.outputs[0].value_type != result.value_type() {
+            self.outputs[0] = OutputPort::new("Combined", result.value_type());
+        }
+        self.outputs[0].value = result;
     }
 }
 
 impl OperatorMeta for ListConcatOp {
     fn category(&self) -> &'static str { "List" }
     fn category_color(&self) -> [f32; 4] { category_colors::LIST }
-    fn description(&self) -> &'static str { "Concatenate two lists" }
+    fn description(&self) -> &'static str { "Concatenate two lists of the same type" }
     fn input_meta(&self, index: usize) -> Option<PortMeta> {
         match index {
             0 => Some(PortMeta::new("ListA")),
@@ -724,13 +943,13 @@ impl OperatorMeta for ListConcatOp {
 }
 
 // ============================================================================
-// ListSlice Operator
+// ListSlice Operator (Polymorphic)
 // ============================================================================
 
 pub struct ListSliceOp {
     id: Id,
     inputs: [InputPort; 3],
-    outputs: [OutputPort; 1],
+    outputs: Vec<OutputPort>,
 }
 
 impl ListSliceOp {
@@ -742,7 +961,7 @@ impl ListSliceOp {
                 InputPort::int("Start", 0),
                 InputPort::int("End", i32::MAX), // i32::MAX means end of list
             ],
-            outputs: [OutputPort::float_list("Slice")],
+            outputs: vec![OutputPort::float_list("Slice")],
         }
     }
 }
@@ -764,47 +983,24 @@ impl Operator for ListSliceOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let list = get_list(&self.inputs[0], get_input);
+        let list_value = get_any_list(&self.inputs[0], get_input);
         let start = get_int(&self.inputs[1], get_input);
         let end = get_int(&self.inputs[2], get_input);
 
-        let len = list.len() as i32;
-        if len == 0 {
-            self.outputs[0].value = Value::FloatList(vec![]);
-            return;
+        let result = list_slice(&list_value, start, end);
+
+        // Update output type if needed
+        if self.outputs[0].value_type != result.value_type() {
+            self.outputs[0] = OutputPort::new("Slice", result.value_type());
         }
-
-        // Handle negative indices (Python-style)
-        // For start: -1 means last element, -2 means second-to-last, etc.
-        let start_idx = if start < 0 {
-            (len + start).max(0) as usize
-        } else {
-            (start as usize).min(list.len())
-        };
-
-        // For end: negative indices wrap from end (Python-style)
-        // -1 means last element position (exclusive = up to but not including last)
-        // Use i32::MAX (or any large positive) for "to the end"
-        let end_idx = if end < 0 {
-            (len + end).max(0) as usize
-        } else {
-            (end as usize).min(list.len())
-        };
-
-        let result = if start_idx < end_idx {
-            list[start_idx..end_idx].to_vec()
-        } else {
-            vec![]
-        };
-
-        self.outputs[0].value = Value::FloatList(result);
+        self.outputs[0].value = result;
     }
 }
 
 impl OperatorMeta for ListSliceOp {
     fn category(&self) -> &'static str { "List" }
     fn category_color(&self) -> [f32; 4] { category_colors::LIST }
-    fn description(&self) -> &'static str { "Extract a slice from list (supports negative indices)" }
+    fn description(&self) -> &'static str { "Extract a slice from any list (supports negative indices)" }
     fn input_meta(&self, index: usize) -> Option<PortMeta> {
         match index {
             0 => Some(PortMeta::new("List")),
@@ -816,6 +1012,206 @@ impl OperatorMeta for ListSliceOp {
     fn output_meta(&self, index: usize) -> Option<PortMeta> {
         match index {
             0 => Some(PortMeta::new("Slice").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+// ============================================================================
+// ListReverse Operator (Polymorphic)
+// ============================================================================
+
+pub struct ListReverseOp {
+    id: Id,
+    inputs: [InputPort; 1],
+    outputs: Vec<OutputPort>,
+}
+
+impl ListReverseOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [InputPort::float_list("List")],
+            outputs: vec![OutputPort::float_list("Reversed")],
+        }
+    }
+}
+
+impl Default for ListReverseOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListReverseOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListReverse" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let list_value = get_any_list(&self.inputs[0], get_input);
+        let result = list_reverse(&list_value);
+
+        // Update output type if needed
+        if self.outputs[0].value_type != result.value_type() {
+            self.outputs[0] = OutputPort::new("Reversed", result.value_type());
+        }
+        self.outputs[0].value = result;
+    }
+}
+
+impl OperatorMeta for ListReverseOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Reverse the order of elements in any list" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("List")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Reversed").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+// ============================================================================
+// ListFirst Operator (Polymorphic)
+// ============================================================================
+
+pub struct ListFirstOp {
+    id: Id,
+    inputs: [InputPort; 1],
+    outputs: Vec<OutputPort>,
+}
+
+impl ListFirstOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [InputPort::float_list("List")],
+            outputs: vec![OutputPort::float("First")],
+        }
+    }
+}
+
+impl Default for ListFirstOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListFirstOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListFirst" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let list_value = get_any_list(&self.inputs[0], get_input);
+        let value = list_get(&list_value, 0);
+
+        // Update output type if needed
+        let elem_type = element_type_for_list(list_value.value_type());
+        if self.outputs[0].value_type != elem_type {
+            self.outputs[0] = OutputPort::new("First", elem_type);
+        }
+        self.outputs[0].value = value;
+    }
+}
+
+impl OperatorMeta for ListFirstOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Get the first element of any list" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("List")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("First").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+// ============================================================================
+// ListLast Operator (Polymorphic)
+// ============================================================================
+
+pub struct ListLastOp {
+    id: Id,
+    inputs: [InputPort; 1],
+    outputs: Vec<OutputPort>,
+}
+
+impl ListLastOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [InputPort::float_list("List")],
+            outputs: vec![OutputPort::float("Last")],
+        }
+    }
+}
+
+impl Default for ListLastOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListLastOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListLast" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let list_value = get_any_list(&self.inputs[0], get_input);
+        let value = list_get(&list_value, -1); // -1 = last element
+
+        // Update output type if needed
+        let elem_type = element_type_for_list(list_value.value_type());
+        if self.outputs[0].value_type != elem_type {
+            self.outputs[0] = OutputPort::new("Last", elem_type);
+        }
+        self.outputs[0].value = value;
+    }
+}
+
+impl OperatorMeta for ListLastOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Get the last element of any list" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("List")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Last").with_shape(PinShape::TriangleFilled)),
             _ => None,
         }
     }
@@ -934,6 +1330,36 @@ pub fn register(registry: &OperatorRegistry) {
             description: "Extract slice from list",
         },
         || capture_meta(ListSliceOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListReverse",
+            category: "List",
+            description: "Reverse list order",
+        },
+        || capture_meta(ListReverseOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListFirst",
+            category: "List",
+            description: "Get first list element",
+        },
+        || capture_meta(ListFirstOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListLast",
+            category: "List",
+            description: "Get last list element",
+        },
+        || capture_meta(ListLastOp::new()),
     );
 }
 

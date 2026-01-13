@@ -52,9 +52,15 @@ impl BypassableType {
             ValueType::Color => None,
             ValueType::Gradient => None,
             ValueType::Matrix4 => None,
+            // List types - not currently bypassable
             ValueType::FloatList => None,
             ValueType::IntList => None,
+            ValueType::BoolList => None,
+            ValueType::Vec2List => None,
             ValueType::Vec3List => None,
+            ValueType::Vec4List => None,
+            ValueType::ColorList => None,
+            ValueType::StringList => None,
         }
     }
 

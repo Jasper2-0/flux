@@ -65,5 +65,5 @@ pub use operator::{InputResolver, Operator};
 pub use operator_meta::{
     category_colors, EffectivePortMeta, OperatorMeta, PinShape, PortMeta, PortOverride,
 };
-pub use port::{InputPort, OutputPort, TriggerInput, TriggerOutput};
+pub use port::{InputPort, OutputPort, OutputTypeRule, TriggerInput, TriggerOutput, TypeConstraint};
 pub use value::{Color, Gradient, GradientStop, Matrix4, TypeCategory, Value, ValueType};

@@ -147,3 +147,7 @@ path = "examples/29_performance_benchmark.rs"
 [[example]]
 name = "30_list_processing"
 path = "examples/30_list_processing.rs"
+
+[[example]]
+name = "31_collection_types"
+path = "examples/31_collection_types.rs"
