@@ -654,7 +654,7 @@ mod tests {
         let ctx = EvalContext::new();
 
         // Set list input
-        op.inputs[0].default = Value::FloatList(vec![10.0, 20.0, 30.0]);
+        op.inputs[0].default = Value::float_list(vec![10.0, 20.0, 30.0]);
         op.compute(&ctx, &no_connections);
         assert_eq!(op.list_len, 3);
 

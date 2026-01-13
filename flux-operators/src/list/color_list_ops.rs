@@ -28,7 +28,7 @@ fn get_color_list(input: &InputPort, get_input: InputResolver) -> Vec<Color> {
         Some((node_id, output_idx)) => {
             let value = get_input(node_id, output_idx);
             match value {
-                Value::ColorList(list) => list,
+                Value::ColorList(list) => list.to_vec(),
                 Value::Color(c) => vec![c],
                 Value::Vec4List(vl) => vl.iter().map(|v| Color::from_array(*v)).collect(),
                 Value::Vec4(v) => vec![Color::from_array(v)],
@@ -36,7 +36,7 @@ fn get_color_list(input: &InputPort, get_input: InputResolver) -> Vec<Color> {
             }
         }
         None => match &input.default {
-            Value::ColorList(list) => list.clone(),
+            Value::ColorList(list) => list.to_vec(),
             Value::Color(c) => vec![*c],
             _ => Vec::new(),
         },
@@ -54,7 +54,7 @@ fn collect_colors(input: &InputPort, get_input: InputResolver) -> Vec<Color> {
             .collect()
     } else {
         match &input.default {
-            Value::ColorList(list) => list.clone(),
+            Value::ColorList(list) => list.to_vec(),
             Value::Color(c) => vec![*c],
             _ => Vec::new(),
         }
@@ -99,7 +99,7 @@ impl Operator for ColorListOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let values = collect_colors(&self.inputs[0], get_input);
-        self.outputs[0].value = Value::ColorList(values);
+        self.outputs[0].value = Value::color_list(values);
     }
 }
 
@@ -345,7 +345,7 @@ mod tests {
         let mut op = ColorListSampleOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::ColorList(vec![
+        op.inputs[0].default = Value::color_list(vec![
             Color::rgba(1.0, 0.0, 0.0, 1.0), // Red
             Color::rgba(0.0, 0.0, 1.0, 1.0), // Blue
         ]);
@@ -374,7 +374,7 @@ mod tests {
         let mut op = ColorListSampleOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::ColorList(vec![
+        op.inputs[0].default = Value::color_list(vec![
             Color::rgba(1.0, 0.0, 0.0, 1.0), // Red
             Color::rgba(0.0, 0.0, 1.0, 1.0), // Blue
         ]);
@@ -394,7 +394,7 @@ mod tests {
         let mut op = ColorListBlendOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::ColorList(vec![
+        op.inputs[0].default = Value::color_list(vec![
             Color::rgba(1.0, 0.0, 0.0, 1.0),
             Color::rgba(0.0, 1.0, 0.0, 1.0),
             Color::rgba(0.0, 0.0, 1.0, 1.0),

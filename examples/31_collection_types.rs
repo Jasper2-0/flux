@@ -72,13 +72,13 @@ fn demo_polymorphic_operators() {
 
     // Create lists of different types
     let float_list = graph.add(FloatListOp::new());
-    graph.set_input_default(float_list, 0, Value::FloatList(vec![1.5, 2.5, 3.5, 4.5]));
+    graph.set_input_default(float_list, 0, Value::float_list(vec![1.5, 2.5, 3.5, 4.5]));
 
     let int_list = graph.add(IntListOp::new());
-    graph.set_input_default(int_list, 0, Value::IntList(vec![10, 20, 30, 40, 50]));
+    graph.set_input_default(int_list, 0, Value::int_list(vec![10, 20, 30, 40, 50]));
 
     let vec3_list = graph.add(Vec3ListOp::new());
-    graph.set_input_default(vec3_list, 0, Value::Vec3List(vec![
+    graph.set_input_default(vec3_list, 0, Value::vec3_list(vec![
         [1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
         [0.0, 0.0, 1.0],
@@ -149,7 +149,7 @@ fn demo_int_list_operations() {
 
     // Create an IntList for aggregation
     let int_list = graph.add(IntListOp::new());
-    graph.set_input_default(int_list, 0, Value::IntList(vec![15, 8, 23, 4, 19, 12]));
+    graph.set_input_default(int_list, 0, Value::int_list(vec![15, 8, 23, 4, 19, 12]));
 
     // IntList aggregations
     let sum_op = graph.add(IntListSumOp::new());
@@ -193,7 +193,7 @@ fn demo_vec3_list_operations() {
 
     // Create a list of 3D points (e.g., vertices of a shape)
     let points = graph.add(Vec3ListOp::new());
-    graph.set_input_default(points, 0, Value::Vec3List(vec![
+    graph.set_input_default(points, 0, Value::vec3_list(vec![
         [0.0, 0.0, 0.0],    // Origin
         [2.0, 0.0, 0.0],    // Right
         [1.0, 2.0, 0.0],    // Top
@@ -228,7 +228,7 @@ fn demo_vec3_list_operations() {
 
     // Vec3ListNormalize: Normalize all vectors
     let vectors = graph.add(Vec3ListOp::new());
-    graph.set_input_default(vectors, 0, Value::Vec3List(vec![
+    graph.set_input_default(vectors, 0, Value::vec3_list(vec![
         [3.0, 0.0, 0.0],   // Length 3
         [0.0, 4.0, 0.0],   // Length 4
         [0.0, 0.0, 5.0],   // Length 5
@@ -241,7 +241,7 @@ fn demo_vec3_list_operations() {
     println!();
     println!("  Normalize vectors [3,0,0], [0,4,0], [0,0,5]:");
     if let Value::Vec3List(vecs) = normalized {
-        for v in &vecs {
+        for v in vecs.iter() {
             let len = (v[0]*v[0] + v[1]*v[1] + v[2]*v[2]).sqrt();
             println!("    [{:.1}, {:.1}, {:.1}] (length: {:.1})", v[0], v[1], v[2], len);
         }
@@ -258,7 +258,7 @@ fn demo_color_list_operations() {
 
     // Create a color palette (gradient from red to blue)
     let palette = graph.add(ColorListOp::new());
-    graph.set_input_default(palette, 0, Value::ColorList(vec![
+    graph.set_input_default(palette, 0, Value::color_list(vec![
         Color::rgba(1.0, 0.0, 0.0, 1.0),  // Red
         Color::rgba(1.0, 1.0, 0.0, 1.0),  // Yellow
         Color::rgba(0.0, 1.0, 0.0, 1.0),  // Green
@@ -314,7 +314,7 @@ fn demo_conversion_operators() {
     println!("  IntList ↔ FloatList:");
 
     let int_list = graph.add(IntListOp::new());
-    graph.set_input_default(int_list, 0, Value::IntList(vec![1, 2, 3, 4, 5]));
+    graph.set_input_default(int_list, 0, Value::int_list(vec![1, 2, 3, 4, 5]));
 
     let to_float = graph.add(IntListToFloatListOp::new());
     graph.connect(int_list, 0, to_float, 0).unwrap();
@@ -326,7 +326,7 @@ fn demo_conversion_operators() {
 
     // FloatList → IntList (truncates)
     let float_list = graph.add(FloatListOp::new());
-    graph.set_input_default(float_list, 0, Value::FloatList(vec![1.9, 2.1, 3.7, 4.2]));
+    graph.set_input_default(float_list, 0, Value::float_list(vec![1.9, 2.1, 3.7, 4.2]));
 
     let to_int = graph.add(FloatListToIntListOp::new());
     graph.connect(float_list, 0, to_int, 0).unwrap();
@@ -341,7 +341,7 @@ fn demo_conversion_operators() {
     println!("  Vec3List ↔ FloatList:");
 
     let vec3_list = graph.add(Vec3ListOp::new());
-    graph.set_input_default(vec3_list, 0, Value::Vec3List(vec![
+    graph.set_input_default(vec3_list, 0, Value::vec3_list(vec![
         [1.0, 2.0, 3.0],
         [4.0, 5.0, 6.0],
     ]));
@@ -357,7 +357,7 @@ fn demo_conversion_operators() {
 
     // Group: FloatList → Vec3List
     let float_data = graph.add(FloatListOp::new());
-    graph.set_input_default(float_data, 0, Value::FloatList(vec![
+    graph.set_input_default(float_data, 0, Value::float_list(vec![
         10.0, 20.0, 30.0, 40.0, 50.0, 60.0
     ]));
 
@@ -379,7 +379,7 @@ fn demo_conversion_operators() {
     println!("  ColorList ↔ Vec4List:");
 
     let colors = graph.add(ColorListOp::new());
-    graph.set_input_default(colors, 0, Value::ColorList(vec![
+    graph.set_input_default(colors, 0, Value::color_list(vec![
         Color::rgba(1.0, 0.0, 0.0, 1.0),  // Red
         Color::rgba(0.0, 1.0, 0.0, 0.5),  // Green (50% alpha)
     ]));
@@ -400,7 +400,7 @@ fn demo_conversion_operators() {
     // Vec4List → ColorList
     // Set the default directly on the conversion operator's input
     let to_color = graph.add(Vec4ListToColorListOp::new());
-    graph.set_input_default(to_color, 0, Value::Vec4List(vec![
+    graph.set_input_default(to_color, 0, Value::vec4_list(vec![
         [0.0, 0.0, 1.0, 1.0],  // Blue
         [1.0, 1.0, 0.0, 0.8],  // Yellow (80% alpha)
     ]));

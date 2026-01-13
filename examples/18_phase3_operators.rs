@@ -386,13 +386,13 @@ fn main() {
 
     // FloatListOp uses multi-input, so we set the default to a pre-built list
     let mut list_op = FloatListOp::new();
-    list_op.inputs_mut()[0].default = Value::FloatList(vec![1.0, 2.0, 3.0, 4.0]);
+    list_op.inputs_mut()[0].default = Value::float_list(vec![1.0, 2.0, 3.0, 4.0]);
     list_op.compute(&ctx, &no_conn);
     let list = list_op.outputs()[0].value.as_float_list().unwrap();
     println!("  FloatList([1,2,3,4]) = {:?}", list);
 
     let mut list_len = ListLengthOp::new();
-    list_len.inputs_mut()[0].default = Value::FloatList(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+    list_len.inputs_mut()[0].default = Value::float_list(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
     list_len.compute(&ctx, &no_conn);
     println!(
         "  ListLength([1,2,3,4,5]) = {}",
@@ -400,7 +400,7 @@ fn main() {
     );
 
     let mut list_sum = ListSumOp::new();
-    list_sum.inputs_mut()[0].default = Value::FloatList(vec![10.0, 20.0, 30.0]);
+    list_sum.inputs_mut()[0].default = Value::float_list(vec![10.0, 20.0, 30.0]);
     list_sum.compute(&ctx, &no_conn);
     println!(
         "  ListSum([10,20,30]) = {}",
@@ -408,7 +408,7 @@ fn main() {
     );
 
     let mut list_avg = ListAverageOp::new();
-    list_avg.inputs_mut()[0].default = Value::FloatList(vec![2.0, 4.0, 6.0, 8.0]);
+    list_avg.inputs_mut()[0].default = Value::float_list(vec![2.0, 4.0, 6.0, 8.0]);
     list_avg.compute(&ctx, &no_conn);
     println!(
         "  ListAverage([2,4,6,8]) = {}",
@@ -416,7 +416,7 @@ fn main() {
     );
 
     let mut list_map = ListMapOp::new();
-    list_map.inputs_mut()[0].default = Value::FloatList(vec![1.0, 2.0, 3.0]);
+    list_map.inputs_mut()[0].default = Value::float_list(vec![1.0, 2.0, 3.0]);
     list_map.inputs_mut()[1].default = Value::Float(2.0); // Multiplier
     list_map.inputs_mut()[2].default = Value::Float(10.0); // Offset
     list_map.compute(&ctx, &no_conn);

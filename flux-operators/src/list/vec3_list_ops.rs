@@ -21,13 +21,13 @@ fn get_vec3_list(input: &InputPort, get_input: InputResolver) -> Vec<[f32; 3]> {
         Some((node_id, output_idx)) => {
             let value = get_input(node_id, output_idx);
             match value {
-                Value::Vec3List(list) => list,
+                Value::Vec3List(list) => list.to_vec(),
                 Value::Vec3(v) => vec![v],
                 _ => Vec::new(),
             }
         }
         None => match &input.default {
-            Value::Vec3List(list) => list.clone(),
+            Value::Vec3List(list) => list.to_vec(),
             Value::Vec3(v) => vec![*v],
             _ => Vec::new(),
         },
@@ -45,7 +45,7 @@ fn collect_vec3s(input: &InputPort, get_input: InputResolver) -> Vec<[f32; 3]> {
             .collect()
     } else {
         match &input.default {
-            Value::Vec3List(list) => list.clone(),
+            Value::Vec3List(list) => list.to_vec(),
             Value::Vec3(v) => vec![*v],
             _ => Vec::new(),
         }
@@ -99,7 +99,7 @@ impl Operator for Vec3ListOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let values = collect_vec3s(&self.inputs[0], get_input);
-        self.outputs[0].value = Value::Vec3List(values);
+        self.outputs[0].value = Value::vec3_list(values);
     }
 }
 
@@ -160,7 +160,7 @@ impl Operator for Vec3ListNormalizeOp {
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let list = get_vec3_list(&self.inputs[0], get_input);
         let normalized: Vec<[f32; 3]> = list.iter().map(|v| normalize_vec3(*v)).collect();
-        self.outputs[0].value = Value::Vec3List(normalized);
+        self.outputs[0].value = Value::vec3_list(normalized);
     }
 }
 
@@ -394,7 +394,7 @@ mod tests {
         let mut op = Vec3ListCentroidOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::Vec3List(vec![
+        op.inputs[0].default = Value::vec3_list(vec![
             [0.0, 0.0, 0.0],
             [2.0, 4.0, 6.0],
         ]);
@@ -414,7 +414,7 @@ mod tests {
         let mut op = Vec3ListBoundsOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::Vec3List(vec![
+        op.inputs[0].default = Value::vec3_list(vec![
             [1.0, 5.0, 2.0],
             [3.0, 2.0, 8.0],
             [-1.0, 4.0, 1.0],
@@ -441,7 +441,7 @@ mod tests {
         let mut op = Vec3ListNormalizeOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::Vec3List(vec![
+        op.inputs[0].default = Value::vec3_list(vec![
             [3.0, 0.0, 0.0],
             [0.0, 4.0, 0.0],
         ]);

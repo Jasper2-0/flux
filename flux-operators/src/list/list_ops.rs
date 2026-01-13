@@ -33,19 +33,20 @@ fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
     }
 }
 
-/// Get float list (legacy helper for FloatList-specific operators)
+/// Get float list as a slice reference (for FloatList-specific operators)
+/// Returns a Vec for owned operations - callers iterate over the slice
 fn get_list(input: &InputPort, get_input: InputResolver) -> Vec<f32> {
     match input.connection {
         Some((node_id, output_idx)) => {
             let value = get_input(node_id, output_idx);
             match value {
-                Value::FloatList(list) => list,
+                Value::FloatList(list) => list.to_vec(),
                 Value::Float(f) => vec![f],
                 _ => Vec::new(),
             }
         }
         None => match &input.default {
-            Value::FloatList(list) => list.clone(),
+            Value::FloatList(list) => list.to_vec(),
             Value::Float(f) => vec![*f],
             _ => Vec::new(),
         },
@@ -145,27 +146,27 @@ fn list_slice(value: &Value, start: i32, end: i32) -> Value {
     if start_idx >= end_idx {
         // Return empty list of same type
         return match value {
-            Value::FloatList(_) => Value::FloatList(vec![]),
-            Value::IntList(_) => Value::IntList(vec![]),
-            Value::BoolList(_) => Value::BoolList(vec![]),
-            Value::Vec2List(_) => Value::Vec2List(vec![]),
-            Value::Vec3List(_) => Value::Vec3List(vec![]),
-            Value::Vec4List(_) => Value::Vec4List(vec![]),
-            Value::ColorList(_) => Value::ColorList(vec![]),
-            Value::StringList(_) => Value::StringList(vec![]),
+            Value::FloatList(_) => Value::float_list(vec![]),
+            Value::IntList(_) => Value::int_list(vec![]),
+            Value::BoolList(_) => Value::bool_list(vec![]),
+            Value::Vec2List(_) => Value::vec2_list(vec![]),
+            Value::Vec3List(_) => Value::vec3_list(vec![]),
+            Value::Vec4List(_) => Value::vec4_list(vec![]),
+            Value::ColorList(_) => Value::color_list(vec![]),
+            Value::StringList(_) => Value::string_list(vec![]),
             _ => value.clone(),
         };
     }
 
     match value {
-        Value::FloatList(l) => Value::FloatList(l[start_idx..end_idx].to_vec()),
-        Value::IntList(l) => Value::IntList(l[start_idx..end_idx].to_vec()),
-        Value::BoolList(l) => Value::BoolList(l[start_idx..end_idx].to_vec()),
-        Value::Vec2List(l) => Value::Vec2List(l[start_idx..end_idx].to_vec()),
-        Value::Vec3List(l) => Value::Vec3List(l[start_idx..end_idx].to_vec()),
-        Value::Vec4List(l) => Value::Vec4List(l[start_idx..end_idx].to_vec()),
-        Value::ColorList(l) => Value::ColorList(l[start_idx..end_idx].to_vec()),
-        Value::StringList(l) => Value::StringList(l[start_idx..end_idx].to_vec()),
+        Value::FloatList(l) => Value::float_list(l[start_idx..end_idx].to_vec()),
+        Value::IntList(l) => Value::int_list(l[start_idx..end_idx].to_vec()),
+        Value::BoolList(l) => Value::bool_list(l[start_idx..end_idx].to_vec()),
+        Value::Vec2List(l) => Value::vec2_list(l[start_idx..end_idx].to_vec()),
+        Value::Vec3List(l) => Value::vec3_list(l[start_idx..end_idx].to_vec()),
+        Value::Vec4List(l) => Value::vec4_list(l[start_idx..end_idx].to_vec()),
+        Value::ColorList(l) => Value::color_list(l[start_idx..end_idx].to_vec()),
+        Value::StringList(l) => Value::string_list(l[start_idx..end_idx].to_vec()),
         _ => value.clone(),
     }
 }
@@ -174,44 +175,44 @@ fn list_slice(value: &Value, start: i32, end: i32) -> Value {
 fn list_concat(a: &Value, b: &Value) -> Value {
     match (a, b) {
         (Value::FloatList(la), Value::FloatList(lb)) => {
-            let mut result = la.clone();
-            result.extend(lb);
-            Value::FloatList(result)
+            let mut result: Vec<f32> = la.iter().copied().collect();
+            result.extend(lb.iter().copied());
+            Value::float_list(result)
         }
         (Value::IntList(la), Value::IntList(lb)) => {
-            let mut result = la.clone();
-            result.extend(lb);
-            Value::IntList(result)
+            let mut result: Vec<i32> = la.iter().copied().collect();
+            result.extend(lb.iter().copied());
+            Value::int_list(result)
         }
         (Value::BoolList(la), Value::BoolList(lb)) => {
-            let mut result = la.clone();
-            result.extend(lb);
-            Value::BoolList(result)
+            let mut result: Vec<bool> = la.iter().copied().collect();
+            result.extend(lb.iter().copied());
+            Value::bool_list(result)
         }
         (Value::Vec2List(la), Value::Vec2List(lb)) => {
-            let mut result = la.clone();
-            result.extend(lb);
-            Value::Vec2List(result)
+            let mut result: Vec<[f32; 2]> = la.iter().copied().collect();
+            result.extend(lb.iter().copied());
+            Value::vec2_list(result)
         }
         (Value::Vec3List(la), Value::Vec3List(lb)) => {
-            let mut result = la.clone();
-            result.extend(lb);
-            Value::Vec3List(result)
+            let mut result: Vec<[f32; 3]> = la.iter().copied().collect();
+            result.extend(lb.iter().copied());
+            Value::vec3_list(result)
         }
         (Value::Vec4List(la), Value::Vec4List(lb)) => {
-            let mut result = la.clone();
-            result.extend(lb);
-            Value::Vec4List(result)
+            let mut result: Vec<[f32; 4]> = la.iter().copied().collect();
+            result.extend(lb.iter().copied());
+            Value::vec4_list(result)
         }
         (Value::ColorList(la), Value::ColorList(lb)) => {
-            let mut result = la.clone();
-            result.extend(lb);
-            Value::ColorList(result)
+            let mut result: Vec<Color> = la.iter().copied().collect();
+            result.extend(lb.iter().copied());
+            Value::color_list(result)
         }
         (Value::StringList(la), Value::StringList(lb)) => {
-            let mut result = la.clone();
+            let mut result: Vec<String> = la.iter().cloned().collect();
             result.extend(lb.iter().cloned());
-            Value::StringList(result)
+            Value::string_list(result)
         }
         // Cross-type: try coercion or return first list
         _ => {
@@ -228,14 +229,14 @@ fn list_concat(a: &Value, b: &Value) -> Value {
 /// Reverse any list type
 fn list_reverse(value: &Value) -> Value {
     match value {
-        Value::FloatList(l) => Value::FloatList(l.iter().rev().copied().collect()),
-        Value::IntList(l) => Value::IntList(l.iter().rev().copied().collect()),
-        Value::BoolList(l) => Value::BoolList(l.iter().rev().copied().collect()),
-        Value::Vec2List(l) => Value::Vec2List(l.iter().rev().copied().collect()),
-        Value::Vec3List(l) => Value::Vec3List(l.iter().rev().copied().collect()),
-        Value::Vec4List(l) => Value::Vec4List(l.iter().rev().copied().collect()),
-        Value::ColorList(l) => Value::ColorList(l.iter().rev().copied().collect()),
-        Value::StringList(l) => Value::StringList(l.iter().rev().cloned().collect()),
+        Value::FloatList(l) => Value::float_list(l.iter().rev().copied().collect()),
+        Value::IntList(l) => Value::int_list(l.iter().rev().copied().collect()),
+        Value::BoolList(l) => Value::bool_list(l.iter().rev().copied().collect()),
+        Value::Vec2List(l) => Value::vec2_list(l.iter().rev().copied().collect()),
+        Value::Vec3List(l) => Value::vec3_list(l.iter().rev().copied().collect()),
+        Value::Vec4List(l) => Value::vec4_list(l.iter().rev().copied().collect()),
+        Value::ColorList(l) => Value::color_list(l.iter().rev().copied().collect()),
+        Value::StringList(l) => Value::string_list(l.iter().rev().cloned().collect()),
         _ => value.clone(),
     }
 }
@@ -268,7 +269,7 @@ fn collect_floats(input: &InputPort, get_input: InputResolver) -> Vec<f32> {
             .collect()
     } else {
         match &input.default {
-            Value::FloatList(list) => list.clone(),
+            Value::FloatList(list) => list.to_vec(),
             Value::Float(f) => vec![*f],
             _ => Vec::new(),
         }
@@ -313,7 +314,7 @@ impl Operator for FloatListOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let values = collect_floats(&self.inputs[0], get_input);
-        self.outputs[0].value = Value::FloatList(values);
+        self.outputs[0].value = Value::float_list(values);
     }
 }
 
@@ -767,7 +768,7 @@ impl Operator for ListMapOp {
         let offset = get_float(&self.inputs[2], get_input);
 
         let result: Vec<f32> = list.iter().map(|v| v * scale + offset).collect();
-        self.outputs[0].value = Value::FloatList(result);
+        self.outputs[0].value = Value::float_list(result);
     }
 }
 
@@ -846,7 +847,7 @@ impl Operator for ListFilterOp {
             }
         }).collect();
 
-        self.outputs[0].value = Value::FloatList(result);
+        self.outputs[0].value = Value::float_list(result);
     }
 }
 
@@ -1218,6 +1219,328 @@ impl OperatorMeta for ListLastOp {
 }
 
 // ============================================================================
+// Binary List Operations (Element-wise with zip-shortest)
+// ============================================================================
+
+/// ListAdd: Element-wise addition of two float lists (zip-shortest)
+pub struct ListAddOp {
+    id: Id,
+    inputs: [InputPort; 2],
+    outputs: [OutputPort; 1],
+}
+
+impl ListAddOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("A"),
+                InputPort::float_list("B"),
+            ],
+            outputs: [OutputPort::float_list("Result")],
+        }
+    }
+}
+
+impl Default for ListAddOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListAddOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListAdd" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = get_list(&self.inputs[0], get_input);
+        let b = get_list(&self.inputs[1], get_input);
+        let result: Vec<f32> = a.iter().zip(b.iter()).map(|(x, y)| x + y).collect();
+        self.outputs[0].value = Value::float_list(result);
+    }
+}
+
+impl OperatorMeta for ListAddOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Element-wise addition of two lists (zip-shortest)" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("A")),
+            1 => Some(PortMeta::new("B")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+/// ListSub: Element-wise subtraction of two float lists (zip-shortest)
+pub struct ListSubOp {
+    id: Id,
+    inputs: [InputPort; 2],
+    outputs: [OutputPort; 1],
+}
+
+impl ListSubOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("A"),
+                InputPort::float_list("B"),
+            ],
+            outputs: [OutputPort::float_list("Result")],
+        }
+    }
+}
+
+impl Default for ListSubOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListSubOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListSub" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = get_list(&self.inputs[0], get_input);
+        let b = get_list(&self.inputs[1], get_input);
+        let result: Vec<f32> = a.iter().zip(b.iter()).map(|(x, y)| x - y).collect();
+        self.outputs[0].value = Value::float_list(result);
+    }
+}
+
+impl OperatorMeta for ListSubOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Element-wise subtraction of two lists (zip-shortest)" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("A")),
+            1 => Some(PortMeta::new("B")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+/// ListMul: Element-wise multiplication of two float lists (zip-shortest)
+pub struct ListMulOp {
+    id: Id,
+    inputs: [InputPort; 2],
+    outputs: [OutputPort; 1],
+}
+
+impl ListMulOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("A"),
+                InputPort::float_list("B"),
+            ],
+            outputs: [OutputPort::float_list("Result")],
+        }
+    }
+}
+
+impl Default for ListMulOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListMulOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListMul" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = get_list(&self.inputs[0], get_input);
+        let b = get_list(&self.inputs[1], get_input);
+        let result: Vec<f32> = a.iter().zip(b.iter()).map(|(x, y)| x * y).collect();
+        self.outputs[0].value = Value::float_list(result);
+    }
+}
+
+impl OperatorMeta for ListMulOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Element-wise multiplication of two lists (zip-shortest)" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("A")),
+            1 => Some(PortMeta::new("B")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+/// ListDiv: Element-wise division of two float lists (zip-shortest)
+pub struct ListDivOp {
+    id: Id,
+    inputs: [InputPort; 2],
+    outputs: [OutputPort; 1],
+}
+
+impl ListDivOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("A"),
+                InputPort::float_list("B"),
+            ],
+            outputs: [OutputPort::float_list("Result")],
+        }
+    }
+}
+
+impl Default for ListDivOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListDivOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListDiv" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = get_list(&self.inputs[0], get_input);
+        let b = get_list(&self.inputs[1], get_input);
+        // Safe division: returns 0.0 for division by zero
+        let result: Vec<f32> = a.iter().zip(b.iter())
+            .map(|(x, y)| if *y != 0.0 { x / y } else { 0.0 })
+            .collect();
+        self.outputs[0].value = Value::float_list(result);
+    }
+}
+
+impl OperatorMeta for ListDivOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Element-wise division of two lists (zip-shortest)" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("A")),
+            1 => Some(PortMeta::new("B")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+/// ListPow: Element-wise power of two float lists (zip-shortest)
+pub struct ListPowOp {
+    id: Id,
+    inputs: [InputPort; 2],
+    outputs: [OutputPort; 1],
+}
+
+impl ListPowOp {
+    pub fn new() -> Self {
+        Self {
+            id: Id::new(),
+            inputs: [
+                InputPort::float_list("Base"),
+                InputPort::float_list("Exponent"),
+            ],
+            outputs: [OutputPort::float_list("Result")],
+        }
+    }
+}
+
+impl Default for ListPowOp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Operator for ListPowOp {
+    fn as_any(&self) -> &dyn Any { self }
+    fn as_any_mut(&mut self) -> &mut dyn Any { self }
+    fn id(&self) -> Id { self.id }
+    fn name(&self) -> &'static str { "ListPow" }
+    fn inputs(&self) -> &[InputPort] { &self.inputs }
+    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
+    fn outputs(&self) -> &[OutputPort] { &self.outputs }
+    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
+
+    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = get_list(&self.inputs[0], get_input);
+        let b = get_list(&self.inputs[1], get_input);
+        let result: Vec<f32> = a.iter().zip(b.iter()).map(|(x, y)| x.powf(*y)).collect();
+        self.outputs[0].value = Value::float_list(result);
+    }
+}
+
+impl OperatorMeta for ListPowOp {
+    fn category(&self) -> &'static str { "List" }
+    fn category_color(&self) -> [f32; 4] { category_colors::LIST }
+    fn description(&self) -> &'static str { "Element-wise power of two lists (zip-shortest)" }
+    fn input_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Base")),
+            1 => Some(PortMeta::new("Exponent")),
+            _ => None,
+        }
+    }
+    fn output_meta(&self, index: usize) -> Option<PortMeta> {
+        match index {
+            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
+            _ => None,
+        }
+    }
+}
+
+// ============================================================================
 // Registration
 // ============================================================================
 
@@ -1361,6 +1684,57 @@ pub fn register(registry: &OperatorRegistry) {
         },
         || capture_meta(ListLastOp::new()),
     );
+
+    // Binary list operations
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListAdd",
+            category: "List",
+            description: "Element-wise list addition",
+        },
+        || capture_meta(ListAddOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListSub",
+            category: "List",
+            description: "Element-wise list subtraction",
+        },
+        || capture_meta(ListSubOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListMul",
+            category: "List",
+            description: "Element-wise list multiplication",
+        },
+        || capture_meta(ListMulOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListDiv",
+            category: "List",
+            description: "Element-wise list division",
+        },
+        || capture_meta(ListDivOp::new()),
+    );
+
+    registry.register(
+        RegistryEntry {
+            type_id: Id::new(),
+            name: "ListPow",
+            category: "List",
+            description: "Element-wise list power",
+        },
+        || capture_meta(ListPowOp::new()),
+    );
 }
 
 #[cfg(test)]
@@ -1376,7 +1750,7 @@ mod tests {
         let mut op = ListLengthOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+        op.inputs[0].default = Value::float_list(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
         op.compute(&ctx, &no_connections);
         assert_eq!(op.outputs[0].value.as_int(), Some(5));
     }
@@ -1386,7 +1760,7 @@ mod tests {
         let mut op = ListGetOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![10.0, 20.0, 30.0]);
+        op.inputs[0].default = Value::float_list(vec![10.0, 20.0, 30.0]);
         op.inputs[1].default = Value::Int(1);
         op.compute(&ctx, &no_connections);
         assert!((op.outputs[0].value.as_float().unwrap() - 20.0).abs() < 0.001);
@@ -1402,7 +1776,7 @@ mod tests {
         let mut op = ListSumOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![1.0, 2.0, 3.0, 4.0]);
+        op.inputs[0].default = Value::float_list(vec![1.0, 2.0, 3.0, 4.0]);
         op.compute(&ctx, &no_connections);
         assert!((op.outputs[0].value.as_float().unwrap() - 10.0).abs() < 0.001);
     }
@@ -1412,12 +1786,12 @@ mod tests {
         let mut op = ListAverageOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![2.0, 4.0, 6.0, 8.0]);
+        op.inputs[0].default = Value::float_list(vec![2.0, 4.0, 6.0, 8.0]);
         op.compute(&ctx, &no_connections);
         assert!((op.outputs[0].value.as_float().unwrap() - 5.0).abs() < 0.001);
 
         // Empty list
-        op.inputs[0].default = Value::FloatList(vec![]);
+        op.inputs[0].default = Value::float_list(vec![]);
         op.compute(&ctx, &no_connections);
         assert!((op.outputs[0].value.as_float().unwrap()).abs() < 0.001);
     }
@@ -1428,8 +1802,8 @@ mod tests {
         let mut max_op = ListMaxOp::new();
         let ctx = EvalContext::new();
 
-        min_op.inputs[0].default = Value::FloatList(vec![5.0, 2.0, 8.0, 1.0, 9.0]);
-        max_op.inputs[0].default = Value::FloatList(vec![5.0, 2.0, 8.0, 1.0, 9.0]);
+        min_op.inputs[0].default = Value::float_list(vec![5.0, 2.0, 8.0, 1.0, 9.0]);
+        max_op.inputs[0].default = Value::float_list(vec![5.0, 2.0, 8.0, 1.0, 9.0]);
 
         min_op.compute(&ctx, &no_connections);
         max_op.compute(&ctx, &no_connections);
@@ -1443,7 +1817,7 @@ mod tests {
         let mut op = ListMapOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![1.0, 2.0, 3.0]);
+        op.inputs[0].default = Value::float_list(vec![1.0, 2.0, 3.0]);
         op.inputs[1].default = Value::Float(2.0); // Scale
         op.inputs[2].default = Value::Float(10.0); // Offset
         op.compute(&ctx, &no_connections);
@@ -1462,7 +1836,7 @@ mod tests {
         let mut op = ListFilterOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![1.0, 5.0, 2.0, 8.0, 3.0]);
+        op.inputs[0].default = Value::float_list(vec![1.0, 5.0, 2.0, 8.0, 3.0]);
         op.inputs[1].default = Value::Float(3.0); // Threshold
         op.inputs[2].default = Value::Int(0); // Mode: GT (greater than)
         op.compute(&ctx, &no_connections);
@@ -1493,8 +1867,8 @@ mod tests {
         let mut op = ListConcatOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![1.0, 2.0]);
-        op.inputs[1].default = Value::FloatList(vec![3.0, 4.0, 5.0]);
+        op.inputs[0].default = Value::float_list(vec![1.0, 2.0]);
+        op.inputs[1].default = Value::float_list(vec![3.0, 4.0, 5.0]);
         op.compute(&ctx, &no_connections);
 
         if let Value::FloatList(result) = &op.outputs[0].value {
@@ -1514,7 +1888,7 @@ mod tests {
         let mut op = ListSliceOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![10.0, 20.0, 30.0, 40.0, 50.0]);
+        op.inputs[0].default = Value::float_list(vec![10.0, 20.0, 30.0, 40.0, 50.0]);
 
         // Slice [1:3] -> [20, 30]
         op.inputs[1].default = Value::Int(1);
@@ -1551,6 +1925,127 @@ mod tests {
             assert_eq!(result.len(), 3);
             assert!((result[0] - 10.0).abs() < 0.001);
             assert!((result[2] - 30.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_add() {
+        let mut op = ListAddOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::float_list(vec![1.0, 2.0, 3.0]);
+        op.inputs[1].default = Value::float_list(vec![10.0, 20.0, 30.0]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 3);
+            assert!((result[0] - 11.0).abs() < 0.001);
+            assert!((result[1] - 22.0).abs() < 0.001);
+            assert!((result[2] - 33.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+
+        // Zip-shortest: mismatched lengths
+        op.inputs[0].default = Value::float_list(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+        op.inputs[1].default = Value::float_list(vec![10.0, 20.0]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 2);  // Shortest length
+            assert!((result[0] - 11.0).abs() < 0.001);
+            assert!((result[1] - 22.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_sub() {
+        let mut op = ListSubOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::float_list(vec![10.0, 20.0, 30.0]);
+        op.inputs[1].default = Value::float_list(vec![1.0, 2.0, 3.0]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 3);
+            assert!((result[0] - 9.0).abs() < 0.001);
+            assert!((result[1] - 18.0).abs() < 0.001);
+            assert!((result[2] - 27.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_mul() {
+        let mut op = ListMulOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::float_list(vec![2.0, 3.0, 4.0]);
+        op.inputs[1].default = Value::float_list(vec![5.0, 6.0, 7.0]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 3);
+            assert!((result[0] - 10.0).abs() < 0.001);
+            assert!((result[1] - 18.0).abs() < 0.001);
+            assert!((result[2] - 28.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_div() {
+        let mut op = ListDivOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::float_list(vec![10.0, 20.0, 30.0]);
+        op.inputs[1].default = Value::float_list(vec![2.0, 4.0, 5.0]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 3);
+            assert!((result[0] - 5.0).abs() < 0.001);
+            assert!((result[1] - 5.0).abs() < 0.001);
+            assert!((result[2] - 6.0).abs() < 0.001);
+        } else {
+            panic!("Expected FloatList");
+        }
+
+        // Division by zero returns 0
+        op.inputs[0].default = Value::float_list(vec![10.0, 20.0]);
+        op.inputs[1].default = Value::float_list(vec![0.0, 5.0]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 2);
+            assert!((result[0]).abs() < 0.001);  // 10 / 0 = 0
+            assert!((result[1] - 4.0).abs() < 0.001);  // 20 / 5 = 4
+        } else {
+            panic!("Expected FloatList");
+        }
+    }
+
+    #[test]
+    fn test_list_pow() {
+        let mut op = ListPowOp::new();
+        let ctx = EvalContext::new();
+
+        op.inputs[0].default = Value::float_list(vec![2.0, 3.0, 4.0]);
+        op.inputs[1].default = Value::float_list(vec![2.0, 2.0, 0.5]);
+        op.compute(&ctx, &no_connections);
+
+        if let Value::FloatList(result) = &op.outputs[0].value {
+            assert_eq!(result.len(), 3);
+            assert!((result[0] - 4.0).abs() < 0.001);   // 2^2 = 4
+            assert!((result[1] - 9.0).abs() < 0.001);   // 3^2 = 9
+            assert!((result[2] - 2.0).abs() < 0.001);   // 4^0.5 = 2
         } else {
             panic!("Expected FloatList");
         }

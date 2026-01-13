@@ -18,8 +18,35 @@ pub use matrix::Matrix4;
 
 // Re-export ops module items (the std::ops impls are automatic)
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
+use std::sync::Arc;
+
+// ========== Serde helpers for Arc<[T]> ==========
+// Arc<[T]> doesn't have built-in serde support, so we serialize as Vec
+
+mod arc_slice_serde {
+    use super::*;
+
+    pub fn serialize<T, S>(data: &Arc<[T]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        // Serialize the slice as a sequence
+        data.as_ref().serialize(serializer)
+    }
+
+    pub fn deserialize<'de, T, D>(deserializer: D) -> Result<Arc<[T]>, D::Error>
+    where
+        T: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        // Deserialize as Vec, then convert to Arc<[T]>
+        let vec = Vec::<T>::deserialize(deserializer)?;
+        Ok(vec.into())
+    }
+}
 
 /// All possible value types in the graph
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -42,15 +69,15 @@ pub enum Value {
     Gradient(Gradient),
     Matrix4(Matrix4),
 
-    // Collections
-    FloatList(Vec<f32>),
-    IntList(Vec<i32>),
-    BoolList(Vec<bool>),
-    Vec2List(Vec<[f32; 2]>),
-    Vec3List(Vec<[f32; 3]>),
-    Vec4List(Vec<[f32; 4]>),
-    ColorList(Vec<Color>),
-    StringList(Vec<String>),
+    // Collections (Arc-wrapped for zero-copy sharing)
+    FloatList(#[serde(with = "arc_slice_serde")] Arc<[f32]>),
+    IntList(#[serde(with = "arc_slice_serde")] Arc<[i32]>),
+    BoolList(#[serde(with = "arc_slice_serde")] Arc<[bool]>),
+    Vec2List(#[serde(with = "arc_slice_serde")] Arc<[[f32; 2]]>),
+    Vec3List(#[serde(with = "arc_slice_serde")] Arc<[[f32; 3]]>),
+    Vec4List(#[serde(with = "arc_slice_serde")] Arc<[[f32; 4]]>),
+    ColorList(#[serde(with = "arc_slice_serde")] Arc<[Color]>),
+    StringList(#[serde(with = "arc_slice_serde")] Arc<[String]>),
 }
 
 impl Value {
@@ -233,6 +260,49 @@ impl Value {
         }
     }
 
+    // ========== List Constructors ==========
+    // These create Arc-wrapped lists from Vec or slice
+
+    /// Create a FloatList from a Vec
+    pub fn float_list(v: Vec<f32>) -> Self {
+        Value::FloatList(v.into())
+    }
+
+    /// Create an IntList from a Vec
+    pub fn int_list(v: Vec<i32>) -> Self {
+        Value::IntList(v.into())
+    }
+
+    /// Create a BoolList from a Vec
+    pub fn bool_list(v: Vec<bool>) -> Self {
+        Value::BoolList(v.into())
+    }
+
+    /// Create a Vec2List from a Vec
+    pub fn vec2_list(v: Vec<[f32; 2]>) -> Self {
+        Value::Vec2List(v.into())
+    }
+
+    /// Create a Vec3List from a Vec
+    pub fn vec3_list(v: Vec<[f32; 3]>) -> Self {
+        Value::Vec3List(v.into())
+    }
+
+    /// Create a Vec4List from a Vec
+    pub fn vec4_list(v: Vec<[f32; 4]>) -> Self {
+        Value::Vec4List(v.into())
+    }
+
+    /// Create a ColorList from a Vec
+    pub fn color_list(v: Vec<Color>) -> Self {
+        Value::ColorList(v.into())
+    }
+
+    /// Create a StringList from a Vec
+    pub fn string_list(v: Vec<String>) -> Self {
+        Value::StringList(v.into())
+    }
+
     // ========== Type Coercion ==========
 
     /// Attempt to coerce this value to the target type
@@ -281,35 +351,35 @@ impl Value {
             // ========== Collection Coercions ==========
 
             // Scalar → List (wrap as single-element list)
-            (Value::Float(f), ValueType::FloatList) => Some(Value::FloatList(vec![*f])),
-            (Value::Int(i), ValueType::IntList) => Some(Value::IntList(vec![*i])),
-            (Value::Bool(b), ValueType::BoolList) => Some(Value::BoolList(vec![*b])),
-            (Value::Vec2(v), ValueType::Vec2List) => Some(Value::Vec2List(vec![*v])),
-            (Value::Vec3(v), ValueType::Vec3List) => Some(Value::Vec3List(vec![*v])),
-            (Value::Vec4(v), ValueType::Vec4List) => Some(Value::Vec4List(vec![*v])),
-            (Value::Color(c), ValueType::ColorList) => Some(Value::ColorList(vec![*c])),
-            (Value::String(s), ValueType::StringList) => Some(Value::StringList(vec![s.clone()])),
+            (Value::Float(f), ValueType::FloatList) => Some(Value::float_list(vec![*f])),
+            (Value::Int(i), ValueType::IntList) => Some(Value::int_list(vec![*i])),
+            (Value::Bool(b), ValueType::BoolList) => Some(Value::bool_list(vec![*b])),
+            (Value::Vec2(v), ValueType::Vec2List) => Some(Value::vec2_list(vec![*v])),
+            (Value::Vec3(v), ValueType::Vec3List) => Some(Value::vec3_list(vec![*v])),
+            (Value::Vec4(v), ValueType::Vec4List) => Some(Value::vec4_list(vec![*v])),
+            (Value::Color(c), ValueType::ColorList) => Some(Value::color_list(vec![*c])),
+            (Value::String(s), ValueType::StringList) => Some(Value::string_list(vec![s.clone()])),
 
             // IntList ↔ FloatList (element-wise conversion)
             (Value::IntList(il), ValueType::FloatList) => {
-                Some(Value::FloatList(il.iter().map(|i| *i as f32).collect()))
+                Some(Value::float_list(il.iter().map(|i| *i as f32).collect()))
             }
             (Value::FloatList(fl), ValueType::IntList) => {
-                Some(Value::IntList(fl.iter().map(|f| *f as i32).collect()))
+                Some(Value::int_list(fl.iter().map(|f| *f as i32).collect()))
             }
 
             // ColorList ↔ Vec4List (isomorphic)
             (Value::ColorList(cl), ValueType::Vec4List) => {
-                Some(Value::Vec4List(cl.iter().map(|c| c.to_array()).collect()))
+                Some(Value::vec4_list(cl.iter().map(|c| c.to_array()).collect()))
             }
             (Value::Vec4List(vl), ValueType::ColorList) => {
-                Some(Value::ColorList(vl.iter().map(|v| Color::from_array(*v)).collect()))
+                Some(Value::color_list(vl.iter().map(|v| Color::from_array(*v)).collect()))
             }
 
             // Vec3List → FloatList (flatten xyz, xyz, xyz...)
             (Value::Vec3List(vl), ValueType::FloatList) => {
                 let flattened: Vec<f32> = vl.iter().flat_map(|v| vec![v[0], v[1], v[2]]).collect();
-                Some(Value::FloatList(flattened))
+                Some(Value::float_list(flattened))
             }
 
             // FloatList → Vec3List (group by 3, truncate remainder)
@@ -319,13 +389,13 @@ impl Value {
                     .filter(|c| c.len() == 3)
                     .map(|c| [c[0], c[1], c[2]])
                     .collect();
-                Some(Value::Vec3List(vec3s))
+                Some(Value::vec3_list(vec3s))
             }
 
             // Vec2List → FloatList (flatten xy, xy, xy...)
             (Value::Vec2List(vl), ValueType::FloatList) => {
                 let flattened: Vec<f32> = vl.iter().flat_map(|v| vec![v[0], v[1]]).collect();
-                Some(Value::FloatList(flattened))
+                Some(Value::float_list(flattened))
             }
 
             // FloatList → Vec2List (group by 2, truncate remainder)
@@ -335,7 +405,7 @@ impl Value {
                     .filter(|c| c.len() == 2)
                     .map(|c| [c[0], c[1]])
                     .collect();
-                Some(Value::Vec2List(vec2s))
+                Some(Value::vec2_list(vec2s))
             }
 
             // Vec4List → FloatList (flatten xyzw, xyzw, xyzw...)
@@ -344,7 +414,7 @@ impl Value {
                     .iter()
                     .flat_map(|v| vec![v[0], v[1], v[2], v[3]])
                     .collect();
-                Some(Value::FloatList(flattened))
+                Some(Value::float_list(flattened))
             }
 
             // FloatList → Vec4List (group by 4, truncate remainder)
@@ -354,7 +424,7 @@ impl Value {
                     .filter(|c| c.len() == 4)
                     .map(|c| [c[0], c[1], c[2], c[3]])
                     .collect();
-                Some(Value::Vec4List(vec4s))
+                Some(Value::vec4_list(vec4s))
             }
 
             // No valid conversion
@@ -544,14 +614,14 @@ impl ValueType {
             ValueType::Color => Value::Color(Color::WHITE),
             ValueType::Gradient => Value::Gradient(Gradient::new()),
             ValueType::Matrix4 => Value::Matrix4(Matrix4::IDENTITY),
-            ValueType::FloatList => Value::FloatList(Vec::new()),
-            ValueType::IntList => Value::IntList(Vec::new()),
-            ValueType::BoolList => Value::BoolList(Vec::new()),
-            ValueType::Vec2List => Value::Vec2List(Vec::new()),
-            ValueType::Vec3List => Value::Vec3List(Vec::new()),
-            ValueType::Vec4List => Value::Vec4List(Vec::new()),
-            ValueType::ColorList => Value::ColorList(Vec::new()),
-            ValueType::StringList => Value::StringList(Vec::new()),
+            ValueType::FloatList => Value::float_list(Vec::new()),
+            ValueType::IntList => Value::int_list(Vec::new()),
+            ValueType::BoolList => Value::bool_list(Vec::new()),
+            ValueType::Vec2List => Value::vec2_list(Vec::new()),
+            ValueType::Vec3List => Value::vec3_list(Vec::new()),
+            ValueType::Vec4List => Value::vec4_list(Vec::new()),
+            ValueType::ColorList => Value::color_list(Vec::new()),
+            ValueType::StringList => Value::string_list(Vec::new()),
         }
     }
 

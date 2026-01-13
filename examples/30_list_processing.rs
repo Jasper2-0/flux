@@ -130,7 +130,7 @@ fn demo_statistical_pipeline() {
 
     // Create a list source (using default value for simplicity)
     let list_source = graph.add(FloatListOp::new());
-    graph.set_input_default(list_source, 0, Value::FloatList(vec![
+    graph.set_input_default(list_source, 0, Value::float_list(vec![
         15.0, 22.0, 8.0, 31.0, 19.0, 27.0, 12.0, 25.0
     ]));
 
@@ -190,7 +190,7 @@ fn demo_list_transformation() {
 
     // Create a list of values
     let source_list = graph.add(FloatListOp::new());
-    graph.set_input_default(source_list, 0, Value::FloatList(vec![1.0, 2.0, 3.0, 4.0, 5.0]));
+    graph.set_input_default(source_list, 0, Value::float_list(vec![1.0, 2.0, 3.0, 4.0, 5.0]));
 
     // Create dynamic scale and offset from graph operators
     let scale = graph.add(ConstantOp::new(2.0));
@@ -246,7 +246,7 @@ fn demo_filter_concat_slice() {
     println!();
 
     let data = graph.add(FloatListOp::new());
-    graph.set_input_default(data, 0, Value::FloatList(vec![
+    graph.set_input_default(data, 0, Value::float_list(vec![
         5.0, 12.0, 3.0, 18.0, 7.0, 25.0, 9.0, 15.0
     ]));
 
@@ -284,8 +284,8 @@ fn demo_filter_concat_slice() {
 
     let list_a = graph.add(FloatListOp::new());
     let list_b = graph.add(FloatListOp::new());
-    graph.set_input_default(list_a, 0, Value::FloatList(vec![1.0, 2.0, 3.0]));
-    graph.set_input_default(list_b, 0, Value::FloatList(vec![4.0, 5.0, 6.0]));
+    graph.set_input_default(list_a, 0, Value::float_list(vec![1.0, 2.0, 3.0]));
+    graph.set_input_default(list_b, 0, Value::float_list(vec![4.0, 5.0, 6.0]));
 
     let concat_op = graph.add(ListConcatOp::new());
     graph.connect(list_a, 0, concat_op, 0).unwrap();
@@ -305,7 +305,7 @@ fn demo_filter_concat_slice() {
     println!();
 
     let source = graph.add(FloatListOp::new());
-    graph.set_input_default(source, 0, Value::FloatList(vec![
+    graph.set_input_default(source, 0, Value::float_list(vec![
         10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0
     ]));
 
@@ -379,7 +379,7 @@ fn demo_sensor_data_pipeline() {
 
     // Static list of sensor readings (voltages)
     let readings = graph.add(FloatListOp::new());
-    graph.set_input_default(readings, 0, Value::FloatList(vec![1.2, 2.5, 1.8, 3.1, 2.2]));
+    graph.set_input_default(readings, 0, Value::float_list(vec![1.2, 2.5, 1.8, 3.1, 2.2]));
 
     // Time-varying scale factor using SineWave
     // Simulates a gain control that oscillates between 15 and 25

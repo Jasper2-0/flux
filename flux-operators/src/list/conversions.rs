@@ -64,10 +64,10 @@ impl Operator for IntListToFloatListOp {
         match value {
             Value::IntList(il) => {
                 let fl: Vec<f32> = il.iter().map(|i| *i as f32).collect();
-                self.outputs[0].value = Value::FloatList(fl);
+                self.outputs[0].value = Value::float_list(fl);
             }
             _ => {
-                self.outputs[0].value = Value::FloatList(vec![]);
+                self.outputs[0].value = Value::float_list(vec![]);
             }
         }
     }
@@ -132,10 +132,10 @@ impl Operator for FloatListToIntListOp {
         match value {
             Value::FloatList(fl) => {
                 let il: Vec<i32> = fl.iter().map(|f| *f as i32).collect();
-                self.outputs[0].value = Value::IntList(il);
+                self.outputs[0].value = Value::int_list(il);
             }
             _ => {
-                self.outputs[0].value = Value::IntList(vec![]);
+                self.outputs[0].value = Value::int_list(vec![]);
             }
         }
     }
@@ -200,10 +200,10 @@ impl Operator for Vec3ListFlattenOp {
         match value {
             Value::Vec3List(vl) => {
                 let fl: Vec<f32> = vl.iter().flat_map(|v| vec![v[0], v[1], v[2]]).collect();
-                self.outputs[0].value = Value::FloatList(fl);
+                self.outputs[0].value = Value::float_list(fl);
             }
             _ => {
-                self.outputs[0].value = Value::FloatList(vec![]);
+                self.outputs[0].value = Value::float_list(vec![]);
             }
         }
     }
@@ -272,10 +272,10 @@ impl Operator for FloatListToVec3ListOp {
                     .filter(|c| c.len() == 3)
                     .map(|c| [c[0], c[1], c[2]])
                     .collect();
-                self.outputs[0].value = Value::Vec3List(vl);
+                self.outputs[0].value = Value::vec3_list(vl);
             }
             _ => {
-                self.outputs[0].value = Value::Vec3List(vec![]);
+                self.outputs[0].value = Value::vec3_list(vec![]);
             }
         }
     }
@@ -340,10 +340,10 @@ impl Operator for ColorListToVec4ListOp {
         match value {
             Value::ColorList(cl) => {
                 let vl: Vec<[f32; 4]> = cl.iter().map(|c| c.to_array()).collect();
-                self.outputs[0].value = Value::Vec4List(vl);
+                self.outputs[0].value = Value::vec4_list(vl);
             }
             _ => {
-                self.outputs[0].value = Value::Vec4List(vec![]);
+                self.outputs[0].value = Value::vec4_list(vec![]);
             }
         }
     }
@@ -408,10 +408,10 @@ impl Operator for Vec4ListToColorListOp {
         match value {
             Value::Vec4List(vl) => {
                 let cl: Vec<Color> = vl.iter().map(|v| Color::from_array(*v)).collect();
-                self.outputs[0].value = Value::ColorList(cl);
+                self.outputs[0].value = Value::color_list(cl);
             }
             _ => {
-                self.outputs[0].value = Value::ColorList(vec![]);
+                self.outputs[0].value = Value::color_list(vec![]);
             }
         }
     }
@@ -514,11 +514,11 @@ mod tests {
         let mut op = IntListToFloatListOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::IntList(vec![1, 2, 3, 4, 5]);
+        op.inputs[0].default = Value::int_list(vec![1, 2, 3, 4, 5]);
         op.compute(&ctx, &no_connections);
 
         if let Value::FloatList(result) = &op.outputs[0].value {
-            assert_eq!(result, &vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+            assert_eq!(result.as_ref(), &[1.0, 2.0, 3.0, 4.0, 5.0]);
         } else {
             panic!("Expected FloatList");
         }
@@ -529,11 +529,11 @@ mod tests {
         let mut op = FloatListToIntListOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![1.9, 2.1, 3.5, 4.0, 5.99]);
+        op.inputs[0].default = Value::float_list(vec![1.9, 2.1, 3.5, 4.0, 5.99]);
         op.compute(&ctx, &no_connections);
 
         if let Value::IntList(result) = &op.outputs[0].value {
-            assert_eq!(result, &vec![1, 2, 3, 4, 5]);
+            assert_eq!(result.as_ref(), &[1, 2, 3, 4, 5]);
         } else {
             panic!("Expected IntList");
         }
@@ -544,14 +544,14 @@ mod tests {
         let mut op = Vec3ListFlattenOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::Vec3List(vec![
+        op.inputs[0].default = Value::vec3_list(vec![
             [1.0, 2.0, 3.0],
             [4.0, 5.0, 6.0],
         ]);
         op.compute(&ctx, &no_connections);
 
         if let Value::FloatList(result) = &op.outputs[0].value {
-            assert_eq!(result, &vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+            assert_eq!(result.as_ref(), &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
         } else {
             panic!("Expected FloatList");
         }
@@ -562,11 +562,11 @@ mod tests {
         let mut op = FloatListToVec3ListOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::FloatList(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]);
+        op.inputs[0].default = Value::float_list(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]);
         op.compute(&ctx, &no_connections);
 
         if let Value::Vec3List(result) = &op.outputs[0].value {
-            assert_eq!(result, &vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
+            assert_eq!(result.as_ref(), &[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
             // Note: 7.0 is truncated since it doesn't complete a Vec3
         } else {
             panic!("Expected Vec3List");
@@ -578,7 +578,7 @@ mod tests {
         let mut op = ColorListToVec4ListOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::ColorList(vec![
+        op.inputs[0].default = Value::color_list(vec![
             Color::rgba(1.0, 0.0, 0.0, 1.0),
             Color::rgba(0.0, 1.0, 0.0, 0.5),
         ]);
@@ -599,7 +599,7 @@ mod tests {
         let mut op = Vec4ListToColorListOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::Vec4List(vec![
+        op.inputs[0].default = Value::vec4_list(vec![
             [1.0, 0.0, 0.0, 1.0],
             [0.0, 1.0, 0.0, 0.5],
         ]);

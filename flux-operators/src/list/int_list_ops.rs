@@ -28,7 +28,7 @@ fn get_int_list(input: &InputPort, get_input: InputResolver) -> Vec<i32> {
         Some((node_id, output_idx)) => {
             let value = get_input(node_id, output_idx);
             match value {
-                Value::IntList(list) => list,
+                Value::IntList(list) => list.to_vec(),
                 Value::Int(i) => vec![i],
                 Value::FloatList(fl) => fl.iter().map(|f| *f as i32).collect(),
                 Value::Float(f) => vec![f as i32],
@@ -36,7 +36,7 @@ fn get_int_list(input: &InputPort, get_input: InputResolver) -> Vec<i32> {
             }
         }
         None => match &input.default {
-            Value::IntList(list) => list.clone(),
+            Value::IntList(list) => list.to_vec(),
             Value::Int(i) => vec![*i],
             _ => Vec::new(),
         },
@@ -54,7 +54,7 @@ fn collect_ints(input: &InputPort, get_input: InputResolver) -> Vec<i32> {
             .collect()
     } else {
         match &input.default {
-            Value::IntList(list) => list.clone(),
+            Value::IntList(list) => list.to_vec(),
             Value::Int(i) => vec![*i],
             _ => Vec::new(),
         }
@@ -99,7 +99,7 @@ impl Operator for IntListOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let values = collect_ints(&self.inputs[0], get_input);
-        self.outputs[0].value = Value::IntList(values);
+        self.outputs[0].value = Value::int_list(values);
     }
 }
 
@@ -364,7 +364,7 @@ impl Operator for IntListRangeOp {
             }
         }
 
-        self.outputs[0].value = Value::IntList(result);
+        self.outputs[0].value = Value::int_list(result);
     }
 }
 
@@ -457,7 +457,7 @@ mod tests {
         let mut op = IntListSumOp::new();
         let ctx = EvalContext::new();
 
-        op.inputs[0].default = Value::IntList(vec![1, 2, 3, 4, 5]);
+        op.inputs[0].default = Value::int_list(vec![1, 2, 3, 4, 5]);
         op.compute(&ctx, &no_connections);
         assert_eq!(op.outputs[0].value.as_int(), Some(15));
     }
@@ -468,8 +468,8 @@ mod tests {
         let mut max_op = IntListMaxOp::new();
         let ctx = EvalContext::new();
 
-        min_op.inputs[0].default = Value::IntList(vec![5, 2, 8, 1, 9]);
-        max_op.inputs[0].default = Value::IntList(vec![5, 2, 8, 1, 9]);
+        min_op.inputs[0].default = Value::int_list(vec![5, 2, 8, 1, 9]);
+        max_op.inputs[0].default = Value::int_list(vec![5, 2, 8, 1, 9]);
 
         min_op.compute(&ctx, &no_connections);
         max_op.compute(&ctx, &no_connections);
@@ -489,7 +489,7 @@ mod tests {
         op.compute(&ctx, &no_connections);
 
         if let Value::IntList(result) = &op.outputs[0].value {
-            assert_eq!(result, &vec![0, 1, 2, 3, 4]);
+            assert_eq!(result.as_ref(), &[0, 1, 2, 3, 4]);
         } else {
             panic!("Expected IntList");
         }
@@ -506,7 +506,7 @@ mod tests {
         op.compute(&ctx, &no_connections);
 
         if let Value::IntList(result) = &op.outputs[0].value {
-            assert_eq!(result, &vec![0, 2, 4, 6, 8]);
+            assert_eq!(result.as_ref(), &[0, 2, 4, 6, 8]);
         } else {
             panic!("Expected IntList");
         }

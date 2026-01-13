@@ -218,7 +218,7 @@ fn demo_foreach() {
 
     // Set list input
     let list = vec![1.5, 2.5, 3.5];
-    foreach_op.inputs_mut()[0].default = Value::FloatList(list.clone());
+    foreach_op.inputs_mut()[0].default = Value::float_list(list.clone());
     foreach_op.compute(&ctx, &|_, _| Value::Float(0.0));
 
     println!("Input list: {:?}", list);

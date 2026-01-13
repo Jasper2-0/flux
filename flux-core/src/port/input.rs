@@ -189,42 +189,42 @@ impl InputPort {
 
     /// Convenience constructor for float list input
     pub fn float_list(name: &'static str) -> Self {
-        Self::new(name, Value::FloatList(Vec::new()))
+        Self::new(name, Value::float_list(Vec::new()))
     }
 
     /// Convenience constructor for int list input
     pub fn int_list(name: &'static str) -> Self {
-        Self::new(name, Value::IntList(Vec::new()))
+        Self::new(name, Value::int_list(Vec::new()))
     }
 
     /// Convenience constructor for bool list input
     pub fn bool_list(name: &'static str) -> Self {
-        Self::new(name, Value::BoolList(Vec::new()))
+        Self::new(name, Value::bool_list(Vec::new()))
     }
 
     /// Convenience constructor for vec2 list input
     pub fn vec2_list(name: &'static str) -> Self {
-        Self::new(name, Value::Vec2List(Vec::new()))
+        Self::new(name, Value::vec2_list(Vec::new()))
     }
 
     /// Convenience constructor for vec3 list input
     pub fn vec3_list(name: &'static str) -> Self {
-        Self::new(name, Value::Vec3List(Vec::new()))
+        Self::new(name, Value::vec3_list(Vec::new()))
     }
 
     /// Convenience constructor for vec4 list input
     pub fn vec4_list(name: &'static str) -> Self {
-        Self::new(name, Value::Vec4List(Vec::new()))
+        Self::new(name, Value::vec4_list(Vec::new()))
     }
 
     /// Convenience constructor for color list input
     pub fn color_list(name: &'static str) -> Self {
-        Self::new(name, Value::ColorList(Vec::new()))
+        Self::new(name, Value::color_list(Vec::new()))
     }
 
     /// Convenience constructor for string list input
     pub fn string_list(name: &'static str) -> Self {
-        Self::new(name, Value::StringList(Vec::new()))
+        Self::new(name, Value::string_list(Vec::new()))
     }
 
     /// Convenience constructor for multi-input bool
