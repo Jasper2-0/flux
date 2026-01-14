@@ -20,6 +20,15 @@ Understanding how Flux works:
 | [Graph Evaluation](GRAPH_EVALUATION.md) | Evaluation lifecycle, caching, lazy evaluation, compiled execution |
 | [Type System](TYPE_SYSTEM.md) | Value types, categories, coercion rules, polymorphism |
 
+## Creating Operators
+
+Building your own operators:
+
+| Document | Description |
+|----------|-------------|
+| [Operator Guide](OPERATOR_GUIDE.md) | Creating custom operators (manual & derive macro) |
+| [Symbol/Instance](SYMBOL_INSTANCE.md) | Reusable operator definitions and runtime state |
+
 ## Learning Path
 
 **New to Flux?** Follow this sequence:
