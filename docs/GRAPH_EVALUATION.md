@@ -217,20 +217,33 @@ let compiled = graph.compile_optimized(output_node, 0)?;
 // Only includes nodes that contribute to output_node
 ```
 
+```mermaid
+flowchart LR
+    subgraph FullGraph["Full Graph"]
+        direction TB
+        unused["Unused Node"]
+        constA1["Const A"]
+        constB1["Const B"]
+        add1["Add"]
+        constA1 --> add1
+        constB1 --> add1
+    end
+
+    subgraph OptimizedGraph["Compiled (optimized)"]
+        direction TB
+        constA2["Const A"]
+        constB2["Const B"]
+        add2["Add"]
+        out2(("output"))
+        constA2 --> add2
+        constB2 --> add2
+        add2 --> out2
+    end
+
+    FullGraph -->|"compile_optimized()"| OptimizedGraph
 ```
-Graph:                          Compiled (optimized):
-┌─────────┐
-│ Unused  │ ←── not included   ┌─────────┐
-│  Node   │                    │ Const A │──┐
-└─────────┘                    └─────────┘  │
-                               ┌─────────┐  ├──▶[Add]──▶ output
-┌─────────┐ ┌─────────┐        │ Const B │──┘
-│ Const A │─┤         │        └─────────┘
-└─────────┘ │   Add   │──▶
-┌─────────┐ │         │
-│ Const B │─┘─────────┘
-└─────────┘
-```
+
+The unused node is eliminated because it doesn't contribute to the output.
 
 ### When to Use Compiled Execution
 
