@@ -29,6 +29,17 @@ Building your own operators:
 | [Operator Guide](OPERATOR_GUIDE.md) | Creating custom operators (manual & derive macro) |
 | [Symbol/Instance](SYMBOL_INSTANCE.md) | Reusable operator definitions and runtime state |
 
+## Advanced Features
+
+Deep dives into specific systems:
+
+| Document | Description |
+|----------|-------------|
+| [Animation System](ANIMATION_SYSTEM.md) | Keyframe animation, curves, interpolation |
+| [Serialization](SERIALIZATION.md) | Save/load projects, symbols, and graphs |
+| [Flow Control](FLOW_CONTROL.md) | Conditionals, loops, and iteration |
+| [List Operations](LIST_OPERATIONS.md) | Collection creation, transformation, iteration |
+
 ## Learning Path
 
 **New to Flux?** Follow this sequence:
