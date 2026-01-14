@@ -108,18 +108,20 @@ flowchart LR
 
 Values flow between operators through connections:
 
-```
-┌──────────────┐        ┌──────────────┐        ┌──────────────┐
-│  Constant    │        │     Add      │        │   Multiply   │
-│   5.0        │──out──▶│              │──out──▶│              │──▶ Result
-└──────────────┘        │              │        │              │
-┌──────────────┐        └──────────────┘        └──────────────┘
-│  Constant    │────────────▲                          ▲
-│   3.0        │                                       │
-└──────────────┘        ┌──────────────┐               │
-                        │  SineWave    │───────────────┘
-                        │   ~time~     │
-                        └──────────────┘
+```mermaid
+flowchart LR
+    const5["Constant<br/>5.0"]
+    const3["Constant<br/>3.0"]
+    add["Add"]
+    sine["SineWave<br/>~time~"]
+    mult["Multiply"]
+    result(("Result"))
+
+    const5 --> add
+    const3 --> add
+    add --> mult
+    sine --> mult
+    mult --> result
 ```
 
 - Each operator has zero or more **InputPorts** and **OutputPorts**
@@ -209,11 +211,15 @@ sequenceDiagram
 
 One output can connect to multiple inputs (fan-out), and multiple paths can merge (fan-in):
 
+```mermaid
+flowchart LR
+    A["Op A"] --> B["Op B"]
+    A --> C["Op C"]
+    B --> D["Op D"]
+    C --> D
 ```
-        ┌──▶ [Op B] ──┐
-[Op A] ─┤             ├──▶ [Op D]   (diamond pattern)
-        └──▶ [Op C] ──┘
-```
+
+This is the **diamond pattern** - a common dataflow structure.
 
 **Why this matters:** Op A's output is computed once and cached, even though B and C both read it. When D is evaluated, A is not recomputed.
 
