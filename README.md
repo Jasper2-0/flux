@@ -29,7 +29,7 @@ Flux is a dataflow graph library designed for real-time creative applications. I
 - **Reactive evaluation** - Values flow through connected operators automatically
 - **Lazy computation** - Dirty flags ensure only changed nodes recompute
 - **Rich type system** - Float, Int, Bool, Vec2, Vec3, Vec4, Color, Gradient, Matrix4, and more
-- **120+ operators** - Math, time, vector, color, flow control, and utilities
+- **150+ operators** - Math, time, vector, color, flow control, lists, and utilities
 - **Animation system** - Keyframe curves with multiple interpolation modes
 - **Serialization** - Save and load graphs as JSON
 
@@ -134,6 +134,7 @@ cargo run --example 27_diamond_dependency  # Fan-out/fan-in caching patterns
 cargo run --example 28_state_machine       # Trigger-based finite state machine
 cargo run --example 29_performance_benchmark --release  # Graph scaling benchmarks
 cargo run --example 30_list_processing        # List operators in graph context
+cargo run --example 31_collection_types       # Collection types and Arc lists
 ```
 
 ## Operator Categories
@@ -147,7 +148,7 @@ cargo run --example 30_list_processing        # List operators in graph context
 | Flow | 14 | Switch, Select, Gate, Loop, ForEach, Delay, Counter, Trigger |
 | Logic | 13 | And, Or, Not, Compare, IntAdd, IntClamp, IntToFloat |
 | String | 8 | StringConcat, Format, Split, Contains, FloatToString |
-| List | 11 | FloatList, ListGet, ListSum, ListAverage, ListMap, ListFilter, ListSlice, ListConcat |
+| List | 40 | FloatList, ListGet, ListAdd, ListMul, ListMap, ArrayIterator |
 | Utility | 6 | Print, Passthrough, Comment, TypeOf, IsConnected |
 
 ## Design Philosophy

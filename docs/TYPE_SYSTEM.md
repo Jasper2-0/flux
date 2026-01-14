@@ -82,14 +82,16 @@ Flux supports **18 value types** organized into families.
 
 | Type | Rust Type | Default | Description |
 |------|-----------|---------|-------------|
-| `FloatList` | `Vec<f32>` | `[]` | List of floats |
-| `IntList` | `Vec<i32>` | `[]` | List of integers |
-| `BoolList` | `Vec<bool>` | `[]` | List of booleans |
-| `Vec2List` | `Vec<[f32; 2]>` | `[]` | List of 2D vectors |
-| `Vec3List` | `Vec<[f32; 3]>` | `[]` | List of 3D vectors |
-| `Vec4List` | `Vec<[f32; 4]>` | `[]` | List of 4D vectors |
-| `ColorList` | `Vec<Color>` | `[]` | List of colors |
-| `StringList` | `Vec<String>` | `[]` | List of strings |
+| `FloatList` | `Arc<[f32]>` | `[]` | List of floats |
+| `IntList` | `Arc<[i32]>` | `[]` | List of integers |
+| `BoolList` | `Arc<[bool]>` | `[]` | List of booleans |
+| `Vec2List` | `Arc<[[f32; 2]]>` | `[]` | List of 2D vectors |
+| `Vec3List` | `Arc<[[f32; 3]]>` | `[]` | List of 3D vectors |
+| `Vec4List` | `Arc<[[f32; 4]]>` | `[]` | List of 4D vectors |
+| `ColorList` | `Arc<[Color]>` | `[]` | List of colors |
+| `StringList` | `Arc<[String]>` | `[]` | List of strings |
+
+> **Note**: Collections use `Arc<[T]>` for zero-copy sharing between nodes. This enables efficient list passing without cloning data.
 
 ---
 
