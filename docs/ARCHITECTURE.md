@@ -36,7 +36,7 @@ flowchart TB
     end
 
     subgraph "flux-graph"
-        graph["Graph<br/>Execution engine"]
+        graphEngine["Graph<br/>Execution engine"]
         symbol["Symbol / Instance<br/>Definition vs state"]
         animation["Animation<br/>Keyframes, curves"]
         serial["Serialization<br/>JSON save/load"]
@@ -48,11 +48,11 @@ flowchart TB
     context --> operator
     dirty --> port
     operator --> builtin
-    operator --> graph
+    operator --> graphEngine
     builtin --> registry
-    registry --> graph
-    value --> graph
-    context --> graph
+    registry --> graphEngine
+    value --> graphEngine
+    context --> graphEngine
 ```
 
 ### Crate Responsibilities
@@ -72,14 +72,14 @@ Flux is built around three core abstractions that work together:
 
 ```mermaid
 flowchart LR
-    subgraph Operator
+    subgraph OperatorBox["Operator"]
         inputs["Inputs"]
         compute["compute()"]
         outputs["Outputs"]
         inputs --> compute --> outputs
     end
 
-    subgraph Graph
+    subgraph GraphBox["Graph"]
         nodes["Nodes<br/>(HashMap)"]
         connections["Connections"]
         cache["Value Cache"]
@@ -87,15 +87,15 @@ flowchart LR
         connections --- cache
     end
 
-    subgraph Context["EvalContext"]
+    subgraph ContextBox["EvalContext"]
         time["time / delta_time"]
         frame["frame count"]
         vars["variables"]
     end
 
-    Graph -->|"stores"| Operator
-    Context -->|"passed to"| Operator
-    Operator -->|"outputs cached in"| Graph
+    GraphBox -->|"stores"| OperatorBox
+    ContextBox -->|"passed to"| OperatorBox
+    OperatorBox -->|"outputs cached in"| GraphBox
 ```
 
 **Operator** - A computational unit with typed inputs and outputs. Implements the `Operator` trait.
