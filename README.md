@@ -94,47 +94,51 @@ Documentation is provided through:
 
 ## Examples
 
-28 examples demonstrate Flux concepts:
+29 examples organized into learning tiers. See [examples/README.md](examples/README.md) for learning paths.
 
 ```bash
-# Fundamentals
-cargo run --example 01_basic_arithmetic    # Core graph evaluation
+# Tier 1: Foundation - Core graph concepts
+cargo run --example 01_basic_arithmetic    # Graph construction and evaluation
 cargo run --example 02_sine_wave           # Time-based oscillators
-cargo run --example 03_multi_input_sum     # Variable input operators
-cargo run --example 04_compare_operator    # Comparison and logic
-cargo run --example 05_vec3_composition    # Vector operations
-cargo run --example 06_type_validation     # Type system and coercion
+cargo run --example 03_multi_input_sum     # Variadic input operators
+cargo run --example 04_compare_operator    # Boolean logic
+cargo run --example 05_vec3_composition    # Vector types
+cargo run --example 06_type_validation     # Type system
 
-# Serialization & Registry
-cargo run --example 07_json_serialization  # Save/load graphs
-cargo run --example 09_operator_registry   # Dynamic operator creation
+# Tier 2: Patterns - Essential graph patterns
+cargo run --example 07_diamond_dependency  # Fan-out/fan-in caching
+cargo run --example 08_composite_operators # Subgraphs and encapsulation
+cargo run --example 09_flow_control        # Conditionals and loops
+cargo run --example 10_color_wheel         # Practical color pipeline
 
-# Graph Features
-cargo run --example 08_composite_operators # Nested graphs
-cargo run --example 10_animation_system    # Keyframe animation
-cargo run --example 11_symbol_instance     # Symbol/instance pattern
-cargo run --example 12_dirty_flag_system   # Lazy evaluation
-cargo run --example 13_bypass_system       # Bypassing nodes
+# Tier 3: Persistence - Saving and loading
+cargo run --example 11_json_serialization  # Basic save/load
+cargo run --example 12_enhanced_serialization # Animation curves
+cargo run --example 13_operator_registry   # Dynamic operator creation
+cargo run --example 14_symbol_instance     # Symbol/instance pattern
 
-# Advanced Features
-cargo run --example 15_playback_settings   # Timeline playback
-cargo run --example 16_enhanced_serialization
-cargo run --example 18_phase3_operators    # Advanced operator patterns
-cargo run --example 19_auto_conversion     # Automatic type conversion
-cargo run --example 20_trigger_system      # Event triggers
-cargo run --example 21_compiled_execution  # Compiled graph execution
-cargo run --example 22_undo_redo           # Command pattern undo/redo
-cargo run --example 23_flow_control        # Loops and conditionals
+# Tier 4: Features - Advanced capabilities
+cargo run --example 15_animation_system    # Keyframe animation
+cargo run --example 16_dirty_flag_system   # Lazy evaluation
+cargo run --example 17_bypass_system       # Bypassing nodes
+cargo run --example 18_auto_conversion     # Automatic type conversion
+cargo run --example 19_trigger_system      # Push-based execution
+cargo run --example 20_playback_settings   # BPM and timing
 
-# Showcase Examples
-cargo run --example 24_procedural_terrain  # FBM noise terrain generation
-cargo run --example 25_spring_physics      # Chained spring physics simulation
-cargo run --example 26_color_wheel         # HSV color pipeline & harmony
-cargo run --example 27_diamond_dependency  # Fan-out/fan-in caching patterns
-cargo run --example 28_state_machine       # Trigger-based finite state machine
-cargo run --example 29_performance_benchmark --release  # Graph scaling benchmarks
-cargo run --example 30_list_processing        # List operators in graph context
-cargo run --example 31_collection_types       # Collection types and Arc lists
+# Tier 5: Performance - Optimization
+cargo run --example 21_compiled_execution  # Two-tier runtime
+cargo run --example 22_undo_redo           # Command pattern
+cargo run --example 23_performance_benchmark --release
+
+# Tier 6: Applications - Real-world examples
+cargo run --example 24_procedural_terrain  # FBM noise terrain
+cargo run --example 25_spring_physics      # Chained spring simulation
+cargo run --example 26_state_machine       # Trigger-based FSM
+cargo run --example 27_list_processing     # List operators
+cargo run --example 28_collection_types    # Polymorphic collections
+
+# Reference
+cargo run --example 29_operator_showcase   # All 150+ operators
 ```
 
 ## Operator Categories

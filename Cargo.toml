@@ -36,6 +36,10 @@ flux-graph.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 
+# =============================================================================
+# TIER 1: FOUNDATION (01-06) - Core graph concepts
+# =============================================================================
+
 [[example]]
 name = "01_basic_arithmetic"
 path = "examples/01_basic_arithmetic.rs"
@@ -60,53 +64,77 @@ path = "examples/05_vec3_composition.rs"
 name = "06_type_validation"
 path = "examples/06_type_validation.rs"
 
+# =============================================================================
+# TIER 2: GRAPH PATTERNS (07-10) - Essential patterns
+# =============================================================================
+
 [[example]]
-name = "07_json_serialization"
-path = "examples/07_json_serialization.rs"
+name = "07_diamond_dependency"
+path = "examples/07_diamond_dependency.rs"
 
 [[example]]
 name = "08_composite_operators"
 path = "examples/08_composite_operators.rs"
 
 [[example]]
-name = "09_operator_registry"
-path = "examples/09_operator_registry.rs"
+name = "09_flow_control"
+path = "examples/09_flow_control.rs"
 
 [[example]]
-name = "10_animation_system"
-path = "examples/10_animation_system.rs"
+name = "10_color_wheel"
+path = "examples/10_color_wheel.rs"
+
+# =============================================================================
+# TIER 3: PERSISTENCE & REGISTRY (11-14) - Saving/loading graphs
+# =============================================================================
 
 [[example]]
-name = "11_symbol_instance"
-path = "examples/11_symbol_instance.rs"
+name = "11_json_serialization"
+path = "examples/11_json_serialization.rs"
 
 [[example]]
-name = "12_dirty_flag_system"
-path = "examples/12_dirty_flag_system.rs"
+name = "12_enhanced_serialization"
+path = "examples/12_enhanced_serialization.rs"
 
 [[example]]
-name = "13_bypass_system"
-path = "examples/13_bypass_system.rs"
+name = "13_operator_registry"
+path = "examples/13_operator_registry.rs"
 
 [[example]]
-name = "15_playback_settings"
-path = "examples/15_playback_settings.rs"
+name = "14_symbol_instance"
+path = "examples/14_symbol_instance.rs"
+
+# =============================================================================
+# TIER 4: SYSTEM FEATURES (15-20) - Advanced capabilities
+# =============================================================================
 
 [[example]]
-name = "16_enhanced_serialization"
-path = "examples/16_enhanced_serialization.rs"
+name = "15_animation_system"
+path = "examples/15_animation_system.rs"
 
 [[example]]
-name = "18_phase3_operators"
-path = "examples/18_phase3_operators.rs"
+name = "16_dirty_flag_system"
+path = "examples/16_dirty_flag_system.rs"
 
 [[example]]
-name = "19_auto_conversion"
-path = "examples/19_auto_conversion.rs"
+name = "17_bypass_system"
+path = "examples/17_bypass_system.rs"
 
 [[example]]
-name = "20_trigger_system"
-path = "examples/20_trigger_system.rs"
+name = "18_auto_conversion"
+path = "examples/18_auto_conversion.rs"
+
+[[example]]
+name = "19_trigger_system"
+path = "examples/19_trigger_system.rs"
+
+[[example]]
+name = "20_playback_settings"
+path = "examples/20_playback_settings.rs"
+
+# =============================================================================
+# TIER 5: PERFORMANCE (21-23) - Optimization and benchmarking
+# =============================================================================
 
 [[example]]
 name = "21_compiled_execution"
@@ -117,8 +145,12 @@ name = "22_undo_redo"
 path = "examples/22_undo_redo.rs"
 
 [[example]]
-name = "23_flow_control"
-path = "examples/23_flow_control.rs"
+name = "23_performance_benchmark"
+path = "examples/23_performance_benchmark.rs"
+
+# =============================================================================
+# TIER 6: APPLICATIONS (24-28) - Real-world examples
+# =============================================================================
 
 [[example]]
 name = "24_procedural_terrain"
@@ -129,25 +161,21 @@ name = "25_spring_physics"
 path = "examples/25_spring_physics.rs"
 
 [[example]]
-name = "26_color_wheel"
-path = "examples/26_color_wheel.rs"
+name = "26_state_machine"
+path = "examples/26_state_machine.rs"
 
 [[example]]
-name = "27_diamond_dependency"
-path = "examples/27_diamond_dependency.rs"
+name = "27_list_processing"
+path = "examples/27_list_processing.rs"
 
 [[example]]
-name = "28_state_machine"
-path = "examples/28_state_machine.rs"
+name = "28_collection_types"
+path = "examples/28_collection_types.rs"
+
+# =============================================================================
+# REFERENCE (29) - Operator catalog
+# =============================================================================
 
 [[example]]
-name = "29_performance_benchmark"
-path = "examples/29_performance_benchmark.rs"
-
-[[example]]
-name = "30_list_processing"
-path = "examples/30_list_processing.rs"
-
-[[example]]
-name = "31_collection_types"
-path = "examples/31_collection_types.rs"
+name = "29_operator_showcase"
+path = "examples/29_operator_showcase.rs"
