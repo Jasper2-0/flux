@@ -479,3 +479,14 @@ The crate boundary is in place; extraction can happen when needed.
 
 - Logical vs actual texture size
 - Automatic re-evaluation on resolution change
+
+### Animated Texture Optimization (Later)
+
+During playback, time-varying nodes re-evaluate each frame. The dirty flag system handles this naturally — static branches stay cached, only animated branches re-evaluate.
+
+For complex animated textures that can't run in real-time, future options include:
+- Pre-bake as flipbook (evaluate at N time samples, cycle through frames)
+- Explicit "static" vs "realtime" graph separation
+- Artist-defined update rates (e.g., animate at 15fps instead of 60fps)
+
+For now: trust the graph is fast enough. Artist's responsibility to keep animated parts lightweight.
