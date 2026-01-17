@@ -110,6 +110,28 @@ impl<T> GpuHandle<T> {
 }
 ```
 
+### Async Primitives (Optional)
+
+solar-gpu provides async primitives for applications that need them (e.g., editor). These are not required for basic usage.
+
+```rust
+pub struct GpuFence {
+    // Wraps wgpu submission tracking
+}
+
+impl GpuFence {
+    pub fn is_complete(&self) -> bool;
+    pub fn block_until_complete(&self);
+}
+
+impl GpuFrame {
+    /// Submit and return a fence for async completion checking
+    pub fn submit_async(self, queue: &wgpu::Queue) -> GpuFence;
+}
+```
+
+The player ignores these and just submits synchronously. The editor uses them for non-blocking evaluation.
+
 ### Staleness Tracking
 
 Tixl-style reference/target pattern with frame deduplication:
@@ -327,34 +349,102 @@ Downstream operators also dirty (inputs changed)
 
 ## Application Integration
 
-### Editor / Player Setup
+### Responsibility Split: Editor vs Player
+
+The core flux-graph evaluation is simple and synchronous. Interactive scheduling complexity belongs in the application layer, not in flux:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  flux-graph                                                 │
+│                                                             │
+│  Simple, synchronous evaluation:                            │
+│   - Evaluate nodes in topological order                     │
+│   - Respect dirty flags (skip clean nodes)                  │
+│   - No awareness of frame budgets or progressive rendering  │
+└─────────────────────────────────────────────────────────────┘
+                            │
+            ┌───────────────┴───────────────┐
+            ▼                               ▼
+┌─────────────────────────────┐ ┌─────────────────────────────┐
+│  Editor                     │ │  Player                     │
+│                             │ │                             │
+│  Interactive scheduling:    │ │  Pre-calculate, then play:  │
+│   - Progressive refinement  │ │   - Startup: evaluate all   │
+│     (low-res → high-res)    │ │     at full quality         │
+│   - Time budgets per frame  │ │     (blocking, take time)   │
+│   - Async polling           │ │   - Playback: only          │
+│   - Show stale while        │ │     time-varying nodes      │
+│     computing               │ │     re-evaluate             │
+│   - Cancel on new input     │ │   - No progressive needed   │
+└─────────────────────────────┘ └─────────────────────────────┘
+```
+
+**Why this split:**
+- flux-graph stays simple and testable
+- Editor complexity doesn't bloat the player
+- Player can be minimal for size-constrained builds (64k intros)
+- Same graph, different execution strategies
+
+### Editor Setup
 
 ```rust
 fn main() {
-    // Application owns wgpu
-    let instance = wgpu::Instance::new(...);
-    let adapter = instance.request_adapter(...).await;
-    let (device, queue) = adapter.request_device(...).await;
+    let ctx = AppContext::new(); // owns wgpu, pool
 
-    // Application owns resource pool
-    let pool = GpuResourcePool::new(device.clone());
+    // Editor-specific: interactive scheduler
+    let mut scheduler = InteractiveScheduler::new()
+        .frame_budget_ms(8.0)
+        .preview_resolution(512, 512)
+        .final_resolution(4096, 4096);
 
-    // Application owns flux graph
-    let graph = FluxGraph::load("project.flux");
-
-    // Event loop
     event_loop.run(|event, _| {
         match event {
             Event::MainEventsCleared => {
-                // update()
-                let mut frame = GpuFrame::new(&device);
-                graph.evaluate(&eval_ctx, &pool, &mut frame);
+                // Scheduler decides what to evaluate this frame
+                let mut frame = GpuFrame::new(&ctx.device);
+                scheduler.evaluate_incremental(&mut graph, &ctx.pool, &mut frame);
 
-                // draw()
-                let commands = frame.finish();
-                queue.submit([commands]);
+                // Submit whatever was computed
+                ctx.queue.submit([frame.finish()]);
 
-                pool.process_deferred_releases();
+                // UI shows scheduler.preview_texture()
+                // (may be stale or low-res while computing)
+            }
+            _ => {}
+        }
+    });
+}
+```
+
+### Player Setup
+
+```rust
+fn main() {
+    let ctx = AppContext::new(); // owns wgpu, pool
+    let mut graph = FluxGraph::load("project.flux");
+
+    // STARTUP: Pre-calculate everything at full quality
+    // This can take as long as needed - no frame budget
+    {
+        let mut frame = GpuFrame::new(&ctx.device);
+        graph.evaluate_all(&ctx.pool, &mut frame); // blocking, full quality
+        ctx.queue.submit([frame.finish()]);
+        ctx.device.poll(wgpu::Maintain::Wait); // ensure complete
+    }
+
+    // PLAYBACK: Only time-varying nodes re-evaluate
+    event_loop.run(|event, _| {
+        match event {
+            Event::MainEventsCleared => {
+                let mut frame = GpuFrame::new(&ctx.device);
+
+                // Only evaluates nodes that depend on time/animation
+                // Everything else returns cached results
+                eval_ctx.time = get_playback_time();
+                graph.evaluate(&eval_ctx, &ctx.pool, &mut frame);
+
+                ctx.queue.submit([frame.finish()]);
+                ctx.pool.process_deferred_releases();
             }
             _ => {}
         }
@@ -389,4 +479,3 @@ The crate boundary is in place; extraction can happen when needed.
 
 - Logical vs actual texture size
 - Automatic re-evaluation on resolution change
-- Progressive refinement for preview
