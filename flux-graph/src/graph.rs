@@ -7,6 +7,7 @@ use flux_core::id::Id;
 use flux_core::operator::Operator;
 use flux_core::operator_meta::{EffectivePortMeta, PortOverride};
 use flux_core::value::{Value, ValueType};
+use flux_core::ParamValue;
 
 /// Cache key combining node ID and call context for context-aware caching.
 ///
@@ -241,6 +242,24 @@ impl Graph {
         self.nodes
             .get_mut(&id)
             .and_then(|n| n.operator.as_any_mut().downcast_mut::<O>())
+    }
+
+    /// Set an operator parameter by name.
+    ///
+    /// This method accesses the operator's `OperatorSettings` trait implementation
+    /// and calls `set_param` on it. Returns `true` if the parameter was found
+    /// and successfully set.
+    ///
+    /// This is provided as a convenience method to avoid trait object lifetime
+    /// issues when accessing settings through `get_mut()`.
+    pub fn set_operator_param(&mut self, id: Id, name: &str, value: ParamValue) -> bool {
+        // Access the Node directly to avoid trait object lifetime issues
+        if let Some(node) = self.nodes.get_mut(&id) {
+            if let Some(settings) = node.operator.settings_mut() {
+                return settings.set_param(name, value);
+            }
+        }
+        false
     }
 
     /// Get the name of a node

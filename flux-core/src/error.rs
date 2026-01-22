@@ -97,6 +97,27 @@ pub enum OperatorError {
     #[error("Failed to load resource '{path}': {reason}")]
     ResourceLoadFailed { path: String, reason: String },
 
+    // === GPU/Rendering Errors ===
+    /// Invalid texture handle
+    #[error("Invalid texture handle: {0:?}")]
+    InvalidTextureHandle(Id),
+
+    /// Invalid buffer handle
+    #[error("Invalid buffer handle: {0:?}")]
+    InvalidBufferHandle(Id),
+
+    /// Invalid mesh handle
+    #[error("Invalid mesh handle: {0:?}")]
+    InvalidMeshHandle(Id),
+
+    /// Shader compilation failed
+    #[error("Shader compilation failed: {reason}")]
+    ShaderCompilationFailed { reason: String },
+
+    /// GPU operation failed
+    #[error("GPU operation failed: {reason}")]
+    GpuError { reason: String },
+
     // === Serialization Errors ===
     /// JSON parsing failed
     #[error("JSON parse error: {message}")]
@@ -214,6 +235,13 @@ impl OperatorError {
     /// Create a resource not found error
     pub fn resource_not_found(path: impl Into<String>) -> Self {
         Self::ResourceNotFound { path: path.into() }
+    }
+
+    /// Create a GPU error
+    pub fn gpu_error(reason: impl Into<String>) -> Self {
+        Self::GpuError {
+            reason: reason.into(),
+        }
     }
 
     /// Create an internal error

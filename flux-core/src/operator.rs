@@ -7,6 +7,8 @@ use std::any::Any;
 
 use crate::context::EvalContext;
 use crate::id::Id;
+use crate::operator_settings::OperatorSettings;
+use crate::operator_visuals::OperatorVisuals;
 use crate::port::{InputPort, OutputPort, TriggerInput, TriggerOutput};
 use crate::value::Value;
 
@@ -213,5 +215,57 @@ pub trait Operator: Any {
         _get_input_value: InputResolver,
     ) -> Vec<usize> {
         Vec::new()
+    }
+
+    // =========================================================================
+    // Settings and Visualization (optional interfaces)
+    // =========================================================================
+
+    /// Get operator settings (editable parameters beyond input defaults).
+    ///
+    /// Override this method and return `Some(self)` if your operator implements
+    /// [`OperatorSettings`] to expose editable parameters like comparison modes,
+    /// waveform types, etc.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// impl Operator for CompareOp {
+    ///     fn settings(&self) -> Option<&dyn OperatorSettings> {
+    ///         Some(self)
+    ///     }
+    ///     // ... other methods
+    /// }
+    /// ```
+    fn settings(&self) -> Option<&dyn OperatorSettings> {
+        None
+    }
+
+    /// Get mutable operator settings for editing parameters.
+    ///
+    /// Override this method alongside `settings()` if your operator implements
+    /// [`OperatorSettings`].
+    fn settings_mut(&mut self) -> Option<&mut dyn OperatorSettings> {
+        None
+    }
+
+    /// Get visualization data from this operator.
+    ///
+    /// Override this method and return `Some(self)` if your operator implements
+    /// [`OperatorVisuals`] to expose visualization data like waveforms,
+    /// histograms, etc.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// impl Operator for ScopeOp {
+    ///     fn visuals(&self) -> Option<&dyn OperatorVisuals> {
+    ///         Some(self)
+    ///     }
+    ///     // ... other methods
+    /// }
+    /// ```
+    fn visuals(&self) -> Option<&dyn OperatorVisuals> {
+        None
     }
 }

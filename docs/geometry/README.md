@@ -105,6 +105,23 @@ Geometry operators participate in Flux's lazy evaluation:
 
 This ensures geometry work only happens when needed.
 
+### Unified Execution Model
+
+Users operate on geometry without knowing where computations run. The system decides:
+
+```
+User sees:                    System executes:
+
+[Sphere] → [Displace] → Render    [Sphere](CPU) → Upload → [Displace](GPU) → Render
+```
+
+- **Operator polymorphism** — Operators declare CPU and/or GPU implementations
+- **Automatic scheduling** — System chooses based on data location and downstream needs
+- **Transparent transfers** — Upload/download nodes inserted automatically
+- **Staged readback** — GPU→CPU uses 1-frame latency to avoid pipeline stalls
+
+See [execution.md](execution.md) for full details.
+
 ## Use Cases
 
 ### Static Procedural Geometry
@@ -143,4 +160,5 @@ Render thousands of copies efficiently. `Arc<Geometry>` enables zero-cost sharin
 
 - [types.md](types.md) — Core type definitions (`Geometry`, `AttributeTable`)
 - [operators.md](operators.md) — Operator catalog (generators, modifiers, bridge)
+- [execution.md](execution.md) — Unified CPU/GPU execution model
 - [implementation.md](implementation.md) — Phased implementation roadmap

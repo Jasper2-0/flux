@@ -6,7 +6,13 @@ use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::port::{InputPort, OutputPort};
 
-use flux_core::{category_colors, InputResolver, Operator, OperatorMeta, PinShape, PortMeta};
+use flux_core::{
+    category_colors, InputResolver, Operator, OperatorMeta, OperatorSettings, ParamDef, ParamValue,
+    PinShape, PortMeta,
+};
+
+/// Comparison mode options (UI display strings).
+const COMPARE_MODE_OPTIONS: &[&str] = &["==", "!=", "<", "<=", ">", ">="];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CompareMode {
@@ -129,6 +135,14 @@ impl Operator for CompareOp {
 
         self.outputs[0].set_bool(result);
     }
+
+    fn settings(&self) -> Option<&dyn OperatorSettings> {
+        Some(self)
+    }
+
+    fn settings_mut(&mut self) -> Option<&mut dyn OperatorSettings> {
+        Some(self)
+    }
 }
 
 impl OperatorMeta for CompareOp {
@@ -164,6 +178,29 @@ impl OperatorMeta for CompareOp {
             0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
             _ => None,
         }
+    }
+}
+
+impl OperatorSettings for CompareOp {
+    fn params(&self) -> Vec<ParamDef> {
+        vec![ParamDef::enumeration(
+            "mode",
+            "Comparison Mode",
+            self.mode.to_index(),
+            COMPARE_MODE_OPTIONS,
+        )]
+    }
+
+    fn set_param(&mut self, name: &str, value: ParamValue) -> bool {
+        if name == "mode" {
+            if let Some(index) = value.as_enum_index() {
+                if let Some(mode) = CompareMode::from_index(index) {
+                    self.mode = mode;
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
 
@@ -281,5 +318,20 @@ mod tests {
             assert_eq!(mode.to_index(), i);
         }
         assert!(CompareMode::from_index(6).is_none());
+    }
+
+    #[test]
+    fn test_settings() {
+        let mut op = CompareOp::new(CompareMode::Equal);
+        assert_eq!(op.mode, CompareMode::Equal);
+
+        // Change mode via settings
+        let success = op.set_param("mode", ParamValue::enum_index(2)); // LessThan
+        assert!(success);
+        assert_eq!(op.mode, CompareMode::LessThan);
+
+        // Invalid param name
+        let success = op.set_param("invalid", ParamValue::enum_index(0));
+        assert!(!success);
     }
 }

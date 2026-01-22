@@ -27,6 +27,7 @@ pub mod conversion;
 pub mod graph;
 pub mod instance_path;
 pub mod playback;
+pub mod resource;
 pub mod serialization;
 pub mod slot_ref;
 pub mod symbol;

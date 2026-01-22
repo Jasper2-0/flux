@@ -36,6 +36,7 @@ use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::Operator;
 use flux_core::value::Value;
+use flux_core::ParamValue;
 
 use crate::graph::{Connection, Graph, GraphError, GraphEvent, GraphStats};
 
@@ -179,6 +180,16 @@ impl<E: Copy + Eq + Hash> AssociatedGraph<E> {
     /// Get a typed mutable operator by flux ID.
     pub fn get_mut_as<O: 'static>(&mut self, id: Id) -> Option<&mut O> {
         self.inner.get_mut_as::<O>(id)
+    }
+
+    /// Set an operator parameter by name.
+    ///
+    /// This delegates to the inner Graph's helper method which handles
+    /// trait object lifetime issues when calling `set_param` on settings.
+    ///
+    /// Returns `true` if the parameter was found and successfully set.
+    pub fn set_operator_param(&mut self, id: Id, name: &str, value: ParamValue) -> bool {
+        self.inner.set_operator_param(id, name, value)
     }
 
     /// Remove an operator by flux ID.

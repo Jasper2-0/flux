@@ -4,12 +4,17 @@
 //! - [`EvalContext`] - The main context passed during operator evaluation
 //! - [`CallContext`] - Context identifier for subroutine/loop caching
 //! - [`GizmoVisibility`] / [`TransformGizmoMode`] - Gizmo settings
-//! - [`Mat4`] - 4x4 matrix type alias
+//! - [`FogParameters`] / [`PbrMaterial`] / [`PointLight`] - Rendering settings
+//! - [`Camera`] / [`PerspectiveCamera`] - Camera abstraction
 
 mod call_context;
+mod camera;
+mod rendering;
 mod types;
 
 pub use call_context::CallContext;
+pub use camera::{Camera, PerspectiveCamera};
+pub use rendering::{FogParameters, PbrMaterial, PointLight};
 pub use types::{GizmoVisibility, Mat4, TransformGizmoMode, MAT4_IDENTITY};
 
 use std::collections::HashMap;
@@ -35,7 +40,7 @@ pub struct EvalContext {
     /// Current frame number
     pub frame: u64,
 
-    // === Transform ===
+    // === Camera/Transform ===
     /// Camera to clip space transform (projection matrix)
     pub camera_to_clip: Mat4,
     /// World to camera transform (view matrix)
@@ -43,7 +48,13 @@ pub struct EvalContext {
     /// Object to world transform (model matrix)
     pub object_to_world: Mat4,
 
-    // === Display ===
+    // === Rendering ===
+    /// Fog parameters
+    pub fog: FogParameters,
+    /// Current PBR material
+    pub pbr_material: PbrMaterial,
+    /// Active point lights
+    pub point_lights: Vec<PointLight>,
     /// Background color (RGBA)
     pub background_color: [f32; 4],
     /// Foreground/text color (RGBA)
@@ -91,12 +102,15 @@ impl EvalContext {
             delta_time: 0.0,
             frame: 0,
 
-            // Transform
+            // Camera/Transform
             camera_to_clip: MAT4_IDENTITY,
             world_to_camera: MAT4_IDENTITY,
             object_to_world: MAT4_IDENTITY,
 
-            // Display
+            // Rendering
+            fog: FogParameters::new(),
+            pbr_material: PbrMaterial::new(),
+            point_lights: Vec::new(),
             background_color: [0.0, 0.0, 0.0, 1.0],
             foreground_color: [1.0, 1.0, 1.0, 1.0],
             resolution: (1920, 1080),
@@ -189,7 +203,13 @@ impl EvalContext {
         ctx
     }
 
-    // === Transform Management ===
+    // === Camera Management ===
+
+    /// Set camera matrices from a Camera implementation
+    pub fn set_camera(&mut self, camera: &impl Camera) {
+        self.world_to_camera = camera.get_view_matrix();
+        self.camera_to_clip = camera.get_projection_matrix();
+    }
 
     /// Set to default camera (identity matrices)
     pub fn set_default_camera(&mut self) {
@@ -266,6 +286,18 @@ impl EvalContext {
 
     pub fn get_object_var(&self, name: &str) -> Option<&Value> {
         self.object_vars.get(name)
+    }
+
+    // === Lighting ===
+
+    /// Add a point light to the context
+    pub fn add_point_light(&mut self, light: PointLight) {
+        self.point_lights.push(light);
+    }
+
+    /// Clear all point lights
+    pub fn clear_lights(&mut self) {
+        self.point_lights.clear();
     }
 
     // === Gizmos ===
@@ -385,6 +417,65 @@ mod tests {
         ctx.show_gizmos = GizmoVisibility::IfSelected;
         assert!(ctx.should_show_gizmos(true));
         assert!(!ctx.should_show_gizmos(false));
+    }
+
+    #[test]
+    fn test_fog_parameters() {
+        let fog = FogParameters::linear(10.0, 100.0, [0.5, 0.5, 0.5, 1.0]);
+        assert!(fog.enabled);
+        assert_eq!(fog.start, 10.0);
+        assert_eq!(fog.end, 100.0);
+
+        let exp_fog = FogParameters::exponential(0.02, [0.3, 0.3, 0.3, 1.0]);
+        assert!(exp_fog.enabled);
+        assert_eq!(exp_fog.density, 0.02);
+    }
+
+    #[test]
+    fn test_pbr_material() {
+        let metal = PbrMaterial::metal([0.8, 0.7, 0.1, 1.0], 0.3);
+        assert_eq!(metal.metallic, 1.0);
+        assert_eq!(metal.roughness, 0.3);
+
+        let plastic = PbrMaterial::dielectric([1.0, 0.0, 0.0, 1.0], 0.8);
+        assert_eq!(plastic.metallic, 0.0);
+    }
+
+    #[test]
+    fn test_point_light() {
+        let mut ctx = EvalContext::new();
+        ctx.add_point_light(PointLight::new([0.0, 5.0, 0.0], [1.0, 1.0, 1.0], 2.0));
+        ctx.add_point_light(PointLight::new([5.0, 0.0, 0.0], [1.0, 0.0, 0.0], 1.0));
+        assert_eq!(ctx.point_lights.len(), 2);
+
+        ctx.clear_lights();
+        assert!(ctx.point_lights.is_empty());
+    }
+
+    #[test]
+    fn test_perspective_camera() {
+        let camera = PerspectiveCamera::look_at([0.0, 0.0, 5.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+
+        let view = camera.get_view_matrix();
+        let proj = camera.get_projection_matrix();
+        let pos = camera.get_position();
+
+        assert_eq!(pos, [0.0, 0.0, 5.0]);
+        // View matrix should be valid
+        assert!(view[3][3] != 0.0);
+        // Projection matrix should be valid
+        assert!(proj[0][0] != 0.0);
+    }
+
+    #[test]
+    fn test_set_camera() {
+        let mut ctx = EvalContext::new();
+        let camera = PerspectiveCamera::new();
+        ctx.set_camera(&camera);
+
+        // Matrices should be set from camera
+        assert_ne!(ctx.world_to_camera, MAT4_IDENTITY);
+        assert_ne!(ctx.camera_to_clip, MAT4_IDENTITY);
     }
 
     #[test]

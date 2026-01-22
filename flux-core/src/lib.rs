@@ -48,12 +48,15 @@ pub mod error;
 pub mod id;
 pub mod operator;
 pub mod operator_meta;
+pub mod operator_settings;
+pub mod operator_visuals;
 pub mod port;
 pub mod value;
 
 // Re-export commonly used types at crate root
 pub use context::{
-    CallContext, EvalContext, GizmoVisibility, Mat4, TransformGizmoMode, MAT4_IDENTITY,
+    CallContext, Camera, EvalContext, FogParameters, GizmoVisibility, Mat4, PbrMaterial,
+    PerspectiveCamera, PointLight, TransformGizmoMode, MAT4_IDENTITY,
 };
 pub use dirty_flag::{
     advance_invalidation_frame, current_invalidation_frame, reset_invalidation_frame, DirtyFlag,
@@ -65,5 +68,7 @@ pub use operator::{InputResolver, Operator};
 pub use operator_meta::{
     category_colors, EffectivePortMeta, OperatorMeta, PinShape, PortMeta, PortOverride,
 };
-pub use port::{InputPort, OutputPort, OutputTypeRule, TriggerInput, TriggerOutput, TypeConstraint};
+pub use operator_settings::{OperatorSettings, ParamDef, ParamValue};
+pub use operator_visuals::{OperatorVisuals, VisualData};
+pub use port::{InputPort, OutputPort, TriggerInput, TriggerOutput};
 pub use value::{Color, Gradient, GradientStop, Matrix4, TypeCategory, Value, ValueType};

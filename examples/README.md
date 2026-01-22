@@ -1,6 +1,6 @@
 # Flux Examples
 
-29 examples organized into learning tiers for progressive mastery of Flux.
+32 examples organized into learning tiers for progressive mastery of Flux.
 
 ## Quick Start
 
@@ -33,10 +33,10 @@ Add patterns and persistence:
 
 ```bash
 # After Path A, continue with:
-cargo run --example 07_diamond_dependency # Fan-out/fan-in patterns
+cargo run --example 07_json_serialization # Save/load graphs
 cargo run --example 08_composite_operators # Encapsulation
-cargo run --example 09_flow_control       # Conditionals and loops
-cargo run --example 11_json_serialization # Save/load graphs
+cargo run --example 23_flow_control       # Conditionals and loops
+cargo run --example 24_diamond_dependency # Fan-out/fan-in patterns
 cargo run --example 21_compiled_execution # Performance optimization
 ```
 
@@ -62,95 +62,100 @@ Core graph concepts every user should understand.
 
 ---
 
-## Tier 2: Graph Patterns (07-10)
-
-Essential patterns for building real applications.
-
-| # | Example | What You'll Learn |
-|---|---------|-------------------|
-| 07 | `diamond_dependency` | Fan-out/fan-in, caching, topological evaluation |
-| 08 | `composite_operators` | Subgraphs, encapsulation, expose I/O |
-| 09 | `flow_control` | Switch, Gate, Loop, ForEach operators |
-| 10 | `color_wheel` | HSV/RGB, color harmony, practical pipeline |
-
-**Time to complete:** 1-2 hours
-
----
-
-## Tier 3: Persistence & Registry (11-14)
+## Tier 2: Persistence & Registry (07-09)
 
 Saving, loading, and dynamic operator creation.
 
 | # | Example | What You'll Learn |
 |---|---------|-------------------|
-| 11 | `json_serialization` | SymbolDef, ChildDef, round-trip save/load |
-| 12 | `enhanced_serialization` | Animation curves, keyframes, metadata |
-| 13 | `operator_registry` | Dynamic creation, registry lookups |
-| 14 | `symbol_instance` | Symbol definitions, instances, hierarchies |
+| 07 | `json_serialization` | SymbolDef, ChildDef, round-trip save/load |
+| 08 | `composite_operators` | Subgraphs, encapsulation, expose I/O |
+| 09 | `operator_registry` | Dynamic creation, registry lookups |
 
 **Time to complete:** 1-2 hours
 
 ---
 
-## Tier 4: System Features (15-20)
+## Tier 3: Animation & Symbols (10-13)
 
-Advanced capabilities and execution models.
+Animation systems and symbol hierarchies.
 
 | # | Example | What You'll Learn |
 |---|---------|-------------------|
-| 15 | `animation_system` | CurveBuilder, keyframes, loop modes |
-| 16 | `dirty_flag_system` | Context-aware marking, lazy evaluation |
-| 17 | `bypass_system` | Bypassing nodes, BypassState |
-| 18 | `auto_conversion` | Type conversion nodes, ConversionOp |
-| 19 | `trigger_system` | Push-based execution, trigger I/O |
-| 20 | `playback_settings` | BPM timing, beat quantization |
+| 10 | `animation_system` | CurveBuilder, keyframes, loop modes |
+| 11 | `symbol_instance` | Symbol definitions, instances, hierarchies |
+| 12 | `dirty_flag_system` | Context-aware marking, lazy evaluation |
+| 13 | `bypass_system` | Bypassing nodes, BypassState |
+
+**Time to complete:** 1-2 hours
+
+---
+
+## Tier 4: Context & Settings (14-18)
+
+Evaluation contexts and advanced features.
+
+| # | Example | What You'll Learn |
+|---|---------|-------------------|
+| 14 | `eval_context` | Evaluation context, custom contexts |
+| 15 | `playback_settings` | BPM timing, beat quantization |
+| 16 | `enhanced_serialization` | Animation curves, keyframes, metadata |
+| 17 | `resource_management` | Resource handling patterns |
+| 18 | `phase3_operators` | Advanced operator categories |
 
 **Time to complete:** 2-3 hours
 
 ---
 
-## Tier 5: Performance (21-23)
+## Tier 5: Execution & Flow (19-23)
 
-Optimization, undo/redo, and benchmarking.
+Triggers, compilation, and flow control.
 
 | # | Example | What You'll Learn |
 |---|---------|-------------------|
+| 19 | `auto_conversion` | Type conversion nodes, ConversionOp |
+| 20 | `trigger_system` | Push-based execution, trigger I/O |
 | 21 | `compiled_execution` | Two-tier runtime, dead code elimination |
 | 22 | `undo_redo` | Command pattern, MacroCommand, state management |
-| 23 | `performance_benchmark` | Wide/deep graphs, interpreted vs compiled |
+| 23 | `flow_control` | Switch, Gate, Loop, ForEach operators |
 
-**Time to complete:** 1-2 hours
-
-**Note:** Run benchmarks with `--release`:
-```bash
-cargo run --example 23_performance_benchmark --release
-```
+**Time to complete:** 2-3 hours
 
 ---
 
-## Tier 6: Applications (24-28)
+## Tier 6: Applications (24-29)
 
 Real-world examples demonstrating complete solutions.
 
 | # | Example | What You'll Learn |
 |---|---------|-------------------|
-| 24 | `procedural_terrain` | Multi-octave FBM noise, terrain generation |
-| 25 | `spring_physics` | Stateful operators, chained simulations |
-| 26 | `state_machine` | Trigger-based FSM, edge detection |
-| 27 | `list_processing` | List operators: map, filter, slice, concat |
-| 28 | `collection_types` | Polymorphic lists, type-specific operators |
+| 24 | `diamond_dependency` | Fan-out/fan-in, caching, topological evaluation |
+| 25 | `color_wheel` | HSV/RGB, color harmony, practical pipeline |
+| 26 | `performance_benchmark` | Wide/deep graphs, interpreted vs compiled |
+| 27 | `procedural_terrain` | Multi-octave FBM noise, terrain generation |
+| 28 | `spring_physics` | Stateful operators, chained simulations |
+| 29 | `state_machine` | Trigger-based FSM, edge detection |
 
 **Time to complete:** 2-3 hours
 
+**Note:** Run benchmarks with `--release`:
+```bash
+cargo run --example 26_performance_benchmark --release
+```
+
 ---
 
-## Reference (29)
+## Tier 7: Collections & Reference (30-32)
+
+Advanced list operations and comprehensive operator reference.
 
 | # | Example | What You'll Learn |
 |---|---------|-------------------|
-| 29 | `operator_showcase` | All 150+ operators organized by category |
+| 30 | `list_processing` | List operators: map, filter, slice, concat |
+| 31 | `collection_types` | Polymorphic lists, type-specific operators |
+| 32 | `operator_showcase` | All 150+ operators organized by category |
 
-Use this as a reference catalog when you need to find a specific operator.
+**Time to complete:** 1-2 hours
 
 ---
 
@@ -160,14 +165,15 @@ Find examples by concept:
 
 | Concept | Examples |
 |---------|----------|
-| **Graph basics** | 01, 02, 07, 08 |
-| **Type system** | 04, 05, 06, 18, 28 |
-| **Time/Animation** | 02, 15, 20 |
-| **Serialization** | 11, 12, 14 |
-| **Performance** | 16, 21, 23 |
-| **Flow control** | 09, 19, 26 |
-| **Collections** | 27, 28 |
-| **Real-world apps** | 10, 24, 25, 26 |
+| **Graph basics** | 01, 02, 08, 24 |
+| **Type system** | 04, 05, 06, 19, 31 |
+| **Time/Animation** | 02, 10, 15 |
+| **Serialization** | 07, 11, 16 |
+| **Performance** | 12, 21, 26 |
+| **Flow control** | 20, 23, 29 |
+| **Collections** | 30, 31 |
+| **Real-world apps** | 25, 27, 28, 29 |
+| **Reference** | 32 |
 
 ---
 
@@ -176,4 +182,3 @@ Find examples by concept:
 1. **Run examples in order** - Later examples build on earlier concepts
 2. **Read the source** - Each example is heavily commented
 3. **Experiment** - Modify values and add nodes to understand behavior
-4. **Use `29_operator_showcase`** - Reference it when looking for specific operators

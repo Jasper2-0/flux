@@ -10,7 +10,10 @@ use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::port::{InputPort, OutputPort};
 
-use flux_core::{category_colors, InputResolver, Operator, OperatorMeta, PinShape, PortMeta};
+use flux_core::{
+    category_colors, InputResolver, Operator, OperatorMeta, OperatorVisuals, PinShape, PortMeta,
+    VisualData,
+};
 
 /// Default number of samples to keep in the buffer
 const DEFAULT_BUFFER_SIZE: usize = 128;
@@ -139,6 +142,10 @@ impl Operator for ScopeOp {
         // Always needs to be re-evaluated to update the buffer
         true
     }
+
+    fn visuals(&self) -> Option<&dyn OperatorVisuals> {
+        Some(self)
+    }
 }
 
 impl OperatorMeta for ScopeOp {
@@ -165,6 +172,15 @@ impl OperatorMeta for ScopeOp {
         match index {
             0 => Some(PortMeta::new("Out").with_shape(PinShape::TriangleFilled)),
             _ => None,
+        }
+    }
+}
+
+impl OperatorVisuals for ScopeOp {
+    fn visual_data(&self) -> VisualData {
+        VisualData::Waveform {
+            samples: self.buffer.iter().copied().collect(),
+            range: self.value_range(),
         }
     }
 }

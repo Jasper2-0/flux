@@ -11,7 +11,9 @@ Phased implementation plan for the Flux geometry system.
 | 3 | Bridge Operators | GetPositions, GetNormals, GetAttribute |
 | 4 | GPU Integration | UploadGeometry, render pipeline |
 | 5 | Modifiers | Transform, Merge |
-| 6 | Future | Instancing, subdivision, curves |
+| 6 | Unified Execution | Scheduler, graph compiler, operator polymorphism |
+| 7 | Compute Shaders | GPU-side geometry ops (Displace, Particles) |
+| 8 | Future | Instancing, subdivision, curves |
 
 ---
 
@@ -330,7 +332,158 @@ fn test_merge() {
 
 ---
 
-## Phase 6: Future Enhancements
+## Phase 6: Unified Execution
+
+**Goal:** Abstract CPU/GPU execution from user's mental model.
+
+See [execution.md](execution.md) for full design.
+
+### Files to Create
+
+```
+flux-graph/src/
+├── scheduler.rs       # Execution location decisions
+├── compiler.rs        # Logical → physical graph transformation
+├── registry.rs        # GeometryRegistry, GeometryStorage
+
+flux-core/src/value/
+├── geometry.rs        # UPDATE: Add GeometryId, GpuGeometry
+```
+
+### Tasks
+
+1. **GeometryRegistry**
+   - [ ] `GeometryId` opaque handle type
+   - [ ] `GeometryStorage` with CPU/GPU dual representation
+   - [ ] `CanonicalLocation` enum (Cpu, Gpu, Synced)
+   - [ ] `ensure_cpu()` / `ensure_gpu()` materialization
+   - [ ] Version tracking for cache invalidation
+
+2. **Operator Polymorphism**
+   - [ ] `GeometryOperator` trait with `implementations()` method
+   - [ ] `ImplementationSet` bitflags (CPU, GPU_COMPUTE, GPU_VERTEX)
+   - [ ] `execute_cpu()` / `execute_gpu_compute()` methods
+   - [ ] Update existing operators to implement trait
+
+3. **Scheduler**
+   - [ ] Heuristics: vertex count threshold, downstream analysis
+   - [ ] `choose_location()` decision function
+   - [ ] `analyze_downstream()` requirement propagation
+
+4. **Graph Compiler**
+   - [ ] `compile()` logical → physical transformation
+   - [ ] Auto-insert Upload/Download nodes
+   - [ ] Physical graph execution
+
+5. **Staged Readback**
+   - [ ] `StagedReadback` for GPU→CPU without stalls
+   - [ ] 1-frame latency pattern
+
+### Verification
+
+```rust
+#[test]
+fn test_auto_upload() {
+    let mut graph = Graph::new();
+    let sphere = graph.add(Sphere::new(1.0, 32, 16));
+    let render = graph.add(Render::new());
+    graph.connect(sphere, render);
+
+    let physical = compiler.compile(&graph, &registry);
+
+    // Should auto-insert upload between CPU sphere and GPU render
+    assert!(physical.has_upload_node());
+}
+
+#[test]
+fn test_gpu_chain() {
+    let mut graph = Graph::new();
+    let sphere = graph.add(Sphere::new(1.0, 64, 32));
+    let displace = graph.add(Displace::new(2.0, 0.3));
+    let render = graph.add(Render::new());
+    graph.connect(sphere, displace);
+    graph.connect(displace, render);
+
+    let physical = compiler.compile(&graph, &registry);
+
+    // Sphere on CPU, upload once, displace on GPU, render
+    assert_eq!(physical.location_of(sphere), ExecutionLocation::Cpu);
+    assert_eq!(physical.location_of(displace), ExecutionLocation::Gpu);
+}
+```
+
+---
+
+## Phase 7: Compute Shaders
+
+**Goal:** GPU-side geometry modification via wgpu compute.
+
+### Files to Create
+
+```
+flux-operators/src/compute/
+├── mod.rs
+├── displace.rs        # Noise-based displacement
+├── normal_recalc.rs   # Recompute normals after modification
+├── particle.rs        # Particle system update
+```
+
+### Tasks
+
+1. **Compute Infrastructure**
+   - [ ] Compute shader loading and compilation
+   - [ ] Storage buffer management for geometry
+   - [ ] Uniform buffer for operator parameters
+   - [ ] Workgroup dispatch helpers
+
+2. **DisplaceCompute**
+   - [ ] WGSL shader for noise displacement
+   - [ ] Operator with CPU fallback and GPU compute impl
+   - [ ] Output buffer management (double-buffering)
+
+3. **NormalRecalcCompute**
+   - [ ] Recompute vertex normals from positions
+   - [ ] Handle indexed geometry
+
+4. **ParticleUpdate**
+   - [ ] Position/velocity integration
+   - [ ] Age/lifetime management
+   - [ ] Emit/destroy logic
+
+### Verification
+
+```rust
+#[test]
+fn test_displace_gpu() {
+    let geo = SphereGeometry::generate(1.0, 64, 32);
+    let registry = GeometryRegistry::new();
+    let id = registry.store_cpu(geo);
+
+    // Force GPU execution
+    let displace = DisplaceOp.force_gpu();
+    let result = displace.execute(&[id], &params, &mut ctx);
+
+    // Result should be GPU-canonical
+    let storage = registry.get_storage(result.id);
+    assert_eq!(storage.canonical, CanonicalLocation::Gpu);
+}
+
+#[test]
+fn test_compute_chain() {
+    // Displace → NormalRecalc → Render (all on GPU, no transfers)
+    let physical = compile_graph(&graph);
+
+    let transfers = physical.nodes()
+        .filter(|n| matches!(n.kind, PhysicalNodeKind::Upload | PhysicalNodeKind::Download))
+        .count();
+
+    assert_eq!(transfers, 1);  // Only initial upload
+}
+```
+
+---
+
+## Phase 8: Future Enhancements
 
 ### Instancing
 
@@ -392,15 +545,21 @@ Phase 1: Core Types
     ├──▶ Phase 2: Generators (depends on Geometry type)
     │         │
     │         └──▶ Phase 4: GPU (depends on generators for testing)
+    │                   │
+    │                   └──▶ Phase 6: Unified Execution (depends on GPU integration)
+    │                             │
+    │                             └──▶ Phase 7: Compute Shaders (depends on execution model)
     │
     └──▶ Phase 3: Bridge Operators (depends on Geometry type)
               │
               └──▶ Phase 5: Modifiers (uses bridge operators internally)
 ```
 
-**Recommended order:** 1 → 2 → 3 → 4 → 5
+**Recommended order:** 1 → 2 → 3 → 4 → 5 → 6 → 7
 
-Phase 4 (GPU) can start after Phase 2 is complete—it needs generators to test but not bridge operators.
+- Phases 1-5 establish the CPU-side geometry system
+- Phase 6 adds the abstraction layer for transparent execution
+- Phase 7 adds GPU compute implementations that plug into Phase 6
 
 ---
 
@@ -413,5 +572,9 @@ Phase 4 (GPU) can start after Phase 2 is complete—it needs generators to test 
 | 3 | 5 | Low | Simple data extraction |
 | 4 | 2 | High | GPU integration, caching |
 | 5 | 2 | Medium | Transform math, merge logic |
+| 6 | 4 | High | Scheduler, compiler, registry—architectural core |
+| 7 | 4 | High | WGSL shaders, compute pipeline, buffer management |
 
-**Total:** ~16 files, mostly in flux-operators with some flux-core additions.
+**Total:** ~24 files across flux-core, flux-operators, and flux-graph.
+
+**Implementation Note:** Phases 1-5 can be built and used without Phases 6-7. The unified execution model is an optimization layer—geometry works without it, just with manual CPU/GPU decisions.
