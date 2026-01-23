@@ -17,9 +17,82 @@ pub use camera::{Camera, PerspectiveCamera};
 pub use rendering::{FogParameters, PbrMaterial, PointLight};
 pub use types::{GizmoVisibility, Mat4, TransformGizmoMode, MAT4_IDENTITY};
 
+use std::any::{Any, TypeId};
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::value::Value;
+
+// ============================================================================
+// Extension Storage
+// ============================================================================
+
+/// Type-erased extension storage for domain-specific contexts.
+///
+/// Extensions allow external systems (GPU, audio, physics) to attach
+/// their context to EvalContext without flux-core having dependencies
+/// on those systems.
+#[derive(Clone, Default)]
+pub struct Extensions {
+    inner: HashMap<TypeId, Arc<dyn Any + Send + Sync>>,
+}
+
+impl Extensions {
+    /// Create empty extension storage
+    pub fn new() -> Self {
+        Self {
+            inner: HashMap::new(),
+        }
+    }
+
+    /// Get an extension by type
+    pub fn get<T: 'static + Send + Sync>(&self) -> Option<&T> {
+        self.inner
+            .get(&TypeId::of::<T>())
+            .and_then(|ext| ext.downcast_ref())
+    }
+
+    /// Set an extension, returning the previous value if any
+    pub fn set<T: 'static + Send + Sync>(&mut self, value: T) -> Option<Arc<dyn Any + Send + Sync>> {
+        self.inner.insert(TypeId::of::<T>(), Arc::new(value))
+    }
+
+    /// Set an extension from an Arc (avoids double-wrapping)
+    pub fn set_arc<T: 'static + Send + Sync>(
+        &mut self,
+        value: Arc<T>,
+    ) -> Option<Arc<dyn Any + Send + Sync>> {
+        self.inner.insert(TypeId::of::<T>(), value)
+    }
+
+    /// Remove an extension by type
+    pub fn remove<T: 'static + Send + Sync>(&mut self) -> Option<Arc<dyn Any + Send + Sync>> {
+        self.inner.remove(&TypeId::of::<T>())
+    }
+
+    /// Check if an extension exists
+    pub fn contains<T: 'static + Send + Sync>(&self) -> bool {
+        self.inner.contains_key(&TypeId::of::<T>())
+    }
+
+    /// Get the number of extensions
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    /// Check if there are no extensions
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
+}
+
+impl std::fmt::Debug for Extensions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Extensions")
+            .field("count", &self.inner.len())
+            .finish()
+    }
+}
 
 // ============================================================================
 // Evaluation Context
@@ -87,6 +160,13 @@ pub struct EvalContext {
     /// or loop iterations, this context ensures separate cache entries.
     pub call_context: CallContext,
 
+    // === Extensions ===
+    /// Type-erased extensions for domain-specific contexts (GPU, audio, etc.)
+    ///
+    /// This allows external systems to attach their context without
+    /// flux-core depending on those systems.
+    pub extensions: Extensions,
+
     // === Internal ===
     /// Parent time for nested time contexts
     parent_time: Option<f64>,
@@ -128,6 +208,9 @@ impl EvalContext {
 
             // Call Context
             call_context: CallContext::root(),
+
+            // Extensions
+            extensions: Extensions::new(),
 
             // Internal
             parent_time: None,
@@ -298,6 +381,59 @@ impl EvalContext {
     /// Clear all point lights
     pub fn clear_lights(&mut self) {
         self.point_lights.clear();
+    }
+
+    // === Extensions ===
+
+    /// Get an extension by type.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use flux_core::EvalContext;
+    ///
+    /// struct MyGpuContext { /* ... */ }
+    ///
+    /// let ctx = EvalContext::new();
+    /// if let Some(gpu) = ctx.get_extension::<MyGpuContext>() {
+    ///     // Use GPU context
+    /// }
+    /// ```
+    pub fn get_extension<T: 'static + Send + Sync>(&self) -> Option<&T> {
+        self.extensions.get::<T>()
+    }
+
+    /// Set an extension, taking ownership.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use flux_core::EvalContext;
+    ///
+    /// struct MyGpuContext { device_name: String }
+    ///
+    /// let mut ctx = EvalContext::new();
+    /// ctx.set_extension(MyGpuContext {
+    ///     device_name: "RTX 4090".to_string()
+    /// });
+    /// ```
+    pub fn set_extension<T: 'static + Send + Sync>(&mut self, value: T) {
+        self.extensions.set(value);
+    }
+
+    /// Set an extension from an Arc (avoids double-wrapping when you already have an Arc).
+    pub fn set_extension_arc<T: 'static + Send + Sync>(&mut self, value: Arc<T>) {
+        self.extensions.set_arc(value);
+    }
+
+    /// Remove an extension by type.
+    pub fn remove_extension<T: 'static + Send + Sync>(&mut self) {
+        self.extensions.remove::<T>();
+    }
+
+    /// Check if an extension of the given type exists.
+    pub fn has_extension<T: 'static + Send + Sync>(&self) -> bool {
+        self.extensions.contains::<T>()
     }
 
     // === Gizmos ===
@@ -485,5 +621,113 @@ mod tests {
 
         ctx.transform_gizmo_mode = TransformGizmoMode::Move;
         assert_eq!(ctx.transform_gizmo_mode, TransformGizmoMode::Move);
+    }
+
+    // === Extension Tests ===
+
+    #[test]
+    fn test_extensions_basic() {
+        // Test type for extensions
+        struct TestGpuContext {
+            device_name: String,
+        }
+
+        let mut ext = Extensions::new();
+        assert!(ext.is_empty());
+        assert_eq!(ext.len(), 0);
+
+        // Set and get
+        ext.set(TestGpuContext {
+            device_name: "Test GPU".to_string(),
+        });
+        assert!(!ext.is_empty());
+        assert_eq!(ext.len(), 1);
+        assert!(ext.contains::<TestGpuContext>());
+
+        let gpu = ext.get::<TestGpuContext>().unwrap();
+        assert_eq!(gpu.device_name, "Test GPU");
+
+        // Remove
+        ext.remove::<TestGpuContext>();
+        assert!(ext.is_empty());
+        assert!(!ext.contains::<TestGpuContext>());
+    }
+
+    #[test]
+    fn test_extensions_multiple_types() {
+        struct TypeA(i32);
+        struct TypeB(String);
+
+        let mut ext = Extensions::new();
+        ext.set(TypeA(42));
+        ext.set(TypeB("hello".to_string()));
+
+        assert_eq!(ext.len(), 2);
+        assert_eq!(ext.get::<TypeA>().unwrap().0, 42);
+        assert_eq!(ext.get::<TypeB>().unwrap().0, "hello");
+
+        // Getting wrong type returns None
+        assert!(ext.get::<i32>().is_none());
+    }
+
+    #[test]
+    fn test_extensions_arc() {
+        struct SharedResource {
+            value: i32,
+        }
+
+        let mut ext = Extensions::new();
+        let shared = Arc::new(SharedResource { value: 100 });
+        ext.set_arc(shared.clone());
+
+        let retrieved = ext.get::<SharedResource>().unwrap();
+        assert_eq!(retrieved.value, 100);
+    }
+
+    #[test]
+    fn test_eval_context_extensions() {
+        struct TestAudioContext {
+            sample_rate: u32,
+        }
+
+        struct TestGpuContext {
+            device_id: u32,
+        }
+
+        let mut ctx = EvalContext::new();
+        assert!(!ctx.has_extension::<TestAudioContext>());
+
+        // Set extension
+        ctx.set_extension(TestAudioContext { sample_rate: 48000 });
+        assert!(ctx.has_extension::<TestAudioContext>());
+
+        // Get extension
+        let audio = ctx.get_extension::<TestAudioContext>().unwrap();
+        assert_eq!(audio.sample_rate, 48000);
+
+        // Multiple extensions
+        ctx.set_extension(TestGpuContext { device_id: 1 });
+        assert!(ctx.has_extension::<TestGpuContext>());
+        assert!(ctx.has_extension::<TestAudioContext>());
+
+        // Remove extension
+        ctx.remove_extension::<TestAudioContext>();
+        assert!(!ctx.has_extension::<TestAudioContext>());
+        assert!(ctx.has_extension::<TestGpuContext>());
+    }
+
+    #[test]
+    fn test_eval_context_extensions_clone() {
+        struct TestContext {
+            value: i32,
+        }
+
+        let mut ctx = EvalContext::new();
+        ctx.set_extension(TestContext { value: 42 });
+
+        // Clone should preserve extensions
+        let cloned = ctx.clone();
+        let ext = cloned.get_extension::<TestContext>().unwrap();
+        assert_eq!(ext.value, 42);
     }
 }

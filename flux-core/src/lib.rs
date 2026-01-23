@@ -55,8 +55,8 @@ pub mod value;
 
 // Re-export commonly used types at crate root
 pub use context::{
-    CallContext, Camera, EvalContext, FogParameters, GizmoVisibility, Mat4, PbrMaterial,
-    PerspectiveCamera, PointLight, TransformGizmoMode, MAT4_IDENTITY,
+    CallContext, Camera, EvalContext, Extensions, FogParameters, GizmoVisibility, Mat4,
+    PbrMaterial, PerspectiveCamera, PointLight, TransformGizmoMode, MAT4_IDENTITY,
 };
 pub use dirty_flag::{
     advance_invalidation_frame, current_invalidation_frame, reset_invalidation_frame, DirtyFlag,

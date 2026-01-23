@@ -152,6 +152,81 @@ impl Graph {
         self.value_cache.clear();
     }
 
+    /// Get the evaluation order (topological sort of nodes).
+    ///
+    /// Call `compute_order()` first to ensure the order is up-to-date.
+    pub fn eval_order(&self) -> &[Id] {
+        &self.eval_order
+    }
+
+    /// Compute the topological evaluation order if needed.
+    ///
+    /// This method is idempotent - it only recomputes if the graph structure
+    /// has changed since the last computation.
+    pub fn compute_order(&mut self) -> Result<(), GraphError> {
+        self.compute_order_internal()
+    }
+
+    /// Check if a node needs evaluation.
+    ///
+    /// This considers:
+    /// - Whether the node has been computed for this call context
+    /// - Whether the operator is time-varying
+    /// - Whether any outputs are dirty
+    /// - Whether any connected inputs were just computed
+    ///
+    /// # Arguments
+    ///
+    /// * `node_id` - The node to check
+    /// * `call_context` - The current evaluation context
+    /// * `computed_nodes` - Set of nodes already computed in this evaluation pass
+    pub fn needs_evaluation(
+        &self,
+        node_id: Id,
+        call_context: CallContext,
+        computed_nodes: &HashSet<Id>,
+    ) -> bool {
+        self.needs_evaluation_internal(node_id, call_context, computed_nodes)
+    }
+
+    /// Update the value cache for a node.
+    ///
+    /// This stores the node's output values, enabling downstream nodes
+    /// to retrieve them and avoiding unnecessary recomputation.
+    pub fn update_value_cache(
+        &mut self,
+        node_id: Id,
+        call_context: CallContext,
+        outputs: Vec<Arc<Value>>,
+    ) {
+        let cache_key = CacheKey {
+            node_id,
+            call_context,
+        };
+        self.value_cache.insert(cache_key, outputs);
+    }
+
+    /// Get a cached output value.
+    ///
+    /// Returns the cached value for the specified node output, or a
+    /// default error if not found.
+    pub fn get_cached_output(
+        &self,
+        node_id: Id,
+        output_index: usize,
+        call_context: CallContext,
+    ) -> Result<Value, GraphError> {
+        let cache_key = CacheKey {
+            node_id,
+            call_context,
+        };
+        self.value_cache
+            .get(&cache_key)
+            .and_then(|outputs| outputs.get(output_index))
+            .map(|arc| Arc::unwrap_or_clone(arc.clone()))
+            .ok_or_else(|| GraphError::node_not_found(node_id, self.node_name(node_id)))
+    }
+
     // =========================================================================
     // Event System
     // =========================================================================
@@ -1023,7 +1098,7 @@ impl Graph {
     }
 
     /// Compute topological order for evaluation using Kahn's algorithm
-    pub(crate) fn compute_order(&mut self) -> Result<(), GraphError> {
+    fn compute_order_internal(&mut self) -> Result<(), GraphError> {
         if !self.order_dirty {
             return Ok(());
         }
@@ -1084,7 +1159,7 @@ impl Graph {
     }
 
     /// Check if a node needs evaluation based on its dirty state and dependencies
-    fn needs_evaluation(
+    fn needs_evaluation_internal(
         &self,
         node_id: Id,
         call_context: CallContext,
@@ -1217,6 +1292,99 @@ impl Graph {
         }
 
         // Return requested output (using the current call context)
+        let output_key = CacheKey {
+            node_id: output_node,
+            call_context,
+        };
+        self.value_cache
+            .get(&output_key)
+            .and_then(|outputs| outputs.get(output_index))
+            .map(|arc| Arc::unwrap_or_clone(arc.clone()))
+            .ok_or_else(|| GraphError::node_not_found(output_node, self.node_name(output_node)))
+    }
+
+    /// Evaluate the graph with a custom compute callback.
+    ///
+    /// This method allows external systems (like GPU batching) to customize
+    /// how operators are computed while still using the graph's topological
+    /// ordering and caching infrastructure.
+    ///
+    /// The `on_compute` callback is called for each operator that needs
+    /// evaluation. It receives:
+    /// - `&mut dyn Operator` - The operator to compute
+    /// - `Id` - The operator's ID
+    /// - `&EvalContext` - The evaluation context
+    /// - `InputResolver` - Function to resolve input values
+    ///
+    /// Returns `true` if the callback handled the computation, `false` to
+    /// use the default `compute()` method.
+    pub fn evaluate_with_callback<F>(
+        &mut self,
+        output_node: Id,
+        output_index: usize,
+        ctx: &EvalContext,
+        mut on_compute: F,
+    ) -> Result<Value, GraphError>
+    where
+        F: FnMut(&mut dyn Operator, Id, &EvalContext, &dyn Fn(Id, usize) -> Value) -> bool,
+    {
+        self.compute_order_internal()?;
+
+        let call_context = ctx.call_context;
+        let mut computed_nodes: HashSet<Id> = HashSet::new();
+        let eval_order = self.eval_order.clone();
+
+        for &node_id in &eval_order {
+            let needs_eval = self.needs_evaluation_internal(node_id, call_context, &computed_nodes);
+
+            if !needs_eval {
+                continue;
+            }
+
+            let node = match self.nodes.get_mut(&node_id) {
+                Some(n) => n,
+                None => continue,
+            };
+
+            // Create lookup closure
+            let cache_ref = &self.value_cache;
+            let get_input = |dep_id: Id, idx: usize| -> Value {
+                let key = CacheKey {
+                    node_id: dep_id,
+                    call_context,
+                };
+                cache_ref
+                    .get(&key)
+                    .and_then(|outputs| outputs.get(idx))
+                    .map(|arc| Arc::unwrap_or_clone(arc.clone()))
+                    .unwrap_or_default()
+            };
+
+            // Let callback try to handle computation
+            let handled = on_compute(node.operator.as_mut(), node_id, ctx, &get_input);
+
+            if !handled {
+                // Default computation
+                node.operator.compute(ctx, &get_input);
+            }
+
+            // Update cache
+            let cache_key = CacheKey {
+                node_id,
+                call_context,
+            };
+            let outputs: Vec<Arc<Value>> = node
+                .operator
+                .outputs()
+                .iter()
+                .map(|o| Arc::new(o.value.clone()))
+                .collect();
+            self.value_cache.insert(cache_key, outputs);
+
+            computed_nodes.insert(node_id);
+        }
+
+        // Return requested output
         let output_key = CacheKey {
             node_id: output_node,
             call_context,

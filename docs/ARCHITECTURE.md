@@ -64,6 +64,26 @@ flowchart TB
 | **flux-graph** | Graph execution and persistence | `Graph`, `Symbol`, `CompiledGraph`, `Animation` |
 | **flux-macros** | Code generation | `#[derive(Operator)]` |
 
+### Known Technical Debt: Dual Registry
+
+Currently, operator metadata lives in two places:
+
+| Registry | Location | Purpose |
+|----------|----------|---------|
+| **OperatorRegistry** | flux-operators | Runtime operator creation (`registry.create_by_name("Add")`) |
+| **SymbolLibrary** | flux-graph | Serialization metadata (`InputDef` with IDs for `.rsym` files) |
+
+This duplication exists because:
+- `OperatorRegistry` needs factory functions to create operators at runtime
+- `SymbolLibrary` needs `InputDef`/`OutputDef` with stable IDs for serialization
+
+**Future consolidation:** Consider merging these into a single registry that:
+1. Stores `SymbolDef` (with `InputDef`/`OutputDef` metadata)
+2. Stores factory functions for runtime creation
+3. Provides a unified API for both use cases
+
+This would eliminate duplicate operator registrations (currently operators like `Noise` must be registered in both).
+
 ## Core Abstractions
 
 Flux is built around three core abstractions that work together:

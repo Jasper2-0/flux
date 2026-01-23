@@ -10,7 +10,7 @@ use crate::value::{TypeCategory, ValueType};
 ///
 /// TypeConstraints enable polymorphic operators by allowing ports to accept
 /// multiple types rather than a single fixed type.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub enum TypeConstraint {
     /// Accept only this exact type
     Exact(ValueType),
@@ -26,6 +26,7 @@ pub enum TypeConstraint {
     SameAsInput(usize),
 
     /// Accept any type
+    #[default]
     Any,
 }
 
@@ -122,16 +123,10 @@ impl TypeConstraint {
     }
 }
 
-impl Default for TypeConstraint {
-    fn default() -> Self {
-        TypeConstraint::Any
-    }
-}
-
 /// Defines how an output port's type is determined
 ///
 /// For polymorphic operators, the output type often depends on the input types.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub enum OutputTypeRule {
     /// Output is always this fixed type
     Fixed(ValueType),
@@ -145,6 +140,7 @@ pub enum OutputTypeRule {
 
     /// Custom rule (type resolved dynamically)
     /// Used when output type depends on complex logic
+    #[default]
     Dynamic,
 }
 
@@ -237,12 +233,6 @@ impl OutputTypeRule {
 
     /// Create a rule for dynamic type resolution
     pub fn dynamic() -> Self {
-        OutputTypeRule::Dynamic
-    }
-}
-
-impl Default for OutputTypeRule {
-    fn default() -> Self {
         OutputTypeRule::Dynamic
     }
 }

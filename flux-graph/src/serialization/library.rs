@@ -368,6 +368,37 @@ impl SymbolLibrary {
         sum.add_input(InputDef::float("Values", 0.0).multi_input());
         sum.add_output(OutputDef::float("Sum"));
         self.register_builtin(sum);
+
+        // =========================================================================
+        // GPU Operators
+        // Note: These are also registered in flux-gpu's OperatorRegistry for runtime
+        // creation. TODO: Consider consolidating SymbolLibrary and OperatorRegistry
+        // into a single registry to reduce duplication and complexity.
+        // =========================================================================
+
+        // Noise - GPU-accelerated Perlin noise generator
+        let mut noise = SymbolDef::new("Noise")
+            .with_category("GPU")
+            .with_description("GPU-accelerated Perlin noise generator");
+        noise.add_input(InputDef::float("Scale", 4.0).with_range(0.1, 20.0));
+        noise.add_input(InputDef::int("Octaves", 4));
+        noise.add_input(InputDef::float("Persistence", 0.5).with_range(0.0, 1.0));
+        noise.add_input(InputDef::int("Seed", 0));
+        noise.add_output(OutputDef::new("TextureId", ValueType::Int));
+        self.register_builtin(noise);
+
+        // Levels - GPU-accelerated levels adjustment
+        let mut levels = SymbolDef::new("Levels")
+            .with_category("GPU")
+            .with_description("GPU-accelerated brightness, contrast, and gamma adjustment");
+        levels.add_input(InputDef::int("InputId", 0)); // Connection to upstream texture
+        levels.add_input(InputDef::float("Brightness", 0.0).with_range(-1.0, 1.0));
+        levels.add_input(InputDef::float("Contrast", 1.0).with_range(0.0, 3.0));
+        levels.add_input(InputDef::float("Gamma", 1.0).with_range(0.1, 3.0));
+        levels.add_input(InputDef::float("InputMin", 0.0).with_range(0.0, 1.0));
+        levels.add_input(InputDef::float("InputMax", 1.0).with_range(0.0, 1.0));
+        levels.add_output(OutputDef::new("TextureId", ValueType::Int));
+        self.register_builtin(levels);
     }
 
     /// Register a builtin symbol
@@ -405,8 +436,34 @@ mod tests {
         assert!(lib.get_by_name("builtin:sine_wave").is_some());
         assert!(lib.get_by_name("builtin:lerp_color").is_some());
 
+        // GPU operators
+        assert!(lib.get_by_name("builtin:Noise").is_some());
+        assert!(lib.get_by_name("builtin:Levels").is_some());
+
         // Should not find non-existent builtins
         assert!(lib.get_by_name("builtin:nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_library_gpu_builtins() {
+        let lib = SymbolLibrary::new();
+
+        // Verify Noise symbol has correct inputs
+        let noise = lib.get_by_name("builtin:Noise").unwrap();
+        assert_eq!(noise.symbol.inputs.len(), 4);
+        assert_eq!(noise.symbol.inputs[0].name, "Scale");
+        assert_eq!(noise.symbol.inputs[1].name, "Octaves");
+        assert_eq!(noise.symbol.inputs[2].name, "Persistence");
+        assert_eq!(noise.symbol.inputs[3].name, "Seed");
+        assert_eq!(noise.symbol.outputs.len(), 1);
+
+        // Verify Levels symbol has correct inputs
+        let levels = lib.get_by_name("builtin:Levels").unwrap();
+        assert_eq!(levels.symbol.inputs.len(), 6);
+        assert_eq!(levels.symbol.inputs[0].name, "InputId");
+        assert_eq!(levels.symbol.inputs[1].name, "Brightness");
+        assert_eq!(levels.symbol.inputs[2].name, "Contrast");
+        assert_eq!(levels.symbol.inputs[3].name, "Gamma");
     }
 
     #[test]
@@ -427,6 +484,7 @@ mod tests {
 
         assert!(categories.contains(&"Math".to_string()));
         assert!(categories.contains(&"Color".to_string()));
+        assert!(categories.contains(&"GPU".to_string()));
     }
 
     #[test]

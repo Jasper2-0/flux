@@ -1,6 +1,4 @@
 # Flux - Reactive Dataflow Graph System
-#
-# Auto-published from solar-nl/CME monorepo
 
 [workspace]
 resolver = "2"

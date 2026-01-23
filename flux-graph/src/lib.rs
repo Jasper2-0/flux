@@ -43,7 +43,7 @@ pub use commands::{
 pub use compiler::CompiledGraph;
 pub use composite::CompositeOp;
 pub use conversion::ConversionOp;
-pub use graph::{Connection, Graph, GraphEvent, GraphStats};
+pub use graph::{Connection, Graph, GraphError, GraphEvent, GraphStats};
 pub use instance_path::InstancePath;
 pub use slot_ref::SlotRef;
 pub use undo::UndoRedoStack;
