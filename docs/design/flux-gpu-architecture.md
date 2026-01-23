@@ -263,9 +263,74 @@ impl Operator for BlurOp {
 
 ---
 
+## PBR Material Output
+
+### Standard PBR Texture Set
+
+Modern PBR (Physically Based Rendering) materials separate surface properties for runtime lighting:
+
+| Map | Channels | Format | Description |
+|-----|----------|--------|-------------|
+| **Albedo** | RGB | sRGB | Pure color, no baked lighting |
+| **Normal** | RG or RGB | Linear | Surface angle per pixel (tangent space) |
+| **Roughness** | R | Linear | 0 = mirror, 1 = matte diffuse |
+| **Metallic** | R | Linear | 0 = dielectric, 1 = metal |
+| **AO** | R | Linear | Ambient occlusion (self-shadowing) |
+| **Height** | R | Linear | Source for deriving other maps |
+
+### Height as First-Class Data
+
+Height is the "source of truth" from which other maps are derived:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Height-Centric Workflow                                    │
+│                                                             │
+│  [Noise] → [Levels] → [Warp] → HEIGHT                       │
+│                                   │                         │
+│                    ┌──────────────┼──────────────┐          │
+│                    ▼              ▼              ▼          │
+│              [NormalGen]    [AO from Height]  [Curvature]   │
+│                    │              │              │          │
+│                    ▼              ▼              ▼          │
+│                 NORMAL           AO         ROUGHNESS       │
+│                                              (edges worn)   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Height-derived operators:**
+
+| Operator | Input | Output | Use |
+|----------|-------|--------|-----|
+| NormalFromHeight | Height | RGB normal | Lighting response |
+| AmbientOcclusion | Height | R8 AO | Crevice shadows |
+| Curvature | Height | R16 signed | Edge/cavity detection |
+| Cavity | Height | R8 | Fine detail AO |
+
+**Curvature for wear and tear:**
+- Convex edges → bright → drive roughness down (worn smooth)
+- Concave areas → dark → drive roughness up (dirt accumulation)
+
+### Channel Packing (Export Optimization)
+
+Pack grayscale maps into single texture:
+
+```
+ORM texture:
+  R = Ambient Occlusion
+  G = Roughness
+  B = Metallic
+
+One texture instead of three
+```
+
+---
+
 ## Texture Format Strategy
 
 ### Internal Processing
+
+All processing uses float to avoid rounding errors and banding:
 
 ```rust
 const INTERNAL_COLOR_FORMAT: TextureFormat = TextureFormat::Rgba16Float;
@@ -281,16 +346,103 @@ const INTERNAL_VECTOR_FORMAT: TextureFormat = TextureFormat::Rg16Float;
 
 ### Output Conversion
 
+Convert to appropriate format only at export:
+
 ```rust
-const OUTPUT_COLOR_FORMAT: TextureFormat = TextureFormat::Rgba8UnormSrgb;
-const OUTPUT_DATA_FORMAT: TextureFormat = TextureFormat::Rgba8Unorm;
-const OUTPUT_MASK_FORMAT: TextureFormat = TextureFormat::R8Unorm;
+const OUTPUT_COLOR_FORMAT: TextureFormat = TextureFormat::Rgba8UnormSrgb;  // Albedo
+const OUTPUT_DATA_FORMAT: TextureFormat = TextureFormat::Rgba8Unorm;       // Normal, ORM
+const OUTPUT_MASK_FORMAT: TextureFormat = TextureFormat::R8Unorm;          // Individual masks
+const OUTPUT_HEIGHT_FORMAT: TextureFormat = TextureFormat::R16Unorm;       // Height (precision)
 ```
 
 Output nodes handle:
-- Linear → sRGB conversion
+- Linear → sRGB conversion (albedo only)
 - Float → integer quantization
 - Optional dithering to reduce banding
+
+### Memory Budget (1080p Target)
+
+Working resolution: 1024×1024 internal, 2048×2048 output
+
+| Texture Type | Resolution | Format | Size |
+|--------------|------------|--------|------|
+| Thumbnail | 128×128 | RGBA8 | 64 KB |
+| Preview | 512×512 | RGBA16F | 2 MB |
+| Working | 1024×1024 | RGBA16F | 8 MB |
+| Output | 2048×2048 | RGBA16F | 32 MB |
+| Export | 2048×2048 | RGBA8 | 16 MB |
+
+**Budget estimate (1GB VRAM allocation):**
+- ~125 working textures at 1024×1024
+- ~31 output textures at 2048×2048
+- Full PBR material (6 outputs): ~192 MB internal, ~44 MB export
+
+---
+
+## Primitive Shaders (solar-gpu)
+
+### Minimal Viable Set
+
+Core operations that belong in solar-gpu (used across all applications):
+
+| Shader | Purpose |
+|--------|---------|
+| blit | Copy/resize texture |
+| blend | Combine two textures (all modes) |
+| fill | Solid color fill |
+| downsample | Box filter for thumbnails/mips |
+| convert | Format/colorspace conversion |
+
+### Blend Modes
+
+Single uber-shader with mode as uniform (no pipeline switching):
+
+**Essential (include in PoC):**
+- Normal, Multiply, Screen, Overlay
+- Add, Subtract, Difference
+- Darken, Lighten
+- Soft Light, Hard Light
+
+**Extended (add later):**
+- Color Dodge, Color Burn
+- Linear Dodge, Linear Burn
+- Vivid Light, Pin Light
+- Hue, Saturation, Color, Luminosity
+
+### Efficiency Considerations
+
+Primitive operations are called many times. Minimize overhead:
+
+```rust
+pub struct PrimitiveRenderer {
+    // Pipelines (created once at startup)
+    blend_pipeline: wgpu::RenderPipeline,
+    blit_pipeline: wgpu::RenderPipeline,
+    downsample_pipeline: wgpu::RenderPipeline,
+    convert_pipeline: wgpu::RenderPipeline,
+
+    // Shared resources
+    sampler_linear: wgpu::Sampler,
+    sampler_nearest: wgpu::Sampler,
+
+    // Per-frame dynamic uniforms
+    params_buffer: wgpu::Buffer,
+    params_offset: u32,
+
+    // Reuse across frames
+    bind_group_cache: BindGroupCache,
+}
+```
+
+**Optimization techniques:**
+
+| Technique | Benefit |
+|-----------|---------|
+| Uber-shader | No pipeline switches |
+| Pre-created layouts | Fast bind group creation |
+| Bind group cache | Reuse across frames |
+| Dynamic uniform offset | One bind group, many params |
+| Batched recording | Fewer render passes |
 
 ---
 
