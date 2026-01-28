@@ -368,6 +368,7 @@ impl Operator for TypeOfOp {
             Value::Vec4(_) => "Vec4",
             Value::Color(_) => "Color",
             Value::Gradient(_) => "Gradient",
+            Value::Matrix3(_) => "Matrix3",
             Value::Matrix4(_) => "Matrix4",
             Value::FloatList(_) => "FloatList",
             Value::IntList(_) => "IntList",

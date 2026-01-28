@@ -51,6 +51,7 @@ impl BypassableType {
             // New types - not currently bypassable
             ValueType::Color => None,
             ValueType::Gradient => None,
+            ValueType::Matrix3 => None,
             ValueType::Matrix4 => None,
             // List types - not currently bypassable
             ValueType::FloatList => None,

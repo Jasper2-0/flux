@@ -71,4 +71,4 @@ pub use operator_meta::{
 pub use operator_settings::{OperatorSettings, ParamDef, ParamValue};
 pub use operator_visuals::{OperatorVisuals, VisualData};
 pub use port::{InputPort, OutputPort, TriggerInput, TriggerOutput};
-pub use value::{Color, Gradient, GradientStop, Matrix4, TypeCategory, Value, ValueType};
+pub use value::{Color, Gradient, GradientStop, Matrix3, Matrix4, TypeCategory, Value, ValueType};

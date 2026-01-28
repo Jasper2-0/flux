@@ -187,6 +187,16 @@ impl InputPort {
         Self::new(name, Value::Gradient(Gradient::new()))
     }
 
+    /// Convenience constructor for matrix3 input
+    pub fn matrix3(name: &'static str, default: crate::value::Matrix3) -> Self {
+        Self::new(name, Value::Matrix3(default))
+    }
+
+    /// Convenience constructor for matrix4 input
+    pub fn matrix4(name: &'static str, default: crate::value::Matrix4) -> Self {
+        Self::new(name, Value::Matrix4(default))
+    }
+
     /// Convenience constructor for float list input
     pub fn float_list(name: &'static str) -> Self {
         Self::new(name, Value::float_list(Vec::new()))

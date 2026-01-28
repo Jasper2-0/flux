@@ -5,7 +5,8 @@
 //! - [`ValueType`] - Type identifiers for compile-time and runtime checks
 //! - [`Color`] - RGBA color with HSV conversion
 //! - [`Gradient`] - Color gradient with stops
-//! - [`Matrix4`] - 4x4 transformation matrix
+//! - [`Matrix3`] - 3×3 matrix for normal/direction transforms
+//! - [`Matrix4`] - 4×4 transformation matrix
 
 mod color;
 mod gradient;
@@ -14,7 +15,7 @@ mod ops;
 
 pub use color::Color;
 pub use gradient::{Gradient, GradientStop};
-pub use matrix::Matrix4;
+pub use matrix::{Matrix3, Matrix4};
 
 // Re-export ops module items (the std::ops impls are automatic)
 
@@ -67,6 +68,7 @@ pub enum Value {
     // Complex types
     Color(Color),
     Gradient(Gradient),
+    Matrix3(Matrix3),
     Matrix4(Matrix4),
 
     // Collections (Arc-wrapped for zero-copy sharing)
@@ -93,6 +95,7 @@ impl Value {
             Value::String(_) => ValueType::String,
             Value::Color(_) => ValueType::Color,
             Value::Gradient(_) => ValueType::Gradient,
+            Value::Matrix3(_) => ValueType::Matrix3,
             Value::Matrix4(_) => ValueType::Matrix4,
             Value::FloatList(_) => ValueType::FloatList,
             Value::IntList(_) => ValueType::IntList,
@@ -182,6 +185,14 @@ impl Value {
     pub fn as_gradient(&self) -> Option<&Gradient> {
         match self {
             Value::Gradient(g) => Some(g),
+            _ => None,
+        }
+    }
+
+    /// Try to get as Matrix3
+    pub fn as_matrix3(&self) -> Option<Matrix3> {
+        match self {
+            Value::Matrix3(m) => Some(*m),
             _ => None,
         }
     }
@@ -427,6 +438,14 @@ impl Value {
                 Some(Value::vec4_list(vec4s))
             }
 
+            // ========== Matrix Coercions ==========
+
+            // Matrix3 → Matrix4 (embed as upper-left 3×3, identity translation)
+            (Value::Matrix3(m), ValueType::Matrix4) => Some(Value::Matrix4(m.to_mat4())),
+
+            // Matrix4 → Matrix3 (extract upper-left 3×3)
+            (Value::Matrix4(m), ValueType::Matrix3) => Some(Value::Matrix3(m.to_mat3())),
+
             // No valid conversion
             _ => None,
         }
@@ -456,6 +475,7 @@ impl fmt::Display for Value {
             Value::String(v) => write!(f, "\"{}\"", v),
             Value::Color(c) => write!(f, "{}", c),
             Value::Gradient(g) => write!(f, "Gradient({} stops)", g.stops.len()),
+            Value::Matrix3(_) => write!(f, "Matrix3"),
             Value::Matrix4(_) => write!(f, "Matrix4"),
             Value::FloatList(v) => write!(f, "FloatList[{}]", v.len()),
             Value::IntList(v) => write!(f, "IntList[{}]", v.len()),
@@ -531,6 +551,12 @@ impl From<Gradient> for Value {
     }
 }
 
+impl From<Matrix3> for Value {
+    fn from(m: Matrix3) -> Self {
+        Value::Matrix3(m)
+    }
+}
+
 impl From<Matrix4> for Value {
     fn from(m: Matrix4) -> Self {
         Value::Matrix4(m)
@@ -549,6 +575,7 @@ pub enum ValueType {
     String,
     Color,
     Gradient,
+    Matrix3,
     Matrix4,
     FloatList,
     IntList,
@@ -613,6 +640,7 @@ impl ValueType {
             ValueType::String => Value::String(String::new()),
             ValueType::Color => Value::Color(Color::WHITE),
             ValueType::Gradient => Value::Gradient(Gradient::new()),
+            ValueType::Matrix3 => Value::Matrix3(Matrix3::IDENTITY),
             ValueType::Matrix4 => Value::Matrix4(Matrix4::IDENTITY),
             ValueType::FloatList => Value::float_list(Vec::new()),
             ValueType::IntList => Value::int_list(Vec::new()),
@@ -679,6 +707,9 @@ impl ValueType {
                 | (ValueType::FloatList, ValueType::Vec2List)
                 | (ValueType::FloatList, ValueType::Vec3List)
                 | (ValueType::FloatList, ValueType::Vec4List)
+                // Matrix3 ↔ Matrix4
+                | (ValueType::Matrix3, ValueType::Matrix4)
+                | (ValueType::Matrix4, ValueType::Matrix3)
         )
     }
 
@@ -713,7 +744,7 @@ impl ValueType {
                     | Self::ColorList
                     | Self::StringList
             ),
-            TypeCategory::Matrix => matches!(self, Self::Matrix4),
+            TypeCategory::Matrix => matches!(self, Self::Matrix3 | Self::Matrix4),
             TypeCategory::Arithmetic => matches!(
                 self,
                 Self::Float | Self::Int | Self::Vec2 | Self::Vec3 | Self::Vec4 | Self::Color
@@ -774,6 +805,7 @@ impl fmt::Display for ValueType {
             ValueType::String => write!(f, "String"),
             ValueType::Color => write!(f, "Color"),
             ValueType::Gradient => write!(f, "Gradient"),
+            ValueType::Matrix3 => write!(f, "Matrix3"),
             ValueType::Matrix4 => write!(f, "Matrix4"),
             ValueType::FloatList => write!(f, "FloatList"),
             ValueType::IntList => write!(f, "IntList"),
@@ -898,8 +930,47 @@ mod tests {
 
     #[test]
     fn test_matrix_category() {
+        assert!(ValueType::Matrix3.is_in_category(TypeCategory::Matrix));
         assert!(ValueType::Matrix4.is_in_category(TypeCategory::Matrix));
         assert!(!ValueType::Vec4.is_in_category(TypeCategory::Matrix));
+    }
+
+    #[test]
+    fn test_coerce_matrix3_to_matrix4() {
+        let m3 = Matrix3::from_scale(2.0, 3.0, 4.0);
+        let v = Value::Matrix3(m3);
+        let result = v.coerce_to(ValueType::Matrix4);
+
+        if let Some(Value::Matrix4(m4)) = result {
+            // Upper-left 3x3 should match
+            assert_eq!(m4.to_mat3(), m3);
+            // Translation should be zero
+            assert_eq!(m4.get_translation(), [0.0, 0.0, 0.0]);
+        } else {
+            panic!("Expected Matrix4");
+        }
+    }
+
+    #[test]
+    fn test_coerce_matrix4_to_matrix3() {
+        let m4 = Matrix4::scale(2.0, 3.0, 4.0);
+        let v = Value::Matrix4(m4);
+        let result = v.coerce_to(ValueType::Matrix3);
+
+        if let Some(Value::Matrix3(m3)) = result {
+            // Should match the upper-left 3x3
+            assert_eq!(m3, m4.to_mat3());
+        } else {
+            panic!("Expected Matrix3");
+        }
+    }
+
+    #[test]
+    fn test_value_type_can_coerce_matrices() {
+        assert!(ValueType::Matrix3.can_coerce_to(ValueType::Matrix4));
+        assert!(ValueType::Matrix4.can_coerce_to(ValueType::Matrix3));
+        assert!(!ValueType::Matrix3.can_coerce_to(ValueType::Float));
+        assert!(!ValueType::Matrix4.can_coerce_to(ValueType::Float));
     }
 
     #[test]

@@ -174,6 +174,11 @@ impl OutputPort {
         Self::new(name, ValueType::Gradient)
     }
 
+    /// Convenience constructor for matrix3 output
+    pub fn matrix3(name: &'static str) -> Self {
+        Self::new(name, ValueType::Matrix3)
+    }
+
     /// Convenience constructor for matrix4 output
     pub fn matrix4(name: &'static str) -> Self {
         Self::new(name, ValueType::Matrix4)

@@ -29,7 +29,8 @@ Flux is a dataflow graph library designed for real-time creative applications. I
 - **Reactive evaluation** - Values flow through connected operators automatically
 - **Lazy computation** - Dirty flags ensure only changed nodes recompute
 - **Rich type system** - Float, Vec3, Color, Gradient, Matrix4, and more
-- **110+ operators** - Math, time, vector, color, flow control, and utilities
+- **130+ operators** - Math, time, vector, color, flow control, and utilities
+- **GPU acceleration** - 24 WGPU-based operators for texture generation and processing
 - **Animation system** - Keyframe curves with multiple interpolation modes
 - **Serialization** - Save and load graphs as JSON
 
@@ -38,9 +39,10 @@ Flux is a dataflow graph library designed for real-time creative applications. I
 ```
 flux/
 ├── flux-core          # Foundation: Value, Operator, Context, Port
-├── flux-operators     # 110+ operator implementations
+├── flux-operators     # 110+ CPU operator implementations
 ├── flux-graph         # Graph execution, Symbol system, Animation
-└── flux-macros        # Derive macros for operators
+├── flux-macros        # Derive macros for operators
+└── flux-gpu           # 24 GPU-accelerated operators (WGPU)
 ```
 
 ## Quick Start
@@ -148,6 +150,7 @@ See [Examples Guide](docs/05-reference/examples-guide.md) for detailed descripti
 | String | 8 | StringConcat, Format, Split, Contains |
 | List | 8 | FloatList, ListGet, ListSum, ListMap |
 | Utility | 6 | Print, Passthrough, TypeOf |
+| **GPU** | 24 | NoiseOp, WorleyOp, BlurOp, BlendOp, LevelsOp |
 
 ## Design Philosophy
 
