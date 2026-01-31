@@ -1,27 +1,13 @@
 //! Random and noise operators: Random, PerlinNoise, PerlinNoise3D, Hash
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
-use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
+use flux_core::OperatorMeta;
+use flux_macros::Operator;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
-fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
-        None => input.default.as_int().unwrap_or(0),
-    }
-}
 
 // ============================================================================
 // Hash function (deterministic pseudo-random)
@@ -155,286 +141,134 @@ fn perlin_3d(x: f32, y: f32, z: f32, seed: u32) -> f32 {
 }
 
 // ============================================================================
-// Random Operator
+// Random Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Random", category = "Math", description = "Deterministic random value in range")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct RandomOp {
     id: Id,
     inputs: [InputPort; 3],
     outputs: [OutputPort; 1],
+    #[input(label = "Min", default = 0.0)]
+    min: f32,
+    #[input(label = "Max", default = 1.0)]
+    max: f32,
+    #[input(label = "Seed", default = 0)]
+    seed: i32,
+    #[output(label = "Result")]
+    result: f32,
 }
 
 impl RandomOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("Min", 0.0),
-                InputPort::float("Max", 1.0),
-                InputPort::int("Seed", 0),
-            ],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
-
-impl Default for RandomOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for RandomOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Random" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let min = get_float(&self.inputs[0], get_input);
-        let max = get_float(&self.inputs[1], get_input);
-        let seed = get_int(&self.inputs[2], get_input) as u32;
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let min = self.get_min(get_input);
+        let max = self.get_max(get_input);
+        let seed = self.get_seed(get_input) as u32;
 
         let t = hash_to_float(seed);
-        let result = min + t * (max - min);
-        self.outputs[0].set_float(result);
-    }
-}
-
-impl OperatorMeta for RandomOp {
-    fn category(&self) -> &'static str { "Math" }
-    fn category_color(&self) -> [f32; 4] { category_colors::MATH }
-    fn description(&self) -> &'static str { "Deterministic random value in range" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Min")),
-            1 => Some(PortMeta::new("Max")),
-            2 => Some(PortMeta::new("Seed")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(min + t * (max - min));
     }
 }
 
 // ============================================================================
-// PerlinNoise Operator (2D)
+// PerlinNoise Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "PerlinNoise", category = "Math", description = "2D Perlin noise")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct PerlinNoiseOp {
     id: Id,
     inputs: [InputPort; 3],
     outputs: [OutputPort; 1],
+    #[input(label = "X", default = 0.0)]
+    x: f32,
+    #[input(label = "Y", default = 0.0)]
+    y: f32,
+    #[input(label = "Scale", default = 1.0)]
+    scale: f32,
+    #[output(label = "Result")]
+    result: f32,
 }
 
 impl PerlinNoiseOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("X", 0.0),
-                InputPort::float("Y", 0.0),
-                InputPort::float("Scale", 1.0),
-            ],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let x = self.get_x(get_input);
+        let y = self.get_y(get_input);
+        let scale = self.get_scale(get_input);
 
-impl Default for PerlinNoiseOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for PerlinNoiseOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "PerlinNoise" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let x = get_float(&self.inputs[0], get_input);
-        let y = get_float(&self.inputs[1], get_input);
-        let scale = get_float(&self.inputs[2], get_input);
-
-        let result = perlin_2d(x * scale, y * scale, 0);
-        self.outputs[0].set_float(result);
-    }
-}
-
-impl OperatorMeta for PerlinNoiseOp {
-    fn category(&self) -> &'static str { "Math" }
-    fn category_color(&self) -> [f32; 4] { category_colors::MATH }
-    fn description(&self) -> &'static str { "2D Perlin noise" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("X")),
-            1 => Some(PortMeta::new("Y")),
-            2 => Some(PortMeta::new("Scale")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(perlin_2d(x * scale, y * scale, 0));
     }
 }
 
 // ============================================================================
-// PerlinNoise3D Operator
+// PerlinNoise3D Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "PerlinNoise3D", category = "Math", description = "3D Perlin noise")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct PerlinNoise3DOp {
     id: Id,
     inputs: [InputPort; 4],
     outputs: [OutputPort; 1],
+    #[input(label = "X", default = 0.0)]
+    x: f32,
+    #[input(label = "Y", default = 0.0)]
+    y: f32,
+    #[input(label = "Z", default = 0.0)]
+    z: f32,
+    #[input(label = "Scale", default = 1.0)]
+    scale: f32,
+    #[output(label = "Result")]
+    result: f32,
 }
 
 impl PerlinNoise3DOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("X", 0.0),
-                InputPort::float("Y", 0.0),
-                InputPort::float("Z", 0.0),
-                InputPort::float("Scale", 1.0),
-            ],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let x = self.get_x(get_input);
+        let y = self.get_y(get_input);
+        let z = self.get_z(get_input);
+        let scale = self.get_scale(get_input);
 
-impl Default for PerlinNoise3DOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for PerlinNoise3DOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "PerlinNoise3D" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let x = get_float(&self.inputs[0], get_input);
-        let y = get_float(&self.inputs[1], get_input);
-        let z = get_float(&self.inputs[2], get_input);
-        let scale = get_float(&self.inputs[3], get_input);
-
-        let result = perlin_3d(x * scale, y * scale, z * scale, 0);
-        self.outputs[0].set_float(result);
-    }
-}
-
-impl OperatorMeta for PerlinNoise3DOp {
-    fn category(&self) -> &'static str { "Math" }
-    fn category_color(&self) -> [f32; 4] { category_colors::MATH }
-    fn description(&self) -> &'static str { "3D Perlin noise" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("X")),
-            1 => Some(PortMeta::new("Y")),
-            2 => Some(PortMeta::new("Z")),
-            3 => Some(PortMeta::new("Scale")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(perlin_3d(x * scale, y * scale, z * scale, 0));
     }
 }
 
 // ============================================================================
-// Hash Operator
+// Hash Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Hash", category = "Math", description = "Deterministic hash of value")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct HashOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "Value", default = 0.0)]
+    value: f32,
+    #[input(label = "Seed", default = 0)]
+    seed: i32,
+    #[output(label = "Result")]
+    result: f32,
 }
 
 impl HashOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("Value", 0.0),
-                InputPort::int("Seed", 0),
-            ],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
-
-impl Default for HashOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for HashOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Hash" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_float(&self.inputs[0], get_input);
-        let seed = get_int(&self.inputs[1], get_input) as u32;
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let value = self.get_value(get_input);
+        let seed = self.get_seed(get_input) as u32;
 
         // Convert float bits to u32 for hashing
         let value_bits = value.to_bits();
         let combined = combine_seeds(value_bits, seed);
-        let result = hash_to_float(combined);
-        self.outputs[0].set_float(result);
-    }
-}
-
-impl OperatorMeta for HashOp {
-    fn category(&self) -> &'static str { "Math" }
-    fn category_color(&self) -> [f32; 4] { category_colors::MATH }
-    fn description(&self) -> &'static str { "Deterministic hash of value" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Value")),
-            1 => Some(PortMeta::new("Seed")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(hash_to_float(combined));
     }
 }
 

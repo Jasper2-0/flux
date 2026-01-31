@@ -6,325 +6,147 @@ use std::any::Any;
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
-use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
+use flux_core::OperatorMeta;
+use flux_macros::Operator;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
-use flux_core::value::{Color, Gradient};
-
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
-fn get_color(input: &InputPort, get_input: InputResolver) -> Color {
-    match input.connection {
-        Some((node_id, output_idx)) => {
-            get_input(node_id, output_idx)
-                .as_color()
-                .unwrap_or(Color::WHITE)
-        }
-        None => input.default.as_color().unwrap_or(Color::WHITE),
-    }
-}
-
-fn get_gradient(input: &InputPort, get_input: InputResolver) -> Gradient {
-    match input.connection {
-        Some((node_id, output_idx)) => {
-            get_input(node_id, output_idx)
-                .as_gradient()
-                .cloned()
-                .unwrap_or_default()
-        }
-        None => input.default.as_gradient().cloned().unwrap_or_default(),
-    }
-}
+use flux_core::value::Color;
 
 // ============================================================================
-// RgbaColor Operator
+// RgbaColor Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "RgbaColor", category = "Color", description = "Create color from RGBA components")]
+#[operator(category_color = [0.55, 0.35, 0.45, 1.0])]
+#[allow(dead_code)]
 pub struct RgbaColorOp {
     id: Id,
     inputs: [InputPort; 4],
     outputs: [OutputPort; 1],
+    #[input(label = "R", default = 1.0)]
+    r: f32,
+    #[input(label = "G", default = 1.0)]
+    g: f32,
+    #[input(label = "B", default = 1.0)]
+    b: f32,
+    #[input(label = "A", default = 1.0)]
+    a: f32,
+    #[output(label = "Color")]
+    color: Color,
 }
 
 impl RgbaColorOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("R", 1.0),
-                InputPort::float("G", 1.0),
-                InputPort::float("B", 1.0),
-                InputPort::float("A", 1.0),
-            ],
-            outputs: [OutputPort::color("Color")],
-        }
-    }
-}
-
-impl Default for RgbaColorOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for RgbaColorOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "RgbaColor" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let r = get_float(&self.inputs[0], get_input);
-        let g = get_float(&self.inputs[1], get_input);
-        let b = get_float(&self.inputs[2], get_input);
-        let a = get_float(&self.inputs[3], get_input);
-        self.outputs[0].set_color(r, g, b, a);
-    }
-}
-
-impl OperatorMeta for RgbaColorOp {
-    fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
-    fn description(&self) -> &'static str { "Create color from RGBA components" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("R").with_range(0.0, 1.0)),
-            1 => Some(PortMeta::new("G").with_range(0.0, 1.0)),
-            2 => Some(PortMeta::new("B").with_range(0.0, 1.0)),
-            3 => Some(PortMeta::new("A").with_range(0.0, 1.0)),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Color").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let r = self.get_r(get_input);
+        let g = self.get_g(get_input);
+        let b = self.get_b(get_input);
+        let a = self.get_a(get_input);
+        self.set_color(Color::rgba(r, g, b, a));
     }
 }
 
 // ============================================================================
-// HsvToRgb Operator
+// HsvToRgb Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "HsvToRgb", category = "Color", description = "Convert HSV to RGB color")]
+#[operator(category_color = [0.55, 0.35, 0.45, 1.0])]
+#[allow(dead_code)]
 pub struct HsvToRgbOp {
     id: Id,
     inputs: [InputPort; 4],
     outputs: [OutputPort; 1],
+    #[input(label = "H", default = 0.0)]
+    h: f32,
+    #[input(label = "S", default = 1.0)]
+    s: f32,
+    #[input(label = "V", default = 1.0)]
+    v: f32,
+    #[input(label = "A", default = 1.0)]
+    a: f32,
+    #[output(label = "Color")]
+    color: Color,
 }
 
 impl HsvToRgbOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("H", 0.0),
-                InputPort::float("S", 1.0),
-                InputPort::float("V", 1.0),
-                InputPort::float("A", 1.0),
-            ],
-            outputs: [OutputPort::color("Color")],
-        }
-    }
-}
-
-impl Default for HsvToRgbOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for HsvToRgbOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "HsvToRgb" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let h = get_float(&self.inputs[0], get_input);
-        let s = get_float(&self.inputs[1], get_input);
-        let v = get_float(&self.inputs[2], get_input);
-        let a = get_float(&self.inputs[3], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let h = self.get_h(get_input);
+        let s = self.get_s(get_input);
+        let v = self.get_v(get_input);
+        let a = self.get_a(get_input);
         let mut color = Color::from_hsv(h, s, v);
         color.a = a;
-        self.outputs[0].set_color(color.r, color.g, color.b, color.a);
-    }
-}
-
-impl OperatorMeta for HsvToRgbOp {
-    fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
-    fn description(&self) -> &'static str { "Convert HSV to RGB color" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("H").with_range(0.0, 360.0).with_unit("deg")),
-            1 => Some(PortMeta::new("S").with_range(0.0, 1.0)),
-            2 => Some(PortMeta::new("V").with_range(0.0, 1.0)),
-            3 => Some(PortMeta::new("A").with_range(0.0, 1.0)),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Color").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_color(color);
     }
 }
 
 // ============================================================================
-// RgbToHsv Operator
+// RgbToHsv Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "RgbToHsv", category = "Color", description = "Convert RGB color to HSV")]
+#[operator(category_color = [0.55, 0.35, 0.45, 1.0])]
+#[allow(dead_code)]
 pub struct RgbToHsvOp {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 3],
+    #[input(label = "Color", default = [1.0, 1.0, 1.0, 1.0])]
+    color: Color,
+    #[output(label = "H")]
+    h: f32,
+    #[output(label = "S")]
+    s: f32,
+    #[output(label = "V")]
+    v: f32,
 }
 
 impl RgbToHsvOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::color("Color", [1.0, 1.0, 1.0, 1.0])],
-            outputs: [
-                OutputPort::float("H"),
-                OutputPort::float("S"),
-                OutputPort::float("V"),
-            ],
-        }
-    }
-}
-
-impl Default for RgbToHsvOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for RgbToHsvOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "RgbToHsv" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let color = get_color(&self.inputs[0], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let color = self.get_color(get_input);
         let (h, s, v) = color.to_hsv();
-        self.outputs[0].set_float(h);
-        self.outputs[1].set_float(s);
-        self.outputs[2].set_float(v);
-    }
-}
-
-impl OperatorMeta for RgbToHsvOp {
-    fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
-    fn description(&self) -> &'static str { "Convert RGB color to HSV" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Color")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("H").with_shape(PinShape::TriangleFilled)),
-            1 => Some(PortMeta::new("S").with_shape(PinShape::TriangleFilled)),
-            2 => Some(PortMeta::new("V").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_h(h);
+        self.set_s(s);
+        self.set_v(v);
     }
 }
 
 // ============================================================================
-// BlendColors Operator
+// BlendColors Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "BlendColors", category = "Color", description = "Blend two colors")]
+#[operator(category_color = [0.55, 0.35, 0.45, 1.0])]
+#[allow(dead_code)]
 pub struct BlendColorsOp {
     id: Id,
     inputs: [InputPort; 3],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = [0.0, 0.0, 0.0, 1.0])]
+    a: Color,
+    #[input(label = "B", default = [1.0, 1.0, 1.0, 1.0])]
+    b: Color,
+    #[input(label = "T", default = 0.5)]
+    t: f32,
+    #[output(label = "Result")]
+    result: Color,
 }
 
 impl BlendColorsOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::color("A", [0.0, 0.0, 0.0, 1.0]),
-                InputPort::color("B", [1.0, 1.0, 1.0, 1.0]),
-                InputPort::float("T", 0.5),
-            ],
-            outputs: [OutputPort::color("Result")],
-        }
-    }
-}
-
-impl Default for BlendColorsOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for BlendColorsOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "BlendColors" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_color(&self.inputs[0], get_input);
-        let b = get_color(&self.inputs[1], get_input);
-        let t = get_float(&self.inputs[2], get_input);
-        let result = Color::lerp(&a, &b, t);
-        self.outputs[0].set_color(result.r, result.g, result.b, result.a);
-    }
-}
-
-impl OperatorMeta for BlendColorsOp {
-    fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
-    fn description(&self) -> &'static str { "Blend two colors" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            2 => Some(PortMeta::new("T").with_range(0.0, 1.0)),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        let t = self.get_t(get_input);
+        self.set_result(Color::lerp(&a, &b, t));
     }
 }
 
 // ============================================================================
-// SampleGradient Operator
+// SampleGradient Operator (NOT migrated - uses Gradient type)
 // ============================================================================
 
 pub struct SampleGradientOp {
@@ -363,8 +185,8 @@ impl Operator for SampleGradientOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let gradient = get_gradient(&self.inputs[0], get_input);
-        let t = get_float(&self.inputs[1], get_input);
+        let gradient = self.inputs[0].resolve_gradient(get_input);
+        let t = self.inputs[1].resolve_float(get_input);
         let color = gradient.sample(t);
         self.outputs[0].set_color(color.r, color.g, color.b, color.a);
     }
@@ -372,219 +194,97 @@ impl Operator for SampleGradientOp {
 
 impl OperatorMeta for SampleGradientOp {
     fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
+    fn category_color(&self) -> [f32; 4] { [0.55, 0.35, 0.45, 1.0] }
     fn description(&self) -> &'static str { "Sample color from gradient at position" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Gradient")),
-            1 => Some(PortMeta::new("T").with_range(0.0, 1.0)),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Color").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
-    }
 }
 
 // ============================================================================
-// AdjustBrightness Operator
+// AdjustBrightness Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "AdjustBrightness", category = "Color", description = "Adjust color brightness")]
+#[operator(category_color = [0.55, 0.35, 0.45, 1.0])]
+#[allow(dead_code)]
 pub struct AdjustBrightnessOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "Color", default = [1.0, 1.0, 1.0, 1.0])]
+    color: Color,
+    #[input(label = "Amount", default = 0.0)]
+    amount: f32,
+    #[output(label = "Result")]
+    result: Color,
 }
 
 impl AdjustBrightnessOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::color("Color", [1.0, 1.0, 1.0, 1.0]),
-                InputPort::float("Amount", 0.0),
-            ],
-            outputs: [OutputPort::color("Result")],
-        }
-    }
-}
-
-impl Default for AdjustBrightnessOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for AdjustBrightnessOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "AdjustBrightness" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let color = get_color(&self.inputs[0], get_input);
-        let amount = get_float(&self.inputs[1], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let color = self.get_color(get_input);
+        let amount = self.get_amount(get_input);
         // Adjust brightness by modifying V in HSV
         let (h, s, v) = color.to_hsv();
         let new_v = (v + amount).clamp(0.0, 1.0);
         let mut result = Color::from_hsv(h, s, new_v);
         result.a = color.a;
-        self.outputs[0].set_color(result.r, result.g, result.b, result.a);
-    }
-}
-
-impl OperatorMeta for AdjustBrightnessOp {
-    fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
-    fn description(&self) -> &'static str { "Adjust color brightness" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Color")),
-            1 => Some(PortMeta::new("Amount").with_range(-1.0, 1.0)),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(result);
     }
 }
 
 // ============================================================================
-// AdjustSaturation Operator
+// AdjustSaturation Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "AdjustSaturation", category = "Color", description = "Adjust color saturation")]
+#[operator(category_color = [0.55, 0.35, 0.45, 1.0])]
+#[allow(dead_code)]
 pub struct AdjustSaturationOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "Color", default = [1.0, 1.0, 1.0, 1.0])]
+    color: Color,
+    #[input(label = "Amount", default = 0.0)]
+    amount: f32,
+    #[output(label = "Result")]
+    result: Color,
 }
 
 impl AdjustSaturationOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::color("Color", [1.0, 1.0, 1.0, 1.0]),
-                InputPort::float("Amount", 0.0),
-            ],
-            outputs: [OutputPort::color("Result")],
-        }
-    }
-}
-
-impl Default for AdjustSaturationOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for AdjustSaturationOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "AdjustSaturation" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let color = get_color(&self.inputs[0], get_input);
-        let amount = get_float(&self.inputs[1], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let color = self.get_color(get_input);
+        let amount = self.get_amount(get_input);
         let (h, s, v) = color.to_hsv();
         let new_s = (s + amount).clamp(0.0, 1.0);
         let mut result = Color::from_hsv(h, new_s, v);
         result.a = color.a;
-        self.outputs[0].set_color(result.r, result.g, result.b, result.a);
-    }
-}
-
-impl OperatorMeta for AdjustSaturationOp {
-    fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
-    fn description(&self) -> &'static str { "Adjust color saturation" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Color")),
-            1 => Some(PortMeta::new("Amount").with_range(-1.0, 1.0)),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(result);
     }
 }
 
 // ============================================================================
-// ColorToVec4 Operator
+// ColorToVec4 Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "ColorToVec4", category = "Color", description = "Convert color to Vec4")]
+#[operator(category_color = [0.55, 0.35, 0.45, 1.0])]
+#[allow(dead_code)]
 pub struct ColorToVec4Op {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 1],
+    #[input(label = "Color", default = [1.0, 1.0, 1.0, 1.0])]
+    color: Color,
+    #[output(label = "Vector")]
+    vector: [f32; 4],
 }
 
 impl ColorToVec4Op {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::color("Color", [1.0, 1.0, 1.0, 1.0])],
-            outputs: [OutputPort::vec4("Vector")],
-        }
-    }
-}
-
-impl Default for ColorToVec4Op {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for ColorToVec4Op {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "ColorToVec4" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let color = get_color(&self.inputs[0], get_input);
-        self.outputs[0].set_vec4([color.r, color.g, color.b, color.a]);
-    }
-}
-
-impl OperatorMeta for ColorToVec4Op {
-    fn category(&self) -> &'static str { "Color" }
-    fn category_color(&self) -> [f32; 4] { category_colors::COLORS }
-    fn description(&self) -> &'static str { "Convert color to Vec4" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Color")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Vector").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let color = self.get_color(get_input);
+        self.set_vector([color.r, color.g, color.b, color.a]);
     }
 }
 

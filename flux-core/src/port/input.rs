@@ -464,4 +464,126 @@ impl InputPort {
             .as_vec4()
             .unwrap_or([0.0, 0.0, 0.0, 0.0])
     }
+
+    // =========================================================================
+    // Resolve methods - take InputResolver directly
+    // =========================================================================
+    //
+    // These methods combine connection lookup + value extraction in one call,
+    // eliminating the need for separate get_* helper functions in each operator.
+
+    /// Resolve the input value using the provided resolver.
+    ///
+    /// If connected, fetches from the upstream node. Otherwise returns default.
+    #[inline]
+    pub fn resolve(&self, get_input: &dyn Fn(Id, usize) -> Value) -> Value {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx),
+            None => self.default.clone(),
+        }
+    }
+
+    /// Resolve input as f32.
+    ///
+    /// # Example
+    /// ```ignore
+    /// fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+    ///     let a = self.inputs[0].resolve_float(get_input);
+    ///     let b = self.inputs[1].resolve_float(get_input);
+    ///     self.outputs[0].set_float(a + b);
+    /// }
+    /// ```
+    #[inline]
+    pub fn resolve_float(&self, get_input: &dyn Fn(Id, usize) -> Value) -> f32 {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
+            None => self.default.as_float().unwrap_or(0.0),
+        }
+    }
+
+    /// Resolve input as i32.
+    #[inline]
+    pub fn resolve_int(&self, get_input: &dyn Fn(Id, usize) -> Value) -> i32 {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
+            None => self.default.as_int().unwrap_or(0),
+        }
+    }
+
+    /// Resolve input as bool.
+    #[inline]
+    pub fn resolve_bool(&self, get_input: &dyn Fn(Id, usize) -> Value) -> bool {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx).as_bool().unwrap_or(false),
+            None => self.default.as_bool().unwrap_or(false),
+        }
+    }
+
+    /// Resolve input as String.
+    #[inline]
+    pub fn resolve_string(&self, get_input: &dyn Fn(Id, usize) -> Value) -> String {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx)
+                .as_string()
+                .map(|s| s.to_string())
+                .unwrap_or_default(),
+            None => self.default.as_string().map(|s| s.to_string()).unwrap_or_default(),
+        }
+    }
+
+    /// Resolve input as [f32; 2].
+    #[inline]
+    pub fn resolve_vec2(&self, get_input: &dyn Fn(Id, usize) -> Value) -> [f32; 2] {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx)
+                .as_vec2()
+                .unwrap_or([0.0, 0.0]),
+            None => self.default.as_vec2().unwrap_or([0.0, 0.0]),
+        }
+    }
+
+    /// Resolve input as [f32; 3].
+    #[inline]
+    pub fn resolve_vec3(&self, get_input: &dyn Fn(Id, usize) -> Value) -> [f32; 3] {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx)
+                .as_vec3()
+                .unwrap_or([0.0, 0.0, 0.0]),
+            None => self.default.as_vec3().unwrap_or([0.0, 0.0, 0.0]),
+        }
+    }
+
+    /// Resolve input as [f32; 4].
+    #[inline]
+    pub fn resolve_vec4(&self, get_input: &dyn Fn(Id, usize) -> Value) -> [f32; 4] {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx)
+                .as_vec4()
+                .unwrap_or([0.0, 0.0, 0.0, 0.0]),
+            None => self.default.as_vec4().unwrap_or([0.0, 0.0, 0.0, 0.0]),
+        }
+    }
+
+    /// Resolve input as Color.
+    #[inline]
+    pub fn resolve_color(&self, get_input: &dyn Fn(Id, usize) -> Value) -> Color {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx)
+                .as_color()
+                .unwrap_or(Color::WHITE),
+            None => self.default.as_color().unwrap_or(Color::WHITE),
+        }
+    }
+
+    /// Resolve input as Gradient.
+    #[inline]
+    pub fn resolve_gradient(&self, get_input: &dyn Fn(Id, usize) -> Value) -> Gradient {
+        match self.connection {
+            Some((node_id, output_idx)) => get_input(node_id, output_idx)
+                .as_gradient()
+                .cloned()
+                .unwrap_or_default(),
+            None => self.default.as_gradient().cloned().unwrap_or_default(),
+        }
+    }
 }

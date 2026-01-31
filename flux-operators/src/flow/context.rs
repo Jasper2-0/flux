@@ -9,30 +9,6 @@ use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 
-fn get_string(input: &InputPort, get_input: InputResolver) -> String {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx)
-            .as_string()
-            .unwrap_or_default()
-            .to_string(),
-        None => input.default.as_string().unwrap_or_default().to_string(),
-    }
-}
-
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
-fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
-        None => input.default.as_int().unwrap_or(0),
-    }
-}
-
 // ============================================================================
 // GetFloatVar Operator
 // ============================================================================
@@ -73,8 +49,8 @@ impl Operator for GetFloatVarOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
-        let name = get_string(&self.inputs[0], get_input);
-        let default = get_float(&self.inputs[1], get_input);
+        let name = self.inputs[0].resolve_string(get_input);
+        let default = self.inputs[1].resolve_float(get_input);
         let value = ctx.get_float_var_or(&name, default);
         self.outputs[0].set_float(value);
     }
@@ -152,8 +128,8 @@ impl Operator for SetFloatVarOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let name = get_string(&self.inputs[0], get_input);
-        let value = get_float(&self.inputs[1], get_input);
+        let name = self.inputs[0].resolve_string(get_input);
+        let value = self.inputs[1].resolve_float(get_input);
 
         // Store for later application to context
         self.var_name = name;
@@ -223,8 +199,8 @@ impl Operator for GetIntVarOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
-        let name = get_string(&self.inputs[0], get_input);
-        let default = get_int(&self.inputs[1], get_input);
+        let name = self.inputs[0].resolve_string(get_input);
+        let default = self.inputs[1].resolve_int(get_input);
         let value = ctx.get_int_var_or(&name, default);
         self.outputs[0].set_int(value);
     }

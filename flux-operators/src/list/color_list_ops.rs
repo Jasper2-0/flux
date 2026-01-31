@@ -16,13 +16,6 @@ use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::Value;
 
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
 fn get_color_list(input: &InputPort, get_input: InputResolver) -> Vec<Color> {
     match input.connection {
         Some((node_id, output_idx)) => {
@@ -162,7 +155,7 @@ impl Operator for ColorListSampleOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let list = get_color_list(&self.inputs[0], get_input);
-        let position = get_float(&self.inputs[1], get_input).clamp(0.0, 1.0);
+        let position = self.inputs[1].resolve_float(get_input).clamp(0.0, 1.0);
 
         if list.is_empty() {
             self.outputs[0].set_color(0.0, 0.0, 0.0, 1.0);

@@ -2,6 +2,18 @@
 //!
 //! This crate provides derive macros for implementing the `Operator` and `OperatorMeta` traits.
 //!
+//! # Supported Types
+//!
+//! The macro supports these input/output types:
+//! - `f32` - Float values
+//! - `i32` - Integer values
+//! - `bool` - Boolean values
+//! - `String` - String values
+//! - `[f32; 2]` - Vec2 values
+//! - `[f32; 3]` - Vec3 values
+//! - `[f32; 4]` - Vec4 values
+//! - `Color` - Color values (from flux_core::value::Color)
+//!
 //! # Simple Example
 //!
 //! For operators with Vec-based ports (generated `new()` constructor):
@@ -27,9 +39,36 @@
 //!
 //! impl DivideOp {
 //!     fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+//!         // Generated getters use InputPort::resolve_* methods internally
 //!         let a = self.get_a(get_input);
 //!         let b = self.get_b(get_input);
 //!         self.set_result(if b != 0.0 { a / b } else { 0.0 });
+//!     }
+//! }
+//! ```
+//!
+//! # Vec3 Example
+//!
+//! ```ignore
+//! #[derive(Operator)]
+//! #[operator(name = "Vec3Scale", category = "Vector", description = "Scales a Vec3")]
+//! struct Vec3ScaleOp {
+//!     _id: Id,
+//!     _inputs: Vec<InputPort>,
+//!     _outputs: Vec<OutputPort>,
+//!     #[input(label = "Vector", default = [0.0, 0.0, 0.0])]
+//!     vector: [f32; 3],
+//!     #[input(label = "Scale", default = 1.0)]
+//!     scale: f32,
+//!     #[output(label = "Scaled")]
+//!     scaled: [f32; 3],
+//! }
+//!
+//! impl Vec3ScaleOp {
+//!     fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+//!         let v = self.get_vector(get_input);  // Returns [f32; 3]
+//!         let s = self.get_scale(get_input);   // Returns f32
+//!         self.set_scaled([v[0] * s, v[1] * s, v[2] * s]);
 //!     }
 //! }
 //! ```
@@ -53,6 +92,34 @@
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Attribute, Data, DeriveInput, Expr, Fields, Type};
+
+/// Detected storage pattern for inputs/outputs
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum StoragePattern {
+    /// Vec-based: `_inputs: Vec<InputPort>` (legacy pattern)
+    Vec,
+    /// Array-based: `inputs: [InputPort; N]` (preferred pattern)
+    Array,
+}
+
+/// Information about the port storage fields
+struct PortStorageInfo {
+    pattern: StoragePattern,
+    inputs_field: String,
+    outputs_field: String,
+    id_field: String,
+}
+
+impl Default for PortStorageInfo {
+    fn default() -> Self {
+        Self {
+            pattern: StoragePattern::Vec,
+            inputs_field: "_inputs".to_string(),
+            outputs_field: "_outputs".to_string(),
+            id_field: "_id".to_string(),
+        }
+    }
+}
 
 /// Derive macro for implementing both `Operator` and `OperatorMeta` traits.
 ///
@@ -80,6 +147,32 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
         },
         _ => panic!("Operator derive only supports structs"),
     };
+
+    // Detect the storage pattern (array vs Vec) by examining field types
+    let mut storage_info = PortStorageInfo::default();
+    for field in fields.iter() {
+        let field_name = field.ident.as_ref().unwrap().to_string();
+        let type_str = quote!(#field.ty).to_string();
+
+        // Check for array pattern: `inputs: [InputPort; N]`
+        if field_name == "inputs" && type_str.contains("[InputPort") {
+            storage_info.pattern = StoragePattern::Array;
+            storage_info.inputs_field = "inputs".to_string();
+        } else if field_name == "outputs" && type_str.contains("[OutputPort") {
+            storage_info.outputs_field = "outputs".to_string();
+        } else if field_name == "id" && type_str.contains("Id") {
+            storage_info.id_field = "id".to_string();
+        }
+        // Check for Vec pattern: `_inputs: Vec<InputPort>`
+        else if field_name == "_inputs" && type_str.contains("Vec") {
+            storage_info.pattern = StoragePattern::Vec;
+            storage_info.inputs_field = "_inputs".to_string();
+        } else if field_name == "_outputs" && type_str.contains("Vec") {
+            storage_info.outputs_field = "_outputs".to_string();
+        } else if field_name == "_id" {
+            storage_info.id_field = "_id".to_string();
+        }
+    }
 
     let mut input_fields: Vec<InputFieldInfo> = Vec::new();
     let mut output_fields: Vec<OutputFieldInfo> = Vec::new();
@@ -127,11 +220,19 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
     let input_inits: Vec<_> = input_fields
         .iter()
         .map(|f| {
+            let type_str = normalize_type(&f.ty);
             let default_val = f.default_value
                 .as_ref()
                 .map(|d| {
-                    syn::parse_str::<Expr>(d)
-                        .unwrap_or_else(|_| syn::parse_str::<Expr>("0.0").unwrap())
+                    // For String type, wrap the value in quotes since parse_kv strips them
+                    if type_str == "String" {
+                        let quoted = format!("\"{}\"", d);
+                        syn::parse_str::<Expr>(&quoted)
+                            .unwrap_or_else(|_| syn::parse_str::<Expr>("\"\"").unwrap())
+                    } else {
+                        syn::parse_str::<Expr>(d)
+                            .unwrap_or_else(|_| syn::parse_str::<Expr>("0.0").unwrap())
+                    }
                 })
                 .unwrap_or_else(|| get_default_for_type(&f.ty));
             let label = &f.label;
@@ -154,39 +255,66 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
         })
         .collect();
 
-    // Generate getter methods for inputs
+    // Generate getter methods for inputs using the new resolve_* methods
+    let inputs_field_ident = format_ident!("{}", storage_info.inputs_field);
     let input_getters: Vec<_> = input_fields
         .iter()
         .enumerate()
         .map(|(i, f)| {
             let getter_name = format_ident!("get_{}", f.name);
             let field_type = &f.ty;
-            let as_method = get_as_method(field_type);
-            let default_val = get_default_for_type(field_type);
+            let resolve_method = get_resolve_method(field_type);
+            let inputs_field = &inputs_field_ident;
             quote! {
                 /// Returns the value from the connected input or the default value.
-                pub fn #getter_name(&self, get_input: &dyn Fn(Id, usize) -> Value) -> #field_type {
-                    match self._inputs[#i].connection {
-                        Some((node_id, output_idx)) => get_input(node_id, output_idx).#as_method().unwrap_or(#default_val),
-                        None => self._inputs[#i].default.#as_method().unwrap_or(#default_val),
-                    }
+                #[inline]
+                pub fn #getter_name(&self, get_input: &dyn Fn(Id, usize) -> flux_core::Value) -> #field_type {
+                    self.#inputs_field[#i].#resolve_method(get_input)
                 }
             }
         })
         .collect();
 
     // Generate setter methods for outputs
+    let outputs_field_ident = format_ident!("{}", storage_info.outputs_field);
     let output_setters: Vec<_> = output_fields
         .iter()
         .enumerate()
         .map(|(i, f)| {
             let setter_name = format_ident!("set_{}", f.name);
             let field_type = &f.ty;
-            let set_method = get_set_method(field_type);
-            quote! {
-                /// Sets the output value.
-                pub fn #setter_name(&mut self, value: #field_type) {
-                    self._outputs[#i].#set_method(value);
+            let type_str = normalize_type(field_type);
+            let outputs_field = &outputs_field_ident;
+
+            // Handle special cases for String and Color
+            match type_str.as_str() {
+                "String" => {
+                    quote! {
+                        /// Sets the output string value.
+                        #[inline]
+                        pub fn #setter_name(&mut self, value: &str) {
+                            self.#outputs_field[#i].set_string(value);
+                        }
+                    }
+                }
+                "Color" => {
+                    quote! {
+                        /// Sets the output color value.
+                        #[inline]
+                        pub fn #setter_name(&mut self, color: Color) {
+                            self.#outputs_field[#i].set_color(color.r, color.g, color.b, color.a);
+                        }
+                    }
+                }
+                _ => {
+                    let set_method = get_set_method(field_type);
+                    quote! {
+                        /// Sets the output value.
+                        #[inline]
+                        pub fn #setter_name(&mut self, value: #field_type) {
+                            self.#outputs_field[#i].#set_method(value);
+                        }
+                    }
                 }
             }
         })
@@ -275,14 +403,31 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
     // Category color array
     let [r, g, b, a] = category_color;
 
+    // Generate field identifiers based on storage pattern
+    let id_field_ident = format_ident!("{}", storage_info.id_field);
+    let inputs_field_ident2 = format_ident!("{}", storage_info.inputs_field);
+    let outputs_field_ident2 = format_ident!("{}", storage_info.outputs_field);
+
+    // Generate initialization based on storage pattern
+    let (inputs_init, outputs_init) = match storage_info.pattern {
+        StoragePattern::Array => (
+            quote! { [#(#input_inits),*] },
+            quote! { [#(#output_inits),*] },
+        ),
+        StoragePattern::Vec => (
+            quote! { vec![#(#input_inits),*] },
+            quote! { vec![#(#output_inits),*] },
+        ),
+    };
+
     let expanded = quote! {
         impl #name {
             /// Creates a new instance with default values.
             pub fn new() -> Self {
                 Self {
-                    _id: Id::new(),
-                    _inputs: vec![#(#input_inits),*],
-                    _outputs: vec![#(#output_inits),*],
+                    #id_field_ident: Id::new(),
+                    #inputs_field_ident2: #inputs_init,
+                    #outputs_field_ident2: #outputs_init,
                     #(#input_field_inits,)*
                     #(#output_field_inits,)*
                 }
@@ -308,7 +453,7 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
             }
 
             fn id(&self) -> Id {
-                self._id
+                self.#id_field_ident
             }
 
             fn name(&self) -> &'static str {
@@ -316,19 +461,19 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
             }
 
             fn inputs(&self) -> &[InputPort] {
-                &self._inputs
+                &self.#inputs_field_ident2
             }
 
             fn inputs_mut(&mut self) -> &mut [InputPort] {
-                &mut self._inputs
+                &mut self.#inputs_field_ident2
             }
 
             fn outputs(&self) -> &[OutputPort] {
-                &self._outputs
+                &self.#outputs_field_ident2
             }
 
             fn outputs_mut(&mut self) -> &mut [OutputPort] {
-                &mut self._outputs
+                &mut self.#outputs_field_ident2
             }
 
             fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
@@ -687,52 +832,83 @@ fn parse_port_meta_attrs(attrs: &[Attribute], attr_name: &str) -> Vec<PortMetaIn
 // Type helpers
 // ============================================================================
 
+/// Normalize type string by removing spaces for consistent matching
+fn normalize_type(ty: &Type) -> String {
+    quote!(#ty).to_string().replace(' ', "")
+}
+
 fn get_port_constructor(ty: &Type) -> proc_macro2::TokenStream {
-    let type_str = quote!(#ty).to_string();
+    let type_str = normalize_type(ty);
     match type_str.as_str() {
         "f32" => quote!(float),
         "i32" => quote!(int),
         "bool" => quote!(bool),
+        "String" => quote!(string),
+        "[f32;2]" => quote!(vec2),
+        "[f32;3]" => quote!(vec3),
+        "[f32;4]" => quote!(vec4),
+        "Color" => quote!(color),
         _ => quote!(float),
     }
 }
 
 fn get_output_constructor(ty: &Type) -> proc_macro2::TokenStream {
-    let type_str = quote!(#ty).to_string();
+    let type_str = normalize_type(ty);
     match type_str.as_str() {
         "f32" => quote!(float),
         "i32" => quote!(int),
         "bool" => quote!(bool),
+        "String" => quote!(string),
+        "[f32;2]" => quote!(vec2),
+        "[f32;3]" => quote!(vec3),
+        "[f32;4]" => quote!(vec4),
+        "Color" => quote!(color),
         _ => quote!(float),
     }
 }
 
-fn get_as_method(ty: &Type) -> proc_macro2::TokenStream {
-    let type_str = quote!(#ty).to_string();
+/// Get the resolve_* method name for a type
+fn get_resolve_method(ty: &Type) -> proc_macro2::TokenStream {
+    let type_str = normalize_type(ty);
     match type_str.as_str() {
-        "f32" => quote!(as_float),
-        "i32" => quote!(as_int),
-        "bool" => quote!(as_bool),
-        _ => quote!(as_float),
+        "f32" => quote!(resolve_float),
+        "i32" => quote!(resolve_int),
+        "bool" => quote!(resolve_bool),
+        "String" => quote!(resolve_string),
+        "[f32;2]" => quote!(resolve_vec2),
+        "[f32;3]" => quote!(resolve_vec3),
+        "[f32;4]" => quote!(resolve_vec4),
+        "Color" => quote!(resolve_color),
+        _ => quote!(resolve_float),
     }
 }
 
 fn get_set_method(ty: &Type) -> proc_macro2::TokenStream {
-    let type_str = quote!(#ty).to_string();
+    let type_str = normalize_type(ty);
     match type_str.as_str() {
         "f32" => quote!(set_float),
         "i32" => quote!(set_int),
         "bool" => quote!(set_bool),
+        "String" => quote!(set_string),
+        "[f32;2]" => quote!(set_vec2),
+        "[f32;3]" => quote!(set_vec3),
+        "[f32;4]" => quote!(set_vec4),
+        "Color" => quote!(set_color),
         _ => quote!(set_float),
     }
 }
 
 fn get_default_for_type(ty: &Type) -> Expr {
-    let type_str = quote!(#ty).to_string();
+    let type_str = normalize_type(ty);
     let default_str = match type_str.as_str() {
         "f32" => "0.0",
         "i32" => "0",
         "bool" => "false",
+        "String" => "String::new()",
+        "[f32;2]" => "[0.0, 0.0]",
+        "[f32;3]" => "[0.0, 0.0, 0.0]",
+        "[f32;4]" => "[0.0, 0.0, 0.0, 0.0]",
+        "Color" => "Color::BLACK",
         _ => "0.0",
     };
     syn::parse_str::<Expr>(default_str).unwrap()

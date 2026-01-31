@@ -11,27 +11,6 @@ use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::Value;
 
-fn get_bool(input: &InputPort, get_input: InputResolver) -> bool {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_bool().unwrap_or(false),
-        None => input.default.as_bool().unwrap_or(false),
-    }
-}
-
-fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
-        None => input.default.as_int().unwrap_or(0),
-    }
-}
-
-fn get_value(input: &InputPort, get_input: InputResolver) -> Value {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx),
-        None => input.default.clone(),
-    }
-}
-
 // ============================================================================
 // Delay Operator
 // ============================================================================
@@ -74,8 +53,8 @@ impl Operator for DelayOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
-        let frames = get_int(&self.inputs[1], get_input).max(0) as usize;
+        let value = self.inputs[0].resolve(get_input);
+        let frames = self.inputs[1].resolve_int(get_input).max(0) as usize;
 
         self.buffer.push_back(value);
 
@@ -155,7 +134,7 @@ impl Operator for PreviousOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let current = get_value(&self.inputs[0], get_input);
+        let current = self.inputs[0].resolve(get_input);
         self.outputs[0].value = self.previous.clone();
         self.previous = current;
     }
@@ -222,7 +201,7 @@ impl Operator for ChangedOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let current = get_value(&self.inputs[0], get_input);
+        let current = self.inputs[0].resolve(get_input);
         let changed = match &self.previous {
             Some(prev) => prev != &current,
             None => true, // First frame is considered a change
@@ -293,7 +272,7 @@ impl Operator for TriggerOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let current = get_bool(&self.inputs[0], get_input);
+        let current = self.inputs[0].resolve_bool(get_input);
         let triggered = current && !self.previous; // Rising edge
         self.outputs[0].set_bool(triggered);
         self.previous = current;
@@ -366,14 +345,14 @@ impl Operator for OnceOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let reset = get_bool(&self.inputs[1], get_input);
+        let reset = self.inputs[1].resolve_bool(get_input);
 
         if reset {
             self.executed = false;
         }
 
         if !self.executed {
-            self.stored_value = get_value(&self.inputs[0], get_input);
+            self.stored_value = self.inputs[0].resolve(get_input);
             self.executed = true;
         }
 
@@ -444,8 +423,8 @@ impl Operator for CounterOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let trigger = get_bool(&self.inputs[0], get_input);
-        let reset = get_bool(&self.inputs[1], get_input);
+        let trigger = self.inputs[0].resolve_bool(get_input);
+        let reset = self.inputs[1].resolve_bool(get_input);
 
         if reset {
             self.count = 0;

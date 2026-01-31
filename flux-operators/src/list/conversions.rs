@@ -16,13 +16,6 @@ use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::Value;
 
-fn get_value(input: &InputPort, get_input: InputResolver) -> Value {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx),
-        None => input.default.clone(),
-    }
-}
-
 // ============================================================================
 // IntListToFloatList Operator
 // ============================================================================
@@ -60,7 +53,7 @@ impl Operator for IntListToFloatListOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         match value {
             Value::IntList(il) => {
                 let fl: Vec<f32> = il.iter().map(|i| *i as f32).collect();
@@ -128,7 +121,7 @@ impl Operator for FloatListToIntListOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         match value {
             Value::FloatList(fl) => {
                 let il: Vec<i32> = fl.iter().map(|f| *f as i32).collect();
@@ -196,7 +189,7 @@ impl Operator for Vec3ListFlattenOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         match value {
             Value::Vec3List(vl) => {
                 let fl: Vec<f32> = vl.iter().flat_map(|v| vec![v[0], v[1], v[2]]).collect();
@@ -264,7 +257,7 @@ impl Operator for FloatListToVec3ListOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         match value {
             Value::FloatList(fl) => {
                 let vl: Vec<[f32; 3]> = fl
@@ -336,7 +329,7 @@ impl Operator for ColorListToVec4ListOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         match value {
             Value::ColorList(cl) => {
                 let vl: Vec<[f32; 4]> = cl.iter().map(|c| c.to_array()).collect();
@@ -404,7 +397,7 @@ impl Operator for Vec4ListToColorListOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         match value {
             Value::Vec4List(vl) => {
                 let cl: Vec<Color> = vl.iter().map(|v| Color::from_array(*v)).collect();

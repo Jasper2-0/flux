@@ -10,13 +10,6 @@ use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
 // ============================================================================
 // SawWave Operator
 // ============================================================================
@@ -59,10 +52,10 @@ impl Operator for SawWaveOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
-        let freq = get_float(&self.inputs[0], get_input);
-        let amp = get_float(&self.inputs[1], get_input);
-        let phase = get_float(&self.inputs[2], get_input);
-        let offset = get_float(&self.inputs[3], get_input);
+        let freq = self.inputs[0].resolve_float(get_input);
+        let amp = self.inputs[1].resolve_float(get_input);
+        let phase = self.inputs[2].resolve_float(get_input);
+        let offset = self.inputs[3].resolve_float(get_input);
 
         let t = ctx.time as f32;
         // Sawtooth: goes from -1 to 1 over one period
@@ -149,10 +142,10 @@ impl Operator for TriangleWaveOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
-        let freq = get_float(&self.inputs[0], get_input);
-        let amp = get_float(&self.inputs[1], get_input);
-        let phase = get_float(&self.inputs[2], get_input);
-        let offset = get_float(&self.inputs[3], get_input);
+        let freq = self.inputs[0].resolve_float(get_input);
+        let amp = self.inputs[1].resolve_float(get_input);
+        let phase = self.inputs[2].resolve_float(get_input);
+        let offset = self.inputs[3].resolve_float(get_input);
 
         let t = ctx.time as f32;
         let cycle = (t * freq + phase).rem_euclid(1.0);
@@ -239,10 +232,10 @@ impl Operator for PulseWaveOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
-        let freq = get_float(&self.inputs[0], get_input);
-        let duty = get_float(&self.inputs[1], get_input).clamp(0.0, 1.0);
-        let amp = get_float(&self.inputs[2], get_input);
-        let offset = get_float(&self.inputs[3], get_input);
+        let freq = self.inputs[0].resolve_float(get_input);
+        let duty = self.inputs[1].resolve_float(get_input).clamp(0.0, 1.0);
+        let amp = self.inputs[2].resolve_float(get_input);
+        let offset = self.inputs[3].resolve_float(get_input);
 
         let t = ctx.time as f32;
         let cycle = (t * freq).rem_euclid(1.0);
@@ -330,8 +323,8 @@ impl Operator for AccumulatorOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_float(&self.inputs[0], get_input);
-        let rate = get_float(&self.inputs[1], get_input);
+        let value = self.inputs[0].resolve_float(get_input);
+        let rate = self.inputs[1].resolve_float(get_input);
 
         let dt = if self.last_time > 0.0 {
             (ctx.time - self.last_time) as f32
@@ -425,9 +418,9 @@ impl Operator for SpringOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, ctx: &EvalContext, get_input: InputResolver) {
-        let target = get_float(&self.inputs[0], get_input);
-        let stiffness = get_float(&self.inputs[1], get_input);
-        let damping = get_float(&self.inputs[2], get_input);
+        let target = self.inputs[0].resolve_float(get_input);
+        let stiffness = self.inputs[1].resolve_float(get_input);
+        let damping = self.inputs[2].resolve_float(get_input);
 
         let dt = if self.last_time > 0.0 {
             (ctx.time - self.last_time) as f32

@@ -11,27 +11,11 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta, Value};
+use flux_macros::Operator;
+
 
 // =============================================================================
-// Helper functions
-// =============================================================================
-
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
-fn get_value(input: &InputPort, get_input: InputResolver) -> Value {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx),
-        None => input.default.clone(),
-    }
-}
-
-// =============================================================================
-// Lerp Operator (polymorphic)
+// Lerp Operator (polymorphic - NOT migrated)
 // =============================================================================
 
 pub struct LerpOp {
@@ -87,9 +71,9 @@ impl Operator for LerpOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_value(&self.inputs[0], get_input);
-        let b = get_value(&self.inputs[1], get_input);
-        let t = get_value(&self.inputs[2], get_input);
+        let a = self.inputs[0].resolve(get_input);
+        let b = self.inputs[1].resolve(get_input);
+        let t = self.inputs[2].resolve(get_input);
 
         let result = a.lerp(&b, &t).unwrap_or(Value::Float(0.0));
         self.outputs[0].set(result);
@@ -123,7 +107,7 @@ impl OperatorMeta for LerpOp {
 }
 
 // =============================================================================
-// SmoothStep Operator (polymorphic)
+// SmoothStep Operator (polymorphic - NOT migrated)
 // =============================================================================
 
 pub struct SmoothStepOp {
@@ -179,9 +163,9 @@ impl Operator for SmoothStepOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let edge0 = get_value(&self.inputs[0], get_input);
-        let edge1 = get_value(&self.inputs[1], get_input);
-        let x = get_value(&self.inputs[2], get_input);
+        let edge0 = self.inputs[0].resolve(get_input);
+        let edge1 = self.inputs[1].resolve(get_input);
+        let x = self.inputs[2].resolve(get_input);
 
         let result = x.smoothstep(&edge0, &edge1).unwrap_or(Value::Float(0.0));
         self.outputs[0].set(result);
@@ -215,310 +199,130 @@ impl OperatorMeta for SmoothStepOp {
 }
 
 // =============================================================================
-// Remap Operator (float-only)
+// Remap Operator (using derive macro)
 // =============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Remap", category = "Math", description = "Remaps value from one range to another")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct RemapOp {
     id: Id,
     inputs: [InputPort; 5],
     outputs: [OutputPort; 1],
+    #[input(label = "Value", default = 0.0)]
+    value: f32,
+    #[input(label = "InMin", default = 0.0)]
+    in_min: f32,
+    #[input(label = "InMax", default = 1.0)]
+    in_max: f32,
+    #[input(label = "OutMin", default = 0.0)]
+    out_min: f32,
+    #[input(label = "OutMax", default = 1.0)]
+    out_max: f32,
+    #[output(label = "Result")]
+    result: f32,
 }
 
 impl RemapOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("Value", 0.0),
-                InputPort::float("InMin", 0.0),
-                InputPort::float("InMax", 1.0),
-                InputPort::float("OutMin", 0.0),
-                InputPort::float("OutMax", 1.0),
-            ],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
-
-impl Default for RemapOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for RemapOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-    fn name(&self) -> &'static str {
-        "Remap"
-    }
-    fn inputs(&self) -> &[InputPort] {
-        &self.inputs
-    }
-    fn inputs_mut(&mut self) -> &mut [InputPort] {
-        &mut self.inputs
-    }
-    fn outputs(&self) -> &[OutputPort] {
-        &self.outputs
-    }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] {
-        &mut self.outputs
-    }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_float(&self.inputs[0], get_input);
-        let in_min = get_float(&self.inputs[1], get_input);
-        let in_max = get_float(&self.inputs[2], get_input);
-        let out_min = get_float(&self.inputs[3], get_input);
-        let out_max = get_float(&self.inputs[4], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let value = self.get_value(get_input);
+        let in_min = self.get_in_min(get_input);
+        let in_max = self.get_in_max(get_input);
+        let out_min = self.get_out_min(get_input);
+        let out_max = self.get_out_max(get_input);
 
         let in_range = in_max - in_min;
         if in_range.abs() < f32::EPSILON {
-            self.outputs[0].set_float(out_min);
+            self.set_result(out_min);
             return;
         }
 
         let t = (value - in_min) / in_range;
-        let result = out_min + t * (out_max - out_min);
-        self.outputs[0].set_float(result);
-    }
-}
-
-impl OperatorMeta for RemapOp {
-    fn category(&self) -> &'static str {
-        "Math"
-    }
-    fn category_color(&self) -> [f32; 4] {
-        category_colors::MATH
-    }
-    fn description(&self) -> &'static str {
-        "Remaps value from one range to another"
-    }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Value")),
-            1 => Some(PortMeta::new("InMin")),
-            2 => Some(PortMeta::new("InMax")),
-            3 => Some(PortMeta::new("OutMin")),
-            4 => Some(PortMeta::new("OutMax")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(out_min + t * (out_max - out_min));
     }
 }
 
 // =============================================================================
-// InverseLerp Operator (float-only)
+// InverseLerp Operator (using derive macro)
 // =============================================================================
 
+#[derive(Operator)]
+#[operator(name = "InverseLerp", category = "Math", description = "Gets T from lerp result")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct InverseLerpOp {
     id: Id,
     inputs: [InputPort; 3],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = 0.0)]
+    a: f32,
+    #[input(label = "B", default = 1.0)]
+    b: f32,
+    #[input(label = "Value", default = 0.5)]
+    value: f32,
+    #[output(label = "T")]
+    t: f32,
 }
 
 impl InverseLerpOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("A", 0.0),
-                InputPort::float("B", 1.0),
-                InputPort::float("Value", 0.5),
-            ],
-            outputs: [OutputPort::float("T")],
-        }
-    }
-}
-
-impl Default for InverseLerpOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for InverseLerpOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-    fn name(&self) -> &'static str {
-        "InverseLerp"
-    }
-    fn inputs(&self) -> &[InputPort] {
-        &self.inputs
-    }
-    fn inputs_mut(&mut self) -> &mut [InputPort] {
-        &mut self.inputs
-    }
-    fn outputs(&self) -> &[OutputPort] {
-        &self.outputs
-    }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] {
-        &mut self.outputs
-    }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_float(&self.inputs[0], get_input);
-        let b = get_float(&self.inputs[1], get_input);
-        let value = get_float(&self.inputs[2], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        let value = self.get_value(get_input);
 
         let range = b - a;
         if range.abs() < f32::EPSILON {
-            self.outputs[0].set_float(0.0);
+            self.set_t(0.0);
             return;
         }
 
-        let t = (value - a) / range;
-        self.outputs[0].set_float(t);
-    }
-}
-
-impl OperatorMeta for InverseLerpOp {
-    fn category(&self) -> &'static str {
-        "Math"
-    }
-    fn category_color(&self) -> [f32; 4] {
-        category_colors::MATH
-    }
-    fn description(&self) -> &'static str {
-        "Gets T from lerp result"
-    }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            2 => Some(PortMeta::new("Value")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("T").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_t((value - a) / range);
     }
 }
 
 // =============================================================================
-// MapRange Operator (float-only)
+// MapRange Operator (using derive macro)
 // =============================================================================
 
+#[derive(Operator)]
+#[operator(name = "MapRange", category = "Math", description = "Maps value from one range to another")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct MapRangeOp {
     id: Id,
     inputs: [InputPort; 5],
     outputs: [OutputPort; 1],
+    #[input(label = "Value", default = 0.0)]
+    value: f32,
+    #[input(label = "FromMin", default = 0.0)]
+    from_min: f32,
+    #[input(label = "FromMax", default = 1.0)]
+    from_max: f32,
+    #[input(label = "ToMin", default = 0.0)]
+    to_min: f32,
+    #[input(label = "ToMax", default = 1.0)]
+    to_max: f32,
+    #[output(label = "Result")]
+    result: f32,
 }
 
 impl MapRangeOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("Value", 0.0),
-                InputPort::float("FromMin", 0.0),
-                InputPort::float("FromMax", 1.0),
-                InputPort::float("ToMin", 0.0),
-                InputPort::float("ToMax", 1.0),
-            ],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
-
-impl Default for MapRangeOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for MapRangeOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-    fn name(&self) -> &'static str {
-        "MapRange"
-    }
-    fn inputs(&self) -> &[InputPort] {
-        &self.inputs
-    }
-    fn inputs_mut(&mut self) -> &mut [InputPort] {
-        &mut self.inputs
-    }
-    fn outputs(&self) -> &[OutputPort] {
-        &self.outputs
-    }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] {
-        &mut self.outputs
-    }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_float(&self.inputs[0], get_input);
-        let from_min = get_float(&self.inputs[1], get_input);
-        let from_max = get_float(&self.inputs[2], get_input);
-        let to_min = get_float(&self.inputs[3], get_input);
-        let to_max = get_float(&self.inputs[4], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let value = self.get_value(get_input);
+        let from_min = self.get_from_min(get_input);
+        let from_max = self.get_from_max(get_input);
+        let to_min = self.get_to_min(get_input);
+        let to_max = self.get_to_max(get_input);
 
         let from_range = from_max - from_min;
         if from_range.abs() < f32::EPSILON {
-            self.outputs[0].set_float(to_min);
+            self.set_result(to_min);
             return;
         }
 
         let t = (value - from_min) / from_range;
-        let result = to_min + t * (to_max - to_min);
-        self.outputs[0].set_float(result);
-    }
-}
-
-impl OperatorMeta for MapRangeOp {
-    fn category(&self) -> &'static str {
-        "Math"
-    }
-    fn category_color(&self) -> [f32; 4] {
-        category_colors::MATH
-    }
-    fn description(&self) -> &'static str {
-        "Maps value from one range to another"
-    }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Value")),
-            1 => Some(PortMeta::new("FromMin")),
-            2 => Some(PortMeta::new("FromMax")),
-            3 => Some(PortMeta::new("ToMin")),
-            4 => Some(PortMeta::new("ToMax")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(to_min + t * (to_max - to_min));
     }
 }
 

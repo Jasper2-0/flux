@@ -16,13 +16,6 @@ use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::Value;
 
-fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
-        None => input.default.as_int().unwrap_or(0),
-    }
-}
-
 fn get_int_list(input: &InputPort, get_input: InputResolver) -> Vec<i32> {
     match input.connection {
         Some((node_id, output_idx)) => {
@@ -345,9 +338,9 @@ impl Operator for IntListRangeOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let start = get_int(&self.inputs[0], get_input);
-        let end = get_int(&self.inputs[1], get_input);
-        let step = get_int(&self.inputs[2], get_input).max(1); // Ensure step >= 1
+        let start = self.inputs[0].resolve_int(get_input);
+        let end = self.inputs[1].resolve_int(get_input);
+        let step = self.inputs[2].resolve_int(get_input).max(1); // Ensure step >= 1
 
         let mut result = Vec::new();
         let mut i = start;

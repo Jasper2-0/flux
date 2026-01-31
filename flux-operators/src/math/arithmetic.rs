@@ -419,13 +419,6 @@ impl OperatorMeta for PowOp {
 // Log Operator (float-only)
 // ============================================================================
 
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
 pub struct LogOp {
     id: Id,
     inputs: [InputPort; 2],
@@ -462,8 +455,8 @@ impl Operator for LogOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_float(&self.inputs[0], get_input);
-        let base = get_float(&self.inputs[1], get_input);
+        let value = self.inputs[0].resolve_float(get_input);
+        let base = self.inputs[1].resolve_float(get_input);
         self.outputs[0].set_float(value.log(base));
     }
 }

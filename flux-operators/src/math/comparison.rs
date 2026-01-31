@@ -12,16 +12,6 @@ use flux_core::operator::{InputResolver, Operator};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta, Value};
 
-// =============================================================================
-// Helper to get value from input (polymorphic)
-// =============================================================================
-
-fn get_value(input: &InputPort, get_input: InputResolver) -> Value {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx),
-        None => input.default.clone(),
-    }
-}
 
 // =============================================================================
 // Min Operator (polymorphic)
@@ -79,8 +69,8 @@ impl Operator for MinOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_value(&self.inputs[0], get_input);
-        let b = get_value(&self.inputs[1], get_input);
+        let a = self.inputs[0].resolve(get_input);
+        let b = self.inputs[1].resolve(get_input);
 
         let result = a.min_value(&b).unwrap_or(Value::Float(0.0));
         self.outputs[0].set(result);
@@ -168,8 +158,8 @@ impl Operator for MaxOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_value(&self.inputs[0], get_input);
-        let b = get_value(&self.inputs[1], get_input);
+        let a = self.inputs[0].resolve(get_input);
+        let b = self.inputs[1].resolve(get_input);
 
         let result = a.max_value(&b).unwrap_or(Value::Float(0.0));
         self.outputs[0].set(result);
@@ -258,9 +248,9 @@ impl Operator for ClampOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
-        let min_val = get_value(&self.inputs[1], get_input);
-        let max_val = get_value(&self.inputs[2], get_input);
+        let value = self.inputs[0].resolve(get_input);
+        let min_val = self.inputs[1].resolve(get_input);
+        let max_val = self.inputs[2].resolve(get_input);
 
         let result = value
             .clamp_value(&min_val, &max_val)
@@ -348,7 +338,7 @@ impl Operator for SignOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         let result = value.sign().unwrap_or(Value::Float(0.0));
         self.outputs[0].set(result);
     }
@@ -434,8 +424,8 @@ impl Operator for StepOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let edge = get_value(&self.inputs[0], get_input);
-        let value = get_value(&self.inputs[1], get_input);
+        let edge = self.inputs[0].resolve(get_input);
+        let value = self.inputs[1].resolve(get_input);
 
         // GLSL step: 0 if value < edge, else 1
         let result = value.step(&edge).unwrap_or(Value::Float(0.0));

@@ -6,259 +6,116 @@ use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
+use flux_macros::Operator;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 
-fn get_bool(input: &InputPort, get_input: InputResolver) -> bool {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_bool().unwrap_or(false),
-        None => input.default.as_bool().unwrap_or(false),
-    }
-}
-
 // ============================================================================
-// And Operator
+// And Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "And", category = "Logic", description = "Logical AND of two booleans")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct AndOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = false)]
+    a: bool,
+    #[input(label = "B", default = false)]
+    b: bool,
+    #[output(label = "Result")]
+    result: bool,
 }
 
 impl AndOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::bool("A", false), InputPort::bool("B", false)],
-            outputs: [OutputPort::bool("Result")],
-        }
-    }
-}
-
-impl Default for AndOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for AndOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "And" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_bool(&self.inputs[0], get_input);
-        let b = get_bool(&self.inputs[1], get_input);
-        self.outputs[0].set_bool(a && b);
-    }
-}
-
-impl OperatorMeta for AndOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Logical AND of two booleans" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        self.set_result(a && b);
     }
 }
 
 // ============================================================================
-// Or Operator
+// Or Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Or", category = "Logic", description = "Logical OR of two booleans")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct OrOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = false)]
+    a: bool,
+    #[input(label = "B", default = false)]
+    b: bool,
+    #[output(label = "Result")]
+    result: bool,
 }
 
 impl OrOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::bool("A", false), InputPort::bool("B", false)],
-            outputs: [OutputPort::bool("Result")],
-        }
-    }
-}
-
-impl Default for OrOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for OrOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Or" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_bool(&self.inputs[0], get_input);
-        let b = get_bool(&self.inputs[1], get_input);
-        self.outputs[0].set_bool(a || b);
-    }
-}
-
-impl OperatorMeta for OrOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Logical OR of two booleans" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        self.set_result(a || b);
     }
 }
 
 // ============================================================================
-// Not Operator
+// Not Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Not", category = "Logic", description = "Logical NOT")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct NotOp {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 1],
+    #[input(label = "Value", default = false)]
+    value: bool,
+    #[output(label = "Result")]
+    result: bool,
 }
 
 impl NotOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::bool("Value", false)],
-            outputs: [OutputPort::bool("Result")],
-        }
-    }
-}
-
-impl Default for NotOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for NotOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Not" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_bool(&self.inputs[0], get_input);
-        self.outputs[0].set_bool(!value);
-    }
-}
-
-impl OperatorMeta for NotOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Logical NOT" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Value")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let value = self.get_value(get_input);
+        self.set_result(!value);
     }
 }
 
 // ============================================================================
-// Xor Operator
+// Xor Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Xor", category = "Logic", description = "Exclusive OR")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct XorOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = false)]
+    a: bool,
+    #[input(label = "B", default = false)]
+    b: bool,
+    #[output(label = "Result")]
+    result: bool,
 }
 
 impl XorOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::bool("A", false), InputPort::bool("B", false)],
-            outputs: [OutputPort::bool("Result")],
-        }
-    }
-}
-
-impl Default for XorOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for XorOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Xor" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_bool(&self.inputs[0], get_input);
-        let b = get_bool(&self.inputs[1], get_input);
-        self.outputs[0].set_bool(a ^ b);
-    }
-}
-
-impl OperatorMeta for XorOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Exclusive OR" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        self.set_result(a ^ b);
     }
 }
 

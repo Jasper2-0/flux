@@ -1,80 +1,38 @@
 //! Integer operators: IntAdd, IntMultiply, IntDivide, IntModulo, IntClamp, IntToFloat
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
-use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
+use flux_core::OperatorMeta;
+use flux_macros::Operator;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
-
-fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
-        None => input.default.as_int().unwrap_or(0),
-    }
-}
 
 // ============================================================================
 // IntAdd Operator
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "IntAdd", category = "Logic", description = "Adds two integers")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct IntAddOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = 0)]
+    a: i32,
+    #[input(label = "B", default = 0)]
+    b: i32,
+    #[output(label = "Result")]
+    result: i32,
 }
 
 impl IntAddOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::int("A", 0), InputPort::int("B", 0)],
-            outputs: [OutputPort::int("Result")],
-        }
-    }
-}
-
-impl Default for IntAddOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for IntAddOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "IntAdd" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_int(&self.inputs[0], get_input);
-        let b = get_int(&self.inputs[1], get_input);
-        self.outputs[0].set_int(a.wrapping_add(b));
-    }
-}
-
-impl OperatorMeta for IntAddOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Adds two integers" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        self.set_result(a.wrapping_add(b));
     }
 }
 
@@ -82,61 +40,27 @@ impl OperatorMeta for IntAddOp {
 // IntMultiply Operator
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "IntMultiply", category = "Logic", description = "Multiplies two integers")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct IntMultiplyOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = 0)]
+    a: i32,
+    #[input(label = "B", default = 1)]
+    b: i32,
+    #[output(label = "Result")]
+    result: i32,
 }
 
 impl IntMultiplyOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::int("A", 0), InputPort::int("B", 1)],
-            outputs: [OutputPort::int("Result")],
-        }
-    }
-}
-
-impl Default for IntMultiplyOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for IntMultiplyOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "IntMultiply" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_int(&self.inputs[0], get_input);
-        let b = get_int(&self.inputs[1], get_input);
-        self.outputs[0].set_int(a.wrapping_mul(b));
-    }
-}
-
-impl OperatorMeta for IntMultiplyOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Multiplies two integers" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        self.set_result(a.wrapping_mul(b));
     }
 }
 
@@ -144,63 +68,28 @@ impl OperatorMeta for IntMultiplyOp {
 // IntDivide Operator
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "IntDivide", category = "Logic", description = "Divides two integers")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct IntDivideOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = 0)]
+    a: i32,
+    #[input(label = "B", default = 1)]
+    b: i32,
+    #[output(label = "Result")]
+    result: i32,
 }
 
 impl IntDivideOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::int("A", 0), InputPort::int("B", 1)],
-            outputs: [OutputPort::int("Result")],
-        }
-    }
-}
-
-impl Default for IntDivideOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for IntDivideOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "IntDivide" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_int(&self.inputs[0], get_input);
-        let b = get_int(&self.inputs[1], get_input);
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
         // Division by zero returns 0
-        let result = if b == 0 { 0 } else { a / b };
-        self.outputs[0].set_int(result);
-    }
-}
-
-impl OperatorMeta for IntDivideOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Divides two integers" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+        self.set_result(if b == 0 { 0 } else { a / b });
     }
 }
 
@@ -208,62 +97,27 @@ impl OperatorMeta for IntDivideOp {
 // IntModulo Operator
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "IntModulo", category = "Logic", description = "Returns remainder of integer division")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct IntModuloOp {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "A", default = 0)]
+    a: i32,
+    #[input(label = "B", default = 1)]
+    b: i32,
+    #[output(label = "Result")]
+    result: i32,
 }
 
 impl IntModuloOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::int("A", 0), InputPort::int("B", 1)],
-            outputs: [OutputPort::int("Result")],
-        }
-    }
-}
-
-impl Default for IntModuloOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for IntModuloOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "IntModulo" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let a = get_int(&self.inputs[0], get_input);
-        let b = get_int(&self.inputs[1], get_input);
-        let result = if b == 0 { 0 } else { a % b };
-        self.outputs[0].set_int(result);
-    }
-}
-
-impl OperatorMeta for IntModuloOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Returns remainder of integer division" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("A")),
-            1 => Some(PortMeta::new("B")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let a = self.get_a(get_input);
+        let b = self.get_b(get_input);
+        self.set_result(if b == 0 { 0 } else { a % b });
     }
 }
 
@@ -271,67 +125,30 @@ impl OperatorMeta for IntModuloOp {
 // IntClamp Operator
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "IntClamp", category = "Logic", description = "Clamps an integer to a range")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct IntClampOp {
     id: Id,
     inputs: [InputPort; 3],
     outputs: [OutputPort; 1],
+    #[input(label = "Value", default = 0)]
+    value: i32,
+    #[input(label = "Min", default = 0)]
+    min: i32,
+    #[input(label = "Max", default = 100)]
+    max: i32,
+    #[output(label = "Result")]
+    result: i32,
 }
 
 impl IntClampOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::int("Value", 0),
-                InputPort::int("Min", 0),
-                InputPort::int("Max", 100),
-            ],
-            outputs: [OutputPort::int("Result")],
-        }
-    }
-}
-
-impl Default for IntClampOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for IntClampOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "IntClamp" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_int(&self.inputs[0], get_input);
-        let min = get_int(&self.inputs[1], get_input);
-        let max = get_int(&self.inputs[2], get_input);
-        self.outputs[0].set_int(value.clamp(min, max));
-    }
-}
-
-impl OperatorMeta for IntClampOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Clamps an integer to a range" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Value")),
-            1 => Some(PortMeta::new("Min")),
-            2 => Some(PortMeta::new("Max")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let value = self.get_value(get_input);
+        let min = self.get_min(get_input);
+        let max = self.get_max(get_input);
+        self.set_result(value.clamp(min, max));
     }
 }
 
@@ -339,59 +156,24 @@ impl OperatorMeta for IntClampOp {
 // IntToFloat Operator
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "IntToFloat", category = "Logic", description = "Converts an integer to a float")]
+#[operator(category_color = [0.55, 0.45, 0.25, 1.0])]
+#[allow(dead_code)]
 pub struct IntToFloatOp {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 1],
+    #[input(label = "Value", default = 0)]
+    value: i32,
+    #[output(label = "Result")]
+    result: f32,
 }
 
 impl IntToFloatOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::int("Value", 0)],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
-
-impl Default for IntToFloatOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for IntToFloatOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "IntToFloat" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_int(&self.inputs[0], get_input);
-        self.outputs[0].set_float(value as f32);
-    }
-}
-
-impl OperatorMeta for IntToFloatOp {
-    fn category(&self) -> &'static str { "Logic" }
-    fn category_color(&self) -> [f32; 4] { category_colors::LOGIC }
-    fn description(&self) -> &'static str { "Converts an integer to a float" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Value")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let value = self.get_value(get_input);
+        self.set_result(value as f32);
     }
 }
 

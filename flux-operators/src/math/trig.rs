@@ -11,27 +11,11 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta, Value};
+use flux_macros::Operator;
+
 
 // =============================================================================
-// Helper functions
-// =============================================================================
-
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
-fn get_value(input: &InputPort, get_input: InputResolver) -> Value {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx),
-        None => input.default.clone(),
-    }
-}
-
-// =============================================================================
-// Sin Operator (polymorphic)
+// Sin Operator (polymorphic - NOT migrated)
 // =============================================================================
 
 pub struct SinOp {
@@ -83,7 +67,7 @@ impl Operator for SinOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let angle = get_value(&self.inputs[0], get_input);
+        let angle = self.inputs[0].resolve(get_input);
         let result = angle.sin().unwrap_or(Value::Float(0.0));
         self.outputs[0].set(result);
     }
@@ -114,7 +98,7 @@ impl OperatorMeta for SinOp {
 }
 
 // =============================================================================
-// Cos Operator (polymorphic)
+// Cos Operator (polymorphic - NOT migrated)
 // =============================================================================
 
 pub struct CosOp {
@@ -166,7 +150,7 @@ impl Operator for CosOp {
     }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let angle = get_value(&self.inputs[0], get_input);
+        let angle = self.inputs[0].resolve(get_input);
         let result = angle.cos().unwrap_or(Value::Float(1.0));
         self.outputs[0].set(result);
     }
@@ -197,344 +181,105 @@ impl OperatorMeta for CosOp {
 }
 
 // =============================================================================
-// Tan Operator (float-only)
+// Tan Operator (using derive macro)
 // =============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Tan", category = "Math", description = "Tangent of angle (radians)")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct TanOp {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 1],
+    #[input(label = "Angle", default = 0.0)]
+    angle: f32,
+    #[output(label = "Tan")]
+    tan: f32,
 }
 
 impl TanOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::float("Angle", 0.0)],
-            outputs: [OutputPort::float("Result")],
-        }
-    }
-}
-
-impl Default for TanOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for TanOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-    fn name(&self) -> &'static str {
-        "Tan"
-    }
-    fn inputs(&self) -> &[InputPort] {
-        &self.inputs
-    }
-    fn inputs_mut(&mut self) -> &mut [InputPort] {
-        &mut self.inputs
-    }
-    fn outputs(&self) -> &[OutputPort] {
-        &self.outputs
-    }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] {
-        &mut self.outputs
-    }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let angle = get_float(&self.inputs[0], get_input);
-        self.outputs[0].set_float(angle.tan());
-    }
-}
-
-impl OperatorMeta for TanOp {
-    fn category(&self) -> &'static str {
-        "Math"
-    }
-    fn category_color(&self) -> [f32; 4] {
-        category_colors::MATH
-    }
-    fn description(&self) -> &'static str {
-        "Tangent of angle (radians)"
-    }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Angle").with_unit("rad")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Tan").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let angle = self.get_angle(get_input);
+        self.set_tan(angle.tan());
     }
 }
 
 // =============================================================================
-// Atan2 Operator (float-only, inherently scalar)
+// Atan2 Operator (using derive macro)
 // =============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Atan2", category = "Math", description = "Two-argument arctangent")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct Atan2Op {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "Y", default = 0.0)]
+    y: f32,
+    #[input(label = "X", default = 1.0)]
+    x: f32,
+    #[output(label = "Angle")]
+    angle: f32,
 }
 
 impl Atan2Op {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::float("Y", 0.0), InputPort::float("X", 1.0)],
-            outputs: [OutputPort::float("Angle")],
-        }
-    }
-}
-
-impl Default for Atan2Op {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for Atan2Op {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-    fn name(&self) -> &'static str {
-        "Atan2"
-    }
-    fn inputs(&self) -> &[InputPort] {
-        &self.inputs
-    }
-    fn inputs_mut(&mut self) -> &mut [InputPort] {
-        &mut self.inputs
-    }
-    fn outputs(&self) -> &[OutputPort] {
-        &self.outputs
-    }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] {
-        &mut self.outputs
-    }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let y = get_float(&self.inputs[0], get_input);
-        let x = get_float(&self.inputs[1], get_input);
-        self.outputs[0].set_float(y.atan2(x));
-    }
-}
-
-impl OperatorMeta for Atan2Op {
-    fn category(&self) -> &'static str {
-        "Math"
-    }
-    fn category_color(&self) -> [f32; 4] {
-        category_colors::MATH
-    }
-    fn description(&self) -> &'static str {
-        "Two-argument arctangent"
-    }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Y")),
-            1 => Some(PortMeta::new("X")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(
-                PortMeta::new("Angle")
-                    .with_shape(PinShape::TriangleFilled)
-                    .with_unit("rad"),
-            ),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let y = self.get_y(get_input);
+        let x = self.get_x(get_input);
+        self.set_angle(y.atan2(x));
     }
 }
 
 // =============================================================================
-// DegreesToRadians Operator (float-only)
+// DegreesToRadians Operator (using derive macro)
 // =============================================================================
 
+#[derive(Operator)]
+#[operator(name = "DegreesToRadians", category = "Math", description = "Converts degrees to radians")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct DegreesToRadiansOp {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 1],
+    #[input(label = "Degrees", default = 0.0)]
+    degrees: f32,
+    #[output(label = "Radians")]
+    radians: f32,
 }
 
 impl DegreesToRadiansOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::float("Degrees", 0.0)],
-            outputs: [OutputPort::float("Radians")],
-        }
-    }
-}
-
-impl Default for DegreesToRadiansOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for DegreesToRadiansOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-    fn name(&self) -> &'static str {
-        "DegreesToRadians"
-    }
-    fn inputs(&self) -> &[InputPort] {
-        &self.inputs
-    }
-    fn inputs_mut(&mut self) -> &mut [InputPort] {
-        &mut self.inputs
-    }
-    fn outputs(&self) -> &[OutputPort] {
-        &self.outputs
-    }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] {
-        &mut self.outputs
-    }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let degrees = get_float(&self.inputs[0], get_input);
-        self.outputs[0].set_float(degrees.to_radians());
-    }
-}
-
-impl OperatorMeta for DegreesToRadiansOp {
-    fn category(&self) -> &'static str {
-        "Math"
-    }
-    fn category_color(&self) -> [f32; 4] {
-        category_colors::MATH
-    }
-    fn description(&self) -> &'static str {
-        "Converts degrees to radians"
-    }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Degrees").with_unit("deg")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(
-                PortMeta::new("Radians")
-                    .with_shape(PinShape::TriangleFilled)
-                    .with_unit("rad"),
-            ),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let degrees = self.get_degrees(get_input);
+        self.set_radians(degrees.to_radians());
     }
 }
 
 // =============================================================================
-// RadiansToDegrees Operator (float-only)
+// RadiansToDegrees Operator (using derive macro)
 // =============================================================================
 
+#[derive(Operator)]
+#[operator(name = "RadiansToDegrees", category = "Math", description = "Converts radians to degrees")]
+#[operator(category_color = [0.35, 0.35, 0.55, 1.0])]
+#[allow(dead_code)]
 pub struct RadiansToDegreesOp {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 1],
+    #[input(label = "Radians", default = 0.0)]
+    radians: f32,
+    #[output(label = "Degrees")]
+    degrees: f32,
 }
 
 impl RadiansToDegreesOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::float("Radians", 0.0)],
-            outputs: [OutputPort::float("Degrees")],
-        }
-    }
-}
-
-impl Default for RadiansToDegreesOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for RadiansToDegreesOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-    fn name(&self) -> &'static str {
-        "RadiansToDegrees"
-    }
-    fn inputs(&self) -> &[InputPort] {
-        &self.inputs
-    }
-    fn inputs_mut(&mut self) -> &mut [InputPort] {
-        &mut self.inputs
-    }
-    fn outputs(&self) -> &[OutputPort] {
-        &self.outputs
-    }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] {
-        &mut self.outputs
-    }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let radians = get_float(&self.inputs[0], get_input);
-        self.outputs[0].set_float(radians.to_degrees());
-    }
-}
-
-impl OperatorMeta for RadiansToDegreesOp {
-    fn category(&self) -> &'static str {
-        "Math"
-    }
-    fn category_color(&self) -> [f32; 4] {
-        category_colors::MATH
-    }
-    fn description(&self) -> &'static str {
-        "Converts radians to degrees"
-    }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Radians").with_unit("rad")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(
-                PortMeta::new("Degrees")
-                    .with_shape(PinShape::TriangleFilled)
-                    .with_unit("deg"),
-            ),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let radians = self.get_radians(get_input);
+        self.set_degrees(radians.to_degrees());
     }
 }
 

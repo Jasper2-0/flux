@@ -1,239 +1,106 @@
 //! Vec4 operators
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
-use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
+use flux_core::OperatorMeta;
+use flux_macros::Operator;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
-fn get_vec3(input: &InputPort, get_input: InputResolver) -> [f32; 3] {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_vec3().unwrap_or([0.0, 0.0, 0.0]),
-        None => input.default.as_vec3().unwrap_or([0.0, 0.0, 0.0]),
-    }
-}
-
-fn get_vec4(input: &InputPort, get_input: InputResolver) -> [f32; 4] {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_vec4().unwrap_or([0.0, 0.0, 0.0, 0.0]),
-        None => input.default.as_vec4().unwrap_or([0.0, 0.0, 0.0, 0.0]),
-    }
-}
-
 // ============================================================================
-// Vec4Compose Operator
+// Vec4Compose Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Vec4Compose", category = "Vector", description = "Create Vec4 from X, Y, Z, W components")]
+#[operator(category_color = [0.20, 0.55, 0.50, 1.0])]
+#[allow(dead_code)]
 pub struct Vec4ComposeOp {
     id: Id,
     inputs: [InputPort; 4],
     outputs: [OutputPort; 1],
+    #[input(label = "X", default = 0.0)]
+    x: f32,
+    #[input(label = "Y", default = 0.0)]
+    y: f32,
+    #[input(label = "Z", default = 0.0)]
+    z: f32,
+    #[input(label = "W", default = 1.0)]
+    w: f32,
+    #[output(label = "Vector")]
+    vector: [f32; 4],
 }
 
 impl Vec4ComposeOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::float("X", 0.0),
-                InputPort::float("Y", 0.0),
-                InputPort::float("Z", 0.0),
-                InputPort::float("W", 1.0),
-            ],
-            outputs: [OutputPort::vec4("Vector")],
-        }
-    }
-}
-
-impl Default for Vec4ComposeOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for Vec4ComposeOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Vec4Compose" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let x = get_float(&self.inputs[0], get_input);
-        let y = get_float(&self.inputs[1], get_input);
-        let z = get_float(&self.inputs[2], get_input);
-        let w = get_float(&self.inputs[3], get_input);
-        self.outputs[0].set_vec4([x, y, z, w]);
-    }
-}
-
-impl OperatorMeta for Vec4ComposeOp {
-    fn category(&self) -> &'static str { "Vector" }
-    fn category_color(&self) -> [f32; 4] { category_colors::VECTORS }
-    fn description(&self) -> &'static str { "Create Vec4 from X, Y, Z, W components" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("X")),
-            1 => Some(PortMeta::new("Y")),
-            2 => Some(PortMeta::new("Z")),
-            3 => Some(PortMeta::new("W")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Vector").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let x = self.get_x(get_input);
+        let y = self.get_y(get_input);
+        let z = self.get_z(get_input);
+        let w = self.get_w(get_input);
+        self.set_vector([x, y, z, w]);
     }
 }
 
 // ============================================================================
-// Vec4Decompose Operator
+// Vec4Decompose Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Vec4Decompose", category = "Vector", description = "Split Vec4 into X, Y, Z, W components")]
+#[operator(category_color = [0.20, 0.55, 0.50, 1.0])]
+#[allow(dead_code)]
 pub struct Vec4DecomposeOp {
     id: Id,
     inputs: [InputPort; 1],
     outputs: [OutputPort; 4],
+    #[input(label = "Vector", default = [0.0, 0.0, 0.0, 1.0])]
+    vector: [f32; 4],
+    #[output(label = "X")]
+    x: f32,
+    #[output(label = "Y")]
+    y: f32,
+    #[output(label = "Z")]
+    z: f32,
+    #[output(label = "W")]
+    w: f32,
 }
 
 impl Vec4DecomposeOp {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [InputPort::vec4("Vector", [0.0, 0.0, 0.0, 1.0])],
-            outputs: [
-                OutputPort::float("X"),
-                OutputPort::float("Y"),
-                OutputPort::float("Z"),
-                OutputPort::float("W"),
-            ],
-        }
-    }
-}
-
-impl Default for Vec4DecomposeOp {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for Vec4DecomposeOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Vec4Decompose" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let v = get_vec4(&self.inputs[0], get_input);
-        self.outputs[0].set_float(v[0]);
-        self.outputs[1].set_float(v[1]);
-        self.outputs[2].set_float(v[2]);
-        self.outputs[3].set_float(v[3]);
-    }
-}
-
-impl OperatorMeta for Vec4DecomposeOp {
-    fn category(&self) -> &'static str { "Vector" }
-    fn category_color(&self) -> [f32; 4] { category_colors::VECTORS }
-    fn description(&self) -> &'static str { "Split Vec4 into X, Y, Z, W components" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Vector")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("X").with_shape(PinShape::TriangleFilled)),
-            1 => Some(PortMeta::new("Y").with_shape(PinShape::TriangleFilled)),
-            2 => Some(PortMeta::new("Z").with_shape(PinShape::TriangleFilled)),
-            3 => Some(PortMeta::new("W").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let v = self.get_vector(get_input);
+        self.set_x(v[0]);
+        self.set_y(v[1]);
+        self.set_z(v[2]);
+        self.set_w(v[3]);
     }
 }
 
 // ============================================================================
-// Vec3ToVec4 Operator
+// Vec3ToVec4 Operator (using derive macro)
 // ============================================================================
 
+#[derive(Operator)]
+#[operator(name = "Vec3ToVec4", category = "Vector", description = "Extend Vec3 to Vec4 with W component")]
+#[operator(category_color = [0.20, 0.55, 0.50, 1.0])]
+#[allow(dead_code)]
 pub struct Vec3ToVec4Op {
     id: Id,
     inputs: [InputPort; 2],
     outputs: [OutputPort; 1],
+    #[input(label = "Vector", default = [0.0, 0.0, 0.0])]
+    vector: [f32; 3],
+    #[input(label = "W", default = 1.0)]
+    w: f32,
+    #[output(label = "Result")]
+    result: [f32; 4],
 }
 
 impl Vec3ToVec4Op {
-    pub fn new() -> Self {
-        Self {
-            id: Id::new(),
-            inputs: [
-                InputPort::vec3("Vector", [0.0, 0.0, 0.0]),
-                InputPort::float("W", 1.0),
-            ],
-            outputs: [OutputPort::vec4("Result")],
-        }
-    }
-}
-
-impl Default for Vec3ToVec4Op {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Operator for Vec3ToVec4Op {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
-    fn id(&self) -> Id { self.id }
-    fn name(&self) -> &'static str { "Vec3ToVec4" }
-    fn inputs(&self) -> &[InputPort] { &self.inputs }
-    fn inputs_mut(&mut self) -> &mut [InputPort] { &mut self.inputs }
-    fn outputs(&self) -> &[OutputPort] { &self.outputs }
-    fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
-
-    fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let v = get_vec3(&self.inputs[0], get_input);
-        let w = get_float(&self.inputs[1], get_input);
-        self.outputs[0].set_vec4([v[0], v[1], v[2], w]);
-    }
-}
-
-impl OperatorMeta for Vec3ToVec4Op {
-    fn category(&self) -> &'static str { "Vector" }
-    fn category_color(&self) -> [f32; 4] { category_colors::VECTORS }
-    fn description(&self) -> &'static str { "Extend Vec3 to Vec4 with W component" }
-    fn input_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Vector")),
-            1 => Some(PortMeta::new("W")),
-            _ => None,
-        }
-    }
-    fn output_meta(&self, index: usize) -> Option<PortMeta> {
-        match index {
-            0 => Some(PortMeta::new("Result").with_shape(PinShape::TriangleFilled)),
-            _ => None,
-        }
+    fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+        let v = self.get_vector(get_input);
+        let w = self.get_w(get_input);
+        self.set_result([v[0], v[1], v[2], w]);
     }
 }
 

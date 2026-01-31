@@ -10,30 +10,6 @@ use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::Value;
 
-fn get_value(input: &InputPort, get_input: InputResolver) -> Value {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx),
-        None => input.default.clone(),
-    }
-}
-
-fn get_string(input: &InputPort, get_input: InputResolver) -> String {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx)
-            .as_string()
-            .unwrap_or_default()
-            .to_string(),
-        None => input.default.as_string().unwrap_or_default().to_string(),
-    }
-}
-
-fn get_bool(input: &InputPort, get_input: InputResolver) -> bool {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_bool().unwrap_or(false),
-        None => input.default.as_bool().unwrap_or(false),
-    }
-}
-
 // ============================================================================
 // Print Operator (Debug output)
 // ============================================================================
@@ -82,9 +58,9 @@ impl Operator for PrintOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
-        let label = get_string(&self.inputs[1], get_input);
-        let enabled = get_bool(&self.inputs[2], get_input);
+        let value = self.inputs[0].resolve(get_input);
+        let label = self.inputs[1].resolve_string(get_input);
+        let enabled = self.inputs[2].resolve_bool(get_input);
 
         if enabled {
             let message = if label.is_empty() {
@@ -160,7 +136,7 @@ impl Operator for PassthroughOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         self.outputs[0].value = value;
     }
 }
@@ -230,7 +206,7 @@ impl Operator for CommentOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        self.comment = get_string(&self.inputs[0], get_input);
+        self.comment = self.inputs[0].resolve_string(get_input);
     }
 }
 
@@ -295,8 +271,8 @@ impl Operator for BookmarkOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        self.bookmark_name = get_string(&self.inputs[0], get_input);
-        let value = get_value(&self.inputs[1], get_input);
+        self.bookmark_name = self.inputs[0].resolve_string(get_input);
+        let value = self.inputs[1].resolve(get_input);
         self.outputs[0].value = value;
     }
 }
@@ -357,7 +333,7 @@ impl Operator for TypeOfOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
+        let value = self.inputs[0].resolve(get_input);
         let type_name = match value {
             Value::Float(_) => "Float",
             Value::Int(_) => "Int",

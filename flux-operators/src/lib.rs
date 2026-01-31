@@ -197,4 +197,115 @@ mod derive_macro_tests {
         // Check result
         assert_eq!(op.outputs()[0].value.as_float(), Some(12.0));
     }
+
+    // ========================================================================
+    // Test with Vec3 type to verify extended type support
+    // ========================================================================
+
+    /// Test operator using Vec3 types - demonstrates extended type support.
+    #[derive(Operator)]
+    #[operator(name = "TestVec3Scale", category = "Vector", description = "Scales a Vec3")]
+    #[operator(category_color = [0.4, 0.6, 0.4, 1.0])]
+    #[allow(dead_code)]
+    struct TestVec3ScaleOp {
+        _id: Id,
+        _inputs: Vec<InputPort>,
+        _outputs: Vec<OutputPort>,
+        #[input(label = "Vector", default = [0.0, 0.0, 0.0])]
+        vector: [f32; 3],
+        #[input(label = "Scale", default = 1.0)]
+        scale: f32,
+        #[output(label = "Scaled")]
+        scaled: [f32; 3],
+    }
+
+    impl TestVec3ScaleOp {
+        fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+            let v = self.get_vector(get_input);
+            let s = self.get_scale(get_input);
+            self.set_scaled([v[0] * s, v[1] * s, v[2] * s]);
+        }
+    }
+
+    #[test]
+    fn test_derive_vec3_types() {
+        let mut op = TestVec3ScaleOp::new();
+
+        // Set input defaults
+        op.inputs_mut()[0].default = Value::Vec3([1.0, 2.0, 3.0]);
+        op.inputs_mut()[1].default = Value::Float(2.0);
+
+        // Compute
+        let ctx = EvalContext::new();
+        let get_input = |_: Id, _: usize| Value::Float(0.0);
+        op.compute(&ctx, &get_input);
+
+        // Check result
+        let result = op.outputs()[0].value.as_vec3().unwrap();
+        assert_eq!(result, [2.0, 4.0, 6.0]);
+    }
+
+    // ========================================================================
+    // Test with array-based storage pattern (preferred for fixed port counts)
+    // ========================================================================
+
+    /// Test operator using array-based storage (preferred pattern).
+    /// This uses `inputs: [InputPort; 2]` instead of `_inputs: Vec<InputPort>`.
+    #[derive(Operator)]
+    #[operator(name = "TestArrayAdd", category = "Math", description = "Adds two numbers (array storage)")]
+    #[operator(category_color = [0.35, 0.55, 0.35, 1.0])]
+    #[allow(dead_code)]
+    struct TestArrayAddOp {
+        id: Id,
+        inputs: [InputPort; 2],
+        outputs: [OutputPort; 1],
+        #[input(label = "A", default = 0.0)]
+        a: f32,
+        #[input(label = "B", default = 0.0)]
+        b: f32,
+        #[output(label = "Sum")]
+        sum: f32,
+    }
+
+    impl TestArrayAddOp {
+        fn compute_impl(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
+            let a = self.get_a(get_input);
+            let b = self.get_b(get_input);
+            self.set_sum(a + b);
+        }
+    }
+
+    #[test]
+    fn test_derive_array_storage() {
+        let op = TestArrayAddOp::new();
+
+        // Test Operator trait methods
+        assert_eq!(op.name(), "TestArrayAdd");
+        assert_eq!(op.inputs().len(), 2);
+        assert_eq!(op.outputs().len(), 1);
+
+        // Check input names
+        assert_eq!(op.inputs()[0].name, "A");
+        assert_eq!(op.inputs()[1].name, "B");
+
+        // Check output
+        assert_eq!(op.outputs()[0].name, "Sum");
+    }
+
+    #[test]
+    fn test_derive_array_storage_compute() {
+        let mut op = TestArrayAddOp::new();
+
+        // Set input defaults
+        op.inputs_mut()[0].default = Value::Float(10.0);
+        op.inputs_mut()[1].default = Value::Float(7.0);
+
+        // Compute
+        let ctx = EvalContext::new();
+        let get_input = |_: Id, _: usize| Value::Float(0.0);
+        op.compute(&ctx, &get_input);
+
+        // Check result: 10 + 7 = 17
+        assert_eq!(op.outputs()[0].value.as_float(), Some(17.0));
+    }
 }

@@ -19,20 +19,6 @@ use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::Value;
 
-fn get_float(input: &InputPort, get_input: InputResolver) -> f32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_float().unwrap_or(0.0),
-        None => input.default.as_float().unwrap_or(0.0),
-    }
-}
-
-fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
-        None => input.default.as_int().unwrap_or(0),
-    }
-}
-
 /// Get float list as a slice reference (for FloatList-specific operators)
 /// Returns a Vec for owned operations - callers iterate over the slice
 fn get_list(input: &InputPort, get_input: InputResolver) -> Vec<f32> {
@@ -439,7 +425,7 @@ impl Operator for ListGetOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let list_value = get_any_list(&self.inputs[0], get_input);
-        let index = get_int(&self.inputs[1], get_input);
+        let index = self.inputs[1].resolve_int(get_input);
 
         // Use polymorphic list_get
         let value = list_get(&list_value, index);
@@ -764,8 +750,8 @@ impl Operator for ListMapOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let list = get_list(&self.inputs[0], get_input);
-        let scale = get_float(&self.inputs[1], get_input);
-        let offset = get_float(&self.inputs[2], get_input);
+        let scale = self.inputs[1].resolve_float(get_input);
+        let offset = self.inputs[2].resolve_float(get_input);
 
         let result: Vec<f32> = list.iter().map(|v| v * scale + offset).collect();
         self.outputs[0].value = Value::float_list(result);
@@ -834,8 +820,8 @@ impl Operator for ListFilterOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let list = get_list(&self.inputs[0], get_input);
-        let threshold = get_float(&self.inputs[1], get_input);
-        let mode = get_int(&self.inputs[2], get_input);
+        let threshold = self.inputs[1].resolve_float(get_input);
+        let mode = self.inputs[2].resolve_int(get_input);
 
         let result: Vec<f32> = list.into_iter().filter(|&v| {
             match mode {
@@ -985,8 +971,8 @@ impl Operator for ListSliceOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         let list_value = get_any_list(&self.inputs[0], get_input);
-        let start = get_int(&self.inputs[1], get_input);
-        let end = get_int(&self.inputs[2], get_input);
+        let start = self.inputs[1].resolve_int(get_input);
+        let end = self.inputs[2].resolve_int(get_input);
 
         let result = list_slice(&list_value, start, end);
 

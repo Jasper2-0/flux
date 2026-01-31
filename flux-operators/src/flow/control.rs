@@ -10,27 +10,6 @@ use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::Value;
 
-fn get_bool(input: &InputPort, get_input: InputResolver) -> bool {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_bool().unwrap_or(false),
-        None => input.default.as_bool().unwrap_or(false),
-    }
-}
-
-fn get_int(input: &InputPort, get_input: InputResolver) -> i32 {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx).as_int().unwrap_or(0),
-        None => input.default.as_int().unwrap_or(0),
-    }
-}
-
-fn get_value(input: &InputPort, get_input: InputResolver) -> Value {
-    match input.connection {
-        Some((node_id, output_idx)) => get_input(node_id, output_idx),
-        None => input.default.clone(),
-    }
-}
-
 // ============================================================================
 // Switch Operator
 // ============================================================================
@@ -72,11 +51,11 @@ impl Operator for SwitchOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let condition = get_bool(&self.inputs[0], get_input);
+        let condition = self.inputs[0].resolve_bool(get_input);
         let value = if condition {
-            get_value(&self.inputs[1], get_input)
+            self.inputs[1].resolve(get_input)
         } else {
-            get_value(&self.inputs[2], get_input)
+            self.inputs[2].resolve(get_input)
         };
         self.outputs[0].value = value;
     }
@@ -142,7 +121,7 @@ impl Operator for SelectOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let index = get_int(&self.inputs[0], get_input) as usize;
+        let index = self.inputs[0].resolve_int(get_input) as usize;
         let values_input = &self.inputs[1];
 
         let value = if index < values_input.connections.len() {
@@ -215,8 +194,8 @@ impl Operator for GateOp {
     fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
-        let value = get_value(&self.inputs[0], get_input);
-        let open = get_bool(&self.inputs[1], get_input);
+        let value = self.inputs[0].resolve(get_input);
+        let open = self.inputs[1].resolve_bool(get_input);
 
         if open {
             self.outputs[0].value = value;
@@ -321,7 +300,7 @@ impl Operator for LoopOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         // Update loop count from input
-        self.loop_count = get_int(&self.inputs[0], get_input);
+        self.loop_count = self.inputs[0].resolve_int(get_input);
         // Output the current index
         self.outputs[0].value = Value::Int(self.current_index);
     }
@@ -449,7 +428,7 @@ impl Operator for ForEachOp {
 
     fn compute(&mut self, _ctx: &EvalContext, get_input: InputResolver) {
         // Get list and update state
-        let list = get_value(&self.inputs[0], get_input);
+        let list = self.inputs[0].resolve(get_input);
         if let Some(float_list) = list.as_float_list() {
             self.list_len = float_list.len();
             if self.current_index < self.list_len {
