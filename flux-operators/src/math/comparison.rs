@@ -3,8 +3,6 @@
 //! All comparison operators are polymorphic and work with:
 //! Float, Int, Vec2, Vec3, Vec4, Color
 
-use std::any::Any;
-
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -43,12 +41,6 @@ impl Default for MinOp {
 }
 
 impl Operator for MinOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -132,12 +124,6 @@ impl Default for MaxOp {
 }
 
 impl Operator for MaxOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -222,12 +208,6 @@ impl Default for ClampOp {
 }
 
 impl Operator for ClampOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -312,12 +292,6 @@ impl Default for SignOp {
 }
 
 impl Operator for SignOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -398,12 +372,6 @@ impl Default for StepOp {
 }
 
 impl Operator for StepOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }

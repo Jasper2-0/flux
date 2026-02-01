@@ -7,13 +7,16 @@
 //! - [`TriggerOutput`] - Ports that emit trigger signals (push-based)
 //! - [`TypeConstraint`] - Defines what types an input port accepts
 //! - [`OutputTypeRule`] - Defines how an output port's type is determined
+//! - [`InputIndex`] / [`OutputIndex`] - Type-safe port index wrappers
 
 mod constraint;
+mod index;
 mod input;
 mod output;
 mod trigger;
 
 pub use constraint::{OutputTypeRule, TypeConstraint};
+pub use index::{InputIndex, OutputIndex, TriggerInputIndex, TriggerOutputIndex};
 pub use input::InputPort;
 pub use output::OutputPort;
 pub use trigger::{TriggerInput, TriggerOutput};

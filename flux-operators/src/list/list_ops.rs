@@ -8,8 +8,6 @@
 //! **Type-specific operators** (require specific element types):
 //! - FloatList (creation), ListSum, ListAverage, ListMin, ListMax, ListMap, ListFilter
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -289,8 +287,6 @@ impl Default for FloatListOp {
 }
 
 impl Operator for FloatListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "FloatList" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -350,8 +346,6 @@ impl Default for ListLengthOp {
 }
 
 impl Operator for ListLengthOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListLength" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -414,8 +408,6 @@ impl Default for ListGetOp {
 }
 
 impl Operator for ListGetOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListGet" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -485,8 +477,6 @@ impl Default for ListSumOp {
 }
 
 impl Operator for ListSumOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListSum" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -546,8 +536,6 @@ impl Default for ListAverageOp {
 }
 
 impl Operator for ListAverageOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListAverage" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -611,8 +599,6 @@ impl Default for ListMinOp {
 }
 
 impl Operator for ListMinOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListMin" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -673,8 +659,6 @@ impl Default for ListMaxOp {
 }
 
 impl Operator for ListMaxOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListMax" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -739,8 +723,6 @@ impl Default for ListMapOp {
 }
 
 impl Operator for ListMapOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListMap" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -809,8 +791,6 @@ impl Default for ListFilterOp {
 }
 
 impl Operator for ListFilterOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListFilter" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -887,8 +867,6 @@ impl Default for ListConcatOp {
 }
 
 impl Operator for ListConcatOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListConcat" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -960,8 +938,6 @@ impl Default for ListSliceOp {
 }
 
 impl Operator for ListSliceOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListSlice" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1031,8 +1007,6 @@ impl Default for ListReverseOp {
 }
 
 impl Operator for ListReverseOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListReverse" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1097,8 +1071,6 @@ impl Default for ListFirstOp {
 }
 
 impl Operator for ListFirstOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListFirst" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1164,8 +1136,6 @@ impl Default for ListLastOp {
 }
 
 impl Operator for ListLastOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListLast" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1235,8 +1205,6 @@ impl Default for ListAddOp {
 }
 
 impl Operator for ListAddOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListAdd" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1298,8 +1266,6 @@ impl Default for ListSubOp {
 }
 
 impl Operator for ListSubOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListSub" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1361,8 +1327,6 @@ impl Default for ListMulOp {
 }
 
 impl Operator for ListMulOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListMul" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1424,8 +1388,6 @@ impl Default for ListDivOp {
 }
 
 impl Operator for ListDivOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListDiv" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -1490,8 +1452,6 @@ impl Default for ListPowOp {
 }
 
 impl Operator for ListPowOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ListPow" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

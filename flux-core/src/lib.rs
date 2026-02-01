@@ -67,8 +67,15 @@ pub use id::Id;
 pub use operator::{InputResolver, Operator};
 pub use operator_meta::{
     category_colors, EffectivePortMeta, OperatorMeta, PinShape, PortMeta, PortOverride,
+    Registerable,
 };
 pub use operator_settings::{OperatorSettings, ParamDef, ParamValue};
 pub use operator_visuals::{OperatorVisuals, VisualData};
-pub use port::{InputPort, OutputPort, TriggerInput, TriggerOutput};
-pub use value::{Color, Gradient, GradientStop, Matrix3, Matrix4, TypeCategory, Value, ValueType};
+pub use port::{
+    InputIndex, InputPort, OutputIndex, OutputPort, TriggerInput, TriggerInputIndex,
+    TriggerOutput, TriggerOutputIndex,
+};
+pub use value::{
+    Color, Gradient, GradientStop, Matrix3, Matrix4, TypeCategory, Value, ValueType,
+    ValueTypeError,
+};

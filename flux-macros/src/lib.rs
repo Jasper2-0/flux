@@ -91,7 +91,70 @@
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, Attribute, Data, DeriveInput, Expr, Fields, Type};
+use syn::{parse_macro_input, Attribute, Data, DeriveInput, Expr, Fields, Path, Type, TypeArray, TypePath};
+
+// ============================================================================
+// Type detection helpers
+// ============================================================================
+
+/// Check if a type path ends with a specific identifier.
+///
+/// This handles both unqualified (`InputPort`) and qualified (`flux_core::InputPort`)
+/// paths by checking only the last segment.
+fn type_path_ends_with(path: &Path, name: &str) -> bool {
+    path.segments.last().map_or(false, |seg| seg.ident == name)
+}
+
+/// Check if a Type is an array of a specific type (e.g., `[InputPort; N]`).
+///
+/// Returns true if the type is an array with the element type matching the given name.
+fn is_array_of(ty: &Type, element_name: &str) -> bool {
+    match ty {
+        Type::Array(TypeArray { elem, .. }) => {
+            match elem.as_ref() {
+                Type::Path(TypePath { path, .. }) => type_path_ends_with(path, element_name),
+                _ => false,
+            }
+        }
+        _ => false,
+    }
+}
+
+/// Check if a Type is a Vec of a specific type (e.g., `Vec<InputPort>`).
+///
+/// Returns true if the type is `Vec<T>` where T matches the given name.
+fn is_vec_of(ty: &Type, element_name: &str) -> bool {
+    match ty {
+        Type::Path(TypePath { path, .. }) => {
+            // Check if it's Vec<...>
+            if let Some(seg) = path.segments.last() {
+                if seg.ident == "Vec" {
+                    // Get the generic argument
+                    if let syn::PathArguments::AngleBracketed(args) = &seg.arguments {
+                        if let Some(syn::GenericArgument::Type(inner_ty)) = args.args.first() {
+                            return match inner_ty {
+                                Type::Path(TypePath { path: inner_path, .. }) => {
+                                    type_path_ends_with(inner_path, element_name)
+                                }
+                                _ => false,
+                            };
+                        }
+                    }
+                }
+            }
+            false
+        }
+        _ => false,
+    }
+}
+
+/// Check if a Type is the `Id` type.
+fn is_id_type(ty: &Type) -> bool {
+    match ty {
+        Type::Path(TypePath { path, .. }) => type_path_ends_with(path, "Id"),
+        _ => false,
+    }
+}
 
 /// Detected storage pattern for inputs/outputs
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -149,27 +212,28 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
     };
 
     // Detect the storage pattern (array vs Vec) by examining field types
+    // using proper AST matching instead of string comparison
     let mut storage_info = PortStorageInfo::default();
     for field in fields.iter() {
         let field_name = field.ident.as_ref().unwrap().to_string();
-        let type_str = quote!(#field.ty).to_string();
+        let field_type = &field.ty;
 
         // Check for array pattern: `inputs: [InputPort; N]`
-        if field_name == "inputs" && type_str.contains("[InputPort") {
+        if field_name == "inputs" && is_array_of(field_type, "InputPort") {
             storage_info.pattern = StoragePattern::Array;
             storage_info.inputs_field = "inputs".to_string();
-        } else if field_name == "outputs" && type_str.contains("[OutputPort") {
+        } else if field_name == "outputs" && is_array_of(field_type, "OutputPort") {
             storage_info.outputs_field = "outputs".to_string();
-        } else if field_name == "id" && type_str.contains("Id") {
+        } else if field_name == "id" && is_id_type(field_type) {
             storage_info.id_field = "id".to_string();
         }
         // Check for Vec pattern: `_inputs: Vec<InputPort>`
-        else if field_name == "_inputs" && type_str.contains("Vec") {
+        else if field_name == "_inputs" && is_vec_of(field_type, "InputPort") {
             storage_info.pattern = StoragePattern::Vec;
             storage_info.inputs_field = "_inputs".to_string();
-        } else if field_name == "_outputs" && type_str.contains("Vec") {
+        } else if field_name == "_outputs" && is_vec_of(field_type, "OutputPort") {
             storage_info.outputs_field = "_outputs".to_string();
-        } else if field_name == "_id" {
+        } else if field_name == "_id" && is_id_type(field_type) {
             storage_info.id_field = "_id".to_string();
         }
     }
@@ -444,13 +508,7 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
         }
 
         impl Operator for #name {
-            fn as_any(&self) -> &dyn std::any::Any {
-                self
-            }
-
-            fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-                self
-            }
+            // Note: as_any() and as_any_mut() are provided by downcast-rs via impl_downcast!
 
             fn id(&self) -> Id {
                 self.#id_field_ident
@@ -509,6 +567,12 @@ pub fn derive_operator(input: TokenStream) -> TokenStream {
                     _ => None,
                 }
             }
+        }
+
+        impl flux_core::Registerable for #name {
+            const NAME: &'static str = #operator_name;
+            const CATEGORY: &'static str = #category;
+            const DESCRIPTION: &'static str = #description;
         }
     };
 

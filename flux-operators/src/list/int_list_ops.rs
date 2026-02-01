@@ -6,8 +6,6 @@
 //! - IntListMin/IntListMax: Integer extrema
 //! - IntListRange: Generate range [start..end]
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -81,8 +79,6 @@ impl Default for IntListOp {
 }
 
 impl Operator for IntListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "IntList" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -141,8 +137,6 @@ impl Default for IntListSumOp {
 }
 
 impl Operator for IntListSumOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "IntListSum" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -202,8 +196,6 @@ impl Default for IntListMinOp {
 }
 
 impl Operator for IntListMinOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "IntListMin" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -263,8 +255,6 @@ impl Default for IntListMaxOp {
 }
 
 impl Operator for IntListMaxOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "IntListMax" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -328,8 +318,6 @@ impl Default for IntListRangeOp {
 }
 
 impl Operator for IntListRangeOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "IntListRange" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

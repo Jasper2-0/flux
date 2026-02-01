@@ -6,8 +6,6 @@
 //! - `OnComplete` trigger fires when iteration finishes
 //! - User can wire `OnElement` back to `Iterate` for auto-continuation
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -136,8 +134,6 @@ impl Default for ArrayIterator {
 }
 
 impl Operator for ArrayIterator {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ArrayIterator" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

@@ -1650,13 +1650,7 @@ mod tests {
                     self.outputs[0].value = val;
                 }
             }
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
+        }
     }
 
     #[test]
@@ -1889,13 +1883,7 @@ mod tests {
                 // Use set() to mark output as clean after computation
                 self.outputs[0].set(Value::Float(f * 2.0));
             }
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
+        }
     }
 
     #[test]
@@ -2047,13 +2035,7 @@ mod tests {
         }
         fn can_operate_in_place(&self) -> bool {
             true
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
+        }
     }
 
     #[test]
@@ -2135,13 +2117,7 @@ mod tests {
         }
         fn compute(&mut self, _ctx: &EvalContext, _get_input: &dyn Fn(Id, usize) -> Value) {
             // Value is already set in constructor
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
+        }
     }
 
     /// Test operator that accepts a Vec3 input
@@ -2187,13 +2163,7 @@ mod tests {
                 self.inputs[0].default.clone()
             };
             self.outputs[0].set(input);
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
+        }
     }
 
     #[test]
@@ -2309,8 +2279,6 @@ mod tests {
             fn outputs(&self) -> &[OutputPort] { &self.outputs }
             fn outputs_mut(&mut self) -> &mut [OutputPort] { &mut self.outputs }
             fn compute(&mut self, _ctx: &EvalContext, _get_input: &dyn Fn(Id, usize) -> Value) {}
-            fn as_any(&self) -> &dyn std::any::Any { self }
-            fn as_any_mut(&mut self) -> &mut dyn std::any::Any { self }
         }
 
         let string_source = graph.add(StringSourceOp::new());
@@ -2424,13 +2392,7 @@ mod tests {
             } else {
                 vec![]
             }
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
+        }
     }
 
     /// Source operator that has trigger outputs but no inputs
@@ -2477,13 +2439,7 @@ mod tests {
         }
         fn compute(&mut self, _ctx: &EvalContext, _get_input: &dyn Fn(Id, usize) -> Value) {
             self.outputs[0].set(Value::Float(1.0));
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
+        }
     }
 
     #[test]

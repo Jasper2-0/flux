@@ -6,7 +6,6 @@
 //!
 //! This design allows the constant value to be edited via pin value drag on the input pin.
 
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -43,14 +42,7 @@ impl ConstantOp {
     }
 }
 
-impl Operator for ConstantOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
+impl Operator for ConstantOp {
 
     fn id(&self) -> Id {
         self.id

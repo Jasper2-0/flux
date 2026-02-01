@@ -1,14 +1,13 @@
 //! Color operators: RgbaColor, HsvToRgb, RgbToHsv, BlendColors, SampleGradient,
 //!                  AdjustBrightness, AdjustSaturation, ColorToVec4
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::OperatorMeta;
 use flux_macros::Operator;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
+use crate::register_operators;
 use flux_core::port::{InputPort, OutputPort};
 use flux_core::value::Color;
 
@@ -175,8 +174,6 @@ impl Default for SampleGradientOp {
 }
 
 impl Operator for SampleGradientOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "SampleGradient" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -293,46 +290,19 @@ impl ColorToVec4Op {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "RgbaColor",
-            category: "Color",
-            description: "Create color from RGBA components",
-        },
-        || capture_meta(RgbaColorOp::new()),
+    // Register operators using #[derive(Operator)] in bulk
+    register_operators!(
+        registry,
+        RgbaColorOp,
+        HsvToRgbOp,
+        RgbToHsvOp,
+        BlendColorsOp,
+        AdjustBrightnessOp,
+        AdjustSaturationOp,
+        ColorToVec4Op,
     );
 
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "HsvToRgb",
-            category: "Color",
-            description: "Convert HSV to RGB color",
-        },
-        || capture_meta(HsvToRgbOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "RgbToHsv",
-            category: "Color",
-            description: "Convert RGB color to HSV",
-        },
-        || capture_meta(RgbToHsvOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "BlendColors",
-            category: "Color",
-            description: "Blend two colors",
-        },
-        || capture_meta(BlendColorsOp::new()),
-    );
-
+    // SampleGradientOp uses Gradient type (not supported by derive macro)
     registry.register(
         RegistryEntry {
             type_id: Id::new(),
@@ -341,36 +311,6 @@ pub fn register(registry: &OperatorRegistry) {
             description: "Sample color from gradient at position",
         },
         || capture_meta(SampleGradientOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "AdjustBrightness",
-            category: "Color",
-            description: "Adjust color brightness",
-        },
-        || capture_meta(AdjustBrightnessOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "AdjustSaturation",
-            category: "Color",
-            description: "Adjust color saturation",
-        },
-        || capture_meta(AdjustSaturationOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "ColorToVec4",
-            category: "Color",
-            description: "Convert color to Vec4",
-        },
-        || capture_meta(ColorToVec4Op::new()),
     );
 }
 

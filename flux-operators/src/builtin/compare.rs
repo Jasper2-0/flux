@@ -1,6 +1,5 @@
 //! Compare operator - compares two values
 
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -81,14 +80,7 @@ impl CompareOp {
     }
 }
 
-impl Operator for CompareOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
+impl Operator for CompareOp {
 
     fn id(&self) -> Id {
         self.id

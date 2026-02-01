@@ -5,8 +5,6 @@
 //! - Vec3ListFlatten / FloatListToVec3List
 //! - ColorListToVec4List / Vec4ListToColorList
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -43,8 +41,6 @@ impl Default for IntListToFloatListOp {
 }
 
 impl Operator for IntListToFloatListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "IntListToFloatList" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -111,8 +107,6 @@ impl Default for FloatListToIntListOp {
 }
 
 impl Operator for FloatListToIntListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "FloatListToIntList" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -179,8 +173,6 @@ impl Default for Vec3ListFlattenOp {
 }
 
 impl Operator for Vec3ListFlattenOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Vec3ListFlatten" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -247,8 +239,6 @@ impl Default for FloatListToVec3ListOp {
 }
 
 impl Operator for FloatListToVec3ListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "FloatListToVec3List" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -319,8 +309,6 @@ impl Default for ColorListToVec4ListOp {
 }
 
 impl Operator for ColorListToVec4ListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ColorListToVec4List" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -387,8 +375,6 @@ impl Default for Vec4ListToColorListOp {
 }
 
 impl Operator for Vec4ListToColorListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Vec4ListToColorList" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

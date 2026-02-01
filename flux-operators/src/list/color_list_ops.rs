@@ -5,8 +5,6 @@
 //! - ColorListSample: Sample color at position (0-1)
 //! - ColorListBlend: Blend all colors together
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -81,8 +79,6 @@ impl Default for ColorListOp {
 }
 
 impl Operator for ColorListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ColorList" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -144,8 +140,6 @@ impl Default for ColorListSampleOp {
 }
 
 impl Operator for ColorListSampleOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ColorListSample" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -236,8 +230,6 @@ impl Default for ColorListBlendOp {
 }
 
 impl Operator for ColorListBlendOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ColorListBlend" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

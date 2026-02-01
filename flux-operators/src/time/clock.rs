@@ -1,6 +1,5 @@
 //! Time/clock operators: Time, LocalTime, DeltaTime, Frame
 
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -34,8 +33,6 @@ impl Default for TimeOp {
 }
 
 impl Operator for TimeOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Time" }
     fn inputs(&self) -> &[InputPort] { &[] }
@@ -98,8 +95,6 @@ impl Default for LocalTimeOp {
 }
 
 impl Operator for LocalTimeOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "LocalTime" }
     fn inputs(&self) -> &[InputPort] { &[] }
@@ -162,8 +157,6 @@ impl Default for DeltaTimeOp {
 }
 
 impl Operator for DeltaTimeOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "DeltaTime" }
     fn inputs(&self) -> &[InputPort] { &[] }
@@ -226,8 +219,6 @@ impl Default for FrameOp {
 }
 
 impl Operator for FrameOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Frame" }
     fn inputs(&self) -> &[InputPort] { &[] }

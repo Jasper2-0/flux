@@ -426,12 +426,6 @@ mod tests {
         fn compute(&mut self, _ctx: &EvalContext, _get_input: &dyn Fn(Id, usize) -> Value) {
             self.outputs[0].set(Value::Float(self.value));
         }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
-        }
     }
 
     /// Add operator for testing
@@ -490,12 +484,6 @@ mod tests {
                 _ => 0.0,
             };
             self.outputs[0].set(Value::Float(sum));
-        }
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
-        fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-            self
         }
     }
 

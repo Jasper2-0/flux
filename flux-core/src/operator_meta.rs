@@ -319,6 +319,48 @@ impl Default for EffectivePortMeta {
     }
 }
 
+// ============================================================================
+// Registerable trait for self-registering operators
+// ============================================================================
+
+use crate::Operator;
+
+/// Trait for operators that can self-register with the registry.
+///
+/// Implemented automatically by `#[derive(Operator)]` using the values from
+/// the `#[operator(...)]` attribute. This allows bulk registration without
+/// repeating metadata.
+///
+/// # Example
+///
+/// ```ignore
+/// // The derive macro generates this impl automatically:
+/// impl Registerable for MyOp {
+///     const NAME: &'static str = "MyOp";
+///     const CATEGORY: &'static str = "Math";
+///     const DESCRIPTION: &'static str = "Does math";
+/// }
+///
+/// // Then registration becomes:
+/// registry.register_type::<MyOp>();
+/// // Instead of:
+/// registry.register(
+///     RegistryEntry { type_id: Id::new(), name: "MyOp", category: "Math", ... },
+///     || capture_meta(MyOp::new()),
+/// );
+/// ```
+///
+/// For operators that don't use `#[derive(Operator)]`, you can implement
+/// this trait manually or continue using explicit registration.
+pub trait Registerable: Operator + OperatorMeta + Default + 'static {
+    /// The operator's display name (used in menus, serialization).
+    const NAME: &'static str;
+    /// The category for grouping (e.g., "Math", "Color", "Logic").
+    const CATEGORY: &'static str;
+    /// A short description for tooltips.
+    const DESCRIPTION: &'static str;
+}
+
 /// Standard category colors for common operator types.
 ///
 /// These are optional conventions - operators can use any color.

@@ -3,8 +3,7 @@
 //! Sin and Cos are polymorphic and work with:
 //! Float, Int, Vec2, Vec3, Vec4
 
-use std::any::Any;
-
+use crate::register_operators;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -41,12 +40,6 @@ impl Default for SinOp {
 }
 
 impl Operator for SinOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -124,12 +117,6 @@ impl Default for CosOp {
 }
 
 impl Operator for CosOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -288,6 +275,16 @@ impl RadiansToDegreesOp {
 // =============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
+    // Operators using #[derive(Operator)]
+    register_operators!(
+        registry,
+        TanOp,
+        Atan2Op,
+        DegreesToRadiansOp,
+        RadiansToDegreesOp,
+    );
+
+    // Polymorphic operators (manual impl)
     registry.register(
         RegistryEntry {
             type_id: Id::new(),
@@ -306,46 +303,6 @@ pub fn register(registry: &OperatorRegistry) {
             description: "Cosine of angle (radians, per-component)",
         },
         || capture_meta(CosOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Tan",
-            category: "Math",
-            description: "Tangent of angle (radians)",
-        },
-        || capture_meta(TanOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Atan2",
-            category: "Math",
-            description: "Two-argument arctangent",
-        },
-        || capture_meta(Atan2Op::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "DegreesToRadians",
-            category: "Math",
-            description: "Converts degrees to radians",
-        },
-        || capture_meta(DegreesToRadiansOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "RadiansToDegrees",
-            category: "Math",
-            description: "Converts radians to degrees",
-        },
-        || capture_meta(RadiansToDegreesOp::new()),
     );
 }
 

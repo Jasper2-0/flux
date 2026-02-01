@@ -17,7 +17,6 @@
 //! graph.connect(float_source, 0, vec3_target, 0)?;
 //! ```
 
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -86,13 +85,7 @@ impl ConversionOp {
 }
 
 impl Operator for ConversionOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 
     fn id(&self) -> Id {
         self.id

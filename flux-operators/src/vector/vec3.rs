@@ -5,7 +5,8 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::OperatorMeta;
 use flux_macros::Operator;
-use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
+use crate::register_operators;
+use crate::registry::OperatorRegistry;
 use flux_core::port::{InputPort, OutputPort};
 
 // ============================================================================
@@ -274,94 +275,17 @@ impl Vec3DistanceOp {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Decompose",
-            category: "Vector",
-            description: "Split Vec3 into X, Y, Z components",
-        },
-        || capture_meta(Vec3DecomposeOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Add",
-            category: "Vector",
-            description: "Add two Vec3 vectors",
-        },
-        || capture_meta(Vec3AddOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Subtract",
-            category: "Vector",
-            description: "Subtract Vec3 B from A",
-        },
-        || capture_meta(Vec3SubtractOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Scale",
-            category: "Vector",
-            description: "Scale Vec3 by scalar",
-        },
-        || capture_meta(Vec3ScaleOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Normalize",
-            category: "Vector",
-            description: "Normalize Vec3 to unit length",
-        },
-        || capture_meta(Vec3NormalizeOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Dot",
-            category: "Vector",
-            description: "Dot product of two Vec3",
-        },
-        || capture_meta(Vec3DotOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Cross",
-            category: "Vector",
-            description: "Cross product of two Vec3",
-        },
-        || capture_meta(Vec3CrossOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Length",
-            category: "Vector",
-            description: "Get length of Vec3",
-        },
-        || capture_meta(Vec3LengthOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3Distance",
-            category: "Vector",
-            description: "Distance between two Vec3 points",
-        },
-        || capture_meta(Vec3DistanceOp::new()),
+    register_operators!(
+        registry,
+        Vec3DecomposeOp,
+        Vec3AddOp,
+        Vec3SubtractOp,
+        Vec3ScaleOp,
+        Vec3NormalizeOp,
+        Vec3DotOp,
+        Vec3CrossOp,
+        Vec3LengthOp,
+        Vec3DistanceOp,
     );
 }
 

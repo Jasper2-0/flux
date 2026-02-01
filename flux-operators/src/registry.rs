@@ -4,6 +4,37 @@ use std::sync::{Arc, RwLock};
 use flux_core::id::Id;
 use flux_core::operator::Operator;
 use flux_core::operator_meta::PortMeta;
+use flux_core::Registerable;
+
+/// Macro to register multiple operators at once using their `Registerable` impl.
+///
+/// This reduces registration boilerplate from verbose `register()` calls to a
+/// simple type list.
+///
+/// # Example
+///
+/// ```ignore
+/// pub fn register(registry: &OperatorRegistry) {
+///     register_operators!(registry,
+///         RgbaColorOp,
+///         HsvToRgbOp,
+///         RgbToHsvOp,
+///         BlendColorsOp,
+///     );
+///
+///     // Operators without #[derive(Operator)] still need explicit registration
+///     registry.register(
+///         RegistryEntry { ... },
+///         || capture_meta(SampleGradientOp::new()),
+///     );
+/// }
+/// ```
+#[macro_export]
+macro_rules! register_operators {
+    ($registry:expr, $($op:ty),* $(,)?) => {
+        $( $registry.register_type::<$op>(); )*
+    };
+}
 
 /// Result of creating an operator: the operator and its input port metadata.
 ///
@@ -309,6 +340,36 @@ impl OperatorRegistry {
         };
         // Wrap in metadata-capturing factory with empty metadata
         self.register(meta, move || (factory(), Vec::new()));
+    }
+
+    /// Register an operator using its `Registerable` trait implementation.
+    ///
+    /// This is the simplest way to register operators that use `#[derive(Operator)]`.
+    /// The derive macro generates a `Registerable` impl with the metadata from
+    /// the `#[operator(...)]` attribute.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// // Instead of:
+    /// registry.register(
+    ///     RegistryEntry { type_id: Id::new(), name: "Add", category: "Math", ... },
+    ///     || capture_meta(AddOp::new()),
+    /// );
+    ///
+    /// // Just use:
+    /// registry.register_type::<AddOp>();
+    /// ```
+    pub fn register_type<T: Registerable>(&self) {
+        self.register(
+            RegistryEntry {
+                type_id: Id::new(),
+                name: T::NAME,
+                category: T::CATEGORY,
+                description: T::DESCRIPTION,
+            },
+            || capture_meta(T::default()),
+        );
     }
 
     /// Create an operator instance by type ID with default parameters.

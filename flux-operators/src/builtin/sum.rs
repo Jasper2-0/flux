@@ -1,6 +1,5 @@
 //! Sum operator - sums multiple inputs (variadic)
 
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -30,14 +29,7 @@ impl Default for SumOp {
     }
 }
 
-impl Operator for SumOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
+impl Operator for SumOp {
 
     fn id(&self) -> Id {
         self.id

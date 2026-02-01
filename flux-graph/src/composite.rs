@@ -1,4 +1,3 @@
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use crate::graph::{Graph, GraphError};
@@ -185,13 +184,7 @@ impl CompositeOp {
 }
 
 impl Operator for CompositeOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 
     fn id(&self) -> Id {
         self.id

@@ -5,7 +5,8 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::OperatorMeta;
 use flux_macros::Operator;
-use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
+use crate::register_operators;
+use crate::registry::OperatorRegistry;
 use flux_core::port::{InputPort, OutputPort};
 
 // ============================================================================
@@ -150,54 +151,13 @@ impl Vec2LengthOp {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec2Compose",
-            category: "Vector",
-            description: "Create Vec2 from X, Y components",
-        },
-        || capture_meta(Vec2ComposeOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec2Decompose",
-            category: "Vector",
-            description: "Split Vec2 into X, Y components",
-        },
-        || capture_meta(Vec2DecomposeOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec2Add",
-            category: "Vector",
-            description: "Add two Vec2 vectors",
-        },
-        || capture_meta(Vec2AddOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec2Scale",
-            category: "Vector",
-            description: "Scale Vec2 by scalar",
-        },
-        || capture_meta(Vec2ScaleOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec2Length",
-            category: "Vector",
-            description: "Get length of Vec2",
-        },
-        || capture_meta(Vec2LengthOp::new()),
+    register_operators!(
+        registry,
+        Vec2ComposeOp,
+        Vec2DecomposeOp,
+        Vec2AddOp,
+        Vec2ScaleOp,
+        Vec2LengthOp,
     );
 }
 

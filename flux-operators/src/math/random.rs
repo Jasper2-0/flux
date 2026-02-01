@@ -5,7 +5,8 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::OperatorMeta;
 use flux_macros::Operator;
-use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
+use crate::register_operators;
+use crate::registry::OperatorRegistry;
 use flux_core::port::{InputPort, OutputPort};
 
 
@@ -277,44 +278,12 @@ impl HashOp {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Random",
-            category: "Math",
-            description: "Deterministic random value in range",
-        },
-        || capture_meta(RandomOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "PerlinNoise",
-            category: "Math",
-            description: "2D Perlin noise",
-        },
-        || capture_meta(PerlinNoiseOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "PerlinNoise3D",
-            category: "Math",
-            description: "3D Perlin noise",
-        },
-        || capture_meta(PerlinNoise3DOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Hash",
-            category: "Math",
-            description: "Deterministic hash of value",
-        },
-        || capture_meta(HashOp::new()),
+    register_operators!(
+        registry,
+        RandomOp,
+        PerlinNoiseOp,
+        PerlinNoise3DOp,
+        HashOp,
     );
 }
 

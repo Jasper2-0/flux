@@ -1,7 +1,5 @@
 //! Control flow operators: Switch, Select, Gate
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -41,8 +39,6 @@ impl Default for SwitchOp {
 }
 
 impl Operator for SwitchOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Switch" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -111,8 +107,6 @@ impl Default for SelectOp {
 }
 
 impl Operator for SelectOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Select" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -184,8 +178,6 @@ impl Default for GateOp {
 }
 
 impl Operator for GateOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Gate" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -285,8 +277,6 @@ impl Default for LoopOp {
 }
 
 impl Operator for LoopOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Loop" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -413,8 +403,6 @@ impl Default for ForEachOp {
 }
 
 impl Operator for ForEachOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "ForEach" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

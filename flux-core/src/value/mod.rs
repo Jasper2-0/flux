@@ -22,6 +22,38 @@ pub use matrix::{Matrix3, Matrix4};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use std::sync::Arc;
+use thiserror::Error;
+
+// ========== Value extraction error ==========
+
+/// Error type for failed Value extractions via TryFrom/TryInto.
+///
+/// This is a lightweight error type specifically for type mismatches when
+/// extracting values. For more complex operator errors, use [`OperatorError`](crate::error::OperatorError).
+///
+/// # Example
+///
+/// ```
+/// use flux_core::value::{Value, ValueTypeError};
+///
+/// let v = Value::Float(42.0);
+///
+/// // This works
+/// let f: f32 = v.clone().try_into().unwrap();
+/// assert_eq!(f, 42.0);
+///
+/// // This fails with a clear error
+/// let result: Result<String, ValueTypeError> = v.try_into();
+/// assert!(result.is_err());
+/// ```
+#[derive(Error, Debug, Clone, PartialEq)]
+#[error("cannot extract {expected} from Value::{actual}")]
+pub struct ValueTypeError {
+    /// The type that was expected
+    pub expected: &'static str,
+    /// The type that was actually found
+    pub actual: ValueType,
+}
 
 // ========== Serde helpers for Arc<[T]> ==========
 // Arc<[T]> doesn't have built-in serde support, so we serialize as Vec
@@ -563,6 +595,281 @@ impl From<Matrix4> for Value {
     }
 }
 
+// ========== TryFrom implementations ==========
+// These allow extracting values with proper error handling:
+// let f: f32 = value.try_into()?;
+
+impl TryFrom<Value> for f32 {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Float(v) => Ok(v),
+            Value::Int(v) => Ok(v as f32),
+            other => Err(ValueTypeError {
+                expected: "f32",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for i32 {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Int(v) => Ok(v),
+            Value::Float(v) => Ok(v as i32),
+            other => Err(ValueTypeError {
+                expected: "i32",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for bool {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Bool(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "bool",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for [f32; 2] {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Vec2(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "[f32; 2]",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for [f32; 3] {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Vec3(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "[f32; 3]",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for [f32; 4] {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Vec4(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "[f32; 4]",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for String {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::String(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "String",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Color {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Color(c) => Ok(c),
+            Value::Vec4(v) => Ok(Color::from_array(v)),
+            other => Err(ValueTypeError {
+                expected: "Color",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Gradient {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Gradient(g) => Ok(g),
+            other => Err(ValueTypeError {
+                expected: "Gradient",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Matrix3 {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Matrix3(m) => Ok(m),
+            other => Err(ValueTypeError {
+                expected: "Matrix3",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Matrix4 {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Matrix4(m) => Ok(m),
+            other => Err(ValueTypeError {
+                expected: "Matrix4",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+// List extractions - return Arc<[T]> directly for zero-copy access
+
+impl TryFrom<Value> for Arc<[f32]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::FloatList(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "FloatList",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Arc<[i32]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::IntList(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "IntList",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Arc<[bool]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::BoolList(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "BoolList",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Arc<[[f32; 2]]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Vec2List(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "Vec2List",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Arc<[[f32; 3]]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Vec3List(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "Vec3List",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Arc<[[f32; 4]]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Vec4List(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "Vec4List",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Arc<[Color]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::ColorList(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "ColorList",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
+impl TryFrom<Value> for Arc<[String]> {
+    type Error = ValueTypeError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::StringList(v) => Ok(v),
+            other => Err(ValueTypeError {
+                expected: "StringList",
+                actual: other.value_type(),
+            }),
+        }
+    }
+}
+
 /// Type identifier for compile-time and runtime type checking
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ValueType {
@@ -1012,5 +1319,110 @@ mod tests {
         // String has no categories (besides Any which we don't include)
         let string_cats = ValueType::String.categories();
         assert!(string_cats.is_empty());
+    }
+
+    // =========================================================================
+    // TryFrom Tests
+    // =========================================================================
+
+    #[test]
+    fn test_try_from_float() {
+        let v = Value::Float(42.5);
+        let f: f32 = v.try_into().unwrap();
+        assert_eq!(f, 42.5);
+    }
+
+    #[test]
+    fn test_try_from_int_to_float() {
+        // Int can be coerced to f32
+        let v = Value::Int(42);
+        let f: f32 = v.try_into().unwrap();
+        assert_eq!(f, 42.0);
+    }
+
+    #[test]
+    fn test_try_from_int() {
+        let v = Value::Int(42);
+        let i: i32 = v.try_into().unwrap();
+        assert_eq!(i, 42);
+    }
+
+    #[test]
+    fn test_try_from_bool() {
+        let v = Value::Bool(true);
+        let b: bool = v.try_into().unwrap();
+        assert!(b);
+    }
+
+    #[test]
+    fn test_try_from_vec2() {
+        let v = Value::Vec2([1.0, 2.0]);
+        let arr: [f32; 2] = v.try_into().unwrap();
+        assert_eq!(arr, [1.0, 2.0]);
+    }
+
+    #[test]
+    fn test_try_from_vec3() {
+        let v = Value::Vec3([1.0, 2.0, 3.0]);
+        let arr: [f32; 3] = v.try_into().unwrap();
+        assert_eq!(arr, [1.0, 2.0, 3.0]);
+    }
+
+    #[test]
+    fn test_try_from_vec4() {
+        let v = Value::Vec4([1.0, 2.0, 3.0, 4.0]);
+        let arr: [f32; 4] = v.try_into().unwrap();
+        assert_eq!(arr, [1.0, 2.0, 3.0, 4.0]);
+    }
+
+    #[test]
+    fn test_try_from_string() {
+        let v = Value::String("hello".to_string());
+        let s: String = v.try_into().unwrap();
+        assert_eq!(s, "hello");
+    }
+
+    #[test]
+    fn test_try_from_color() {
+        let v = Value::Color(Color::rgba(1.0, 0.5, 0.25, 0.8));
+        let c: Color = v.try_into().unwrap();
+        assert_eq!(c.r, 1.0);
+        assert_eq!(c.g, 0.5);
+    }
+
+    #[test]
+    fn test_try_from_vec4_to_color() {
+        // Vec4 can be converted to Color
+        let v = Value::Vec4([1.0, 0.5, 0.25, 0.8]);
+        let c: Color = v.try_into().unwrap();
+        assert_eq!(c.r, 1.0);
+        assert_eq!(c.a, 0.8);
+    }
+
+    #[test]
+    fn test_try_from_error() {
+        let v = Value::String("not a number".to_string());
+        let result: Result<f32, ValueTypeError> = v.try_into();
+        assert!(result.is_err());
+
+        let err = result.unwrap_err();
+        assert_eq!(err.expected, "f32");
+        assert_eq!(err.actual, ValueType::String);
+        assert!(err.to_string().contains("cannot extract f32 from Value::String"));
+    }
+
+    #[test]
+    fn test_try_from_float_list() {
+        let v = Value::float_list(vec![1.0, 2.0, 3.0]);
+        let list: Arc<[f32]> = v.try_into().unwrap();
+        assert_eq!(list.as_ref(), &[1.0, 2.0, 3.0]);
+    }
+
+    #[test]
+    fn test_try_from_vec3_list() {
+        let v = Value::vec3_list(vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]);
+        let list: Arc<[[f32; 3]]> = v.try_into().unwrap();
+        assert_eq!(list.len(), 2);
+        assert_eq!(list[0], [1.0, 2.0, 3.0]);
     }
 }

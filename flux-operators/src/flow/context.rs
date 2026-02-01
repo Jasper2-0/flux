@@ -1,7 +1,5 @@
 //! Context variable operators: GetFloatVar, SetFloatVar, GetIntVar
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -39,8 +37,6 @@ impl Default for GetFloatVarOp {
 }
 
 impl Operator for GetFloatVarOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "GetFloatVar" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -118,8 +114,6 @@ impl Default for SetFloatVarOp {
 }
 
 impl Operator for SetFloatVarOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "SetFloatVar" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -189,8 +183,6 @@ impl Default for GetIntVarOp {
 }
 
 impl Operator for GetIntVarOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "GetIntVar" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

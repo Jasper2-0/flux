@@ -12,7 +12,6 @@
 //! let mul = MultiplyOp::new(); // Scalar * Vec3 = scaled Vec3
 //! ```
 
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -154,8 +153,6 @@ impl Default for BinaryOp {
 }
 
 impl Operator for BinaryOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { self.op.name() }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -302,8 +299,6 @@ impl Default for UnaryOp {
 }
 
 impl Operator for UnaryOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { self.op.name() }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -377,8 +372,6 @@ impl Default for PowOp {
 }
 
 impl Operator for PowOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Pow" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -445,8 +438,6 @@ impl Default for LogOp {
 }
 
 impl Operator for LogOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Log" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

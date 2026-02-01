@@ -6,8 +6,6 @@
 //! - Vec3ListCentroid: Average position (returns Vec3)
 //! - Vec3ListBounds: Bounding box (returns min/max Vec3)
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -88,8 +86,6 @@ impl Default for Vec3ListOp {
 }
 
 impl Operator for Vec3ListOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Vec3List" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -148,8 +144,6 @@ impl Default for Vec3ListNormalizeOp {
 }
 
 impl Operator for Vec3ListNormalizeOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Vec3ListNormalize" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -209,8 +203,6 @@ impl Default for Vec3ListCentroidOp {
 }
 
 impl Operator for Vec3ListCentroidOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Vec3ListCentroid" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -283,8 +275,6 @@ impl Default for Vec3ListBoundsOp {
 }
 
 impl Operator for Vec3ListBoundsOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Vec3ListBounds" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

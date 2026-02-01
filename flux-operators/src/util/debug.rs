@@ -1,7 +1,5 @@
 //! Utility/Debug operators: Print, Passthrough, Comment, Bookmark, TypeOf, IsNull
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
@@ -48,8 +46,6 @@ impl Default for PrintOp {
 }
 
 impl Operator for PrintOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Print" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -126,8 +122,6 @@ impl Default for PassthroughOp {
 }
 
 impl Operator for PassthroughOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Passthrough" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -196,8 +190,6 @@ impl Default for CommentOp {
 }
 
 impl Operator for CommentOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Comment" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -261,8 +253,6 @@ impl Default for BookmarkOp {
 }
 
 impl Operator for BookmarkOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Bookmark" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -323,8 +313,6 @@ impl Default for TypeOfOp {
 }
 
 impl Operator for TypeOfOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "TypeOf" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -404,8 +392,6 @@ impl Default for IsConnectedOp {
 }
 
 impl Operator for IsConnectedOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "IsConnected" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

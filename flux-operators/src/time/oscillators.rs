@@ -1,7 +1,6 @@
 //! Oscillator operators: SawWave, TriangleWave, PulseWave, Accumulator, Spring
 //! Note: SineWave is in the legacy operator.rs
 
-use std::any::Any;
 
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -42,8 +41,6 @@ impl Default for SawWaveOp {
 }
 
 impl Operator for SawWaveOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "SawWave" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -132,8 +129,6 @@ impl Default for TriangleWaveOp {
 }
 
 impl Operator for TriangleWaveOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "TriangleWave" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -222,8 +217,6 @@ impl Default for PulseWaveOp {
 }
 
 impl Operator for PulseWaveOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "PulseWave" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -313,8 +306,6 @@ impl Default for AccumulatorOp {
 }
 
 impl Operator for AccumulatorOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Accumulator" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -408,8 +399,6 @@ impl Default for SpringOp {
 }
 
 impl Operator for SpringOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Spring" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

@@ -3,7 +3,6 @@
 //! This operator acts as a pass-through while maintaining a ring buffer
 //! of recent values for visualization.
 
-use std::any::Any;
 use std::collections::VecDeque;
 
 use flux_core::context::EvalContext;
@@ -79,13 +78,7 @@ impl Default for ScopeOp {
 }
 
 impl Operator for ScopeOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 
     fn id(&self) -> Id {
         self.id

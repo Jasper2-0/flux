@@ -5,7 +5,8 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::OperatorMeta;
 use flux_macros::Operator;
-use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
+use crate::register_operators;
+use crate::registry::OperatorRegistry;
 use flux_core::port::{InputPort, OutputPort};
 
 // ============================================================================
@@ -109,34 +110,11 @@ impl Vec3ToVec4Op {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec4Compose",
-            category: "Vector",
-            description: "Create Vec4 from X, Y, Z, W components",
-        },
-        || capture_meta(Vec4ComposeOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec4Decompose",
-            category: "Vector",
-            description: "Split Vec4 into X, Y, Z, W components",
-        },
-        || capture_meta(Vec4DecomposeOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Vec3ToVec4",
-            category: "Vector",
-            description: "Extend Vec3 to Vec4 with W component",
-        },
-        || capture_meta(Vec3ToVec4Op::new()),
+    register_operators!(
+        registry,
+        Vec4ComposeOp,
+        Vec4DecomposeOp,
+        Vec3ToVec4Op,
     );
 }
 

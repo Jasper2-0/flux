@@ -5,7 +5,8 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::OperatorMeta;
 use flux_macros::Operator;
-use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
+use crate::register_operators;
+use crate::registry::OperatorRegistry;
 use flux_core::port::{InputPort, OutputPort};
 
 // ============================================================================
@@ -182,64 +183,14 @@ impl IntToFloatOp {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "IntAdd",
-            category: "Logic",
-            description: "Integer addition",
-        },
-        || capture_meta(IntAddOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "IntMultiply",
-            category: "Logic",
-            description: "Integer multiplication",
-        },
-        || capture_meta(IntMultiplyOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "IntDivide",
-            category: "Logic",
-            description: "Integer division",
-        },
-        || capture_meta(IntDivideOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "IntModulo",
-            category: "Logic",
-            description: "Integer modulo",
-        },
-        || capture_meta(IntModuloOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "IntClamp",
-            category: "Logic",
-            description: "Clamp integer to range",
-        },
-        || capture_meta(IntClampOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "IntToFloat",
-            category: "Logic",
-            description: "Convert integer to float",
-        },
-        || capture_meta(IntToFloatOp::new()),
+    register_operators!(
+        registry,
+        IntAddOp,
+        IntMultiplyOp,
+        IntDivideOp,
+        IntModuloOp,
+        IntClampOp,
+        IntToFloatOp,
     );
 }
 

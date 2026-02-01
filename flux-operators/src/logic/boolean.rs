@@ -1,12 +1,11 @@
 //! Boolean logic operators: And, Or, Not, Xor, All, Any
 
-use std::any::Any;
-
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::{category_colors, OperatorMeta, PinShape, PortMeta};
 use flux_macros::Operator;
+use crate::register_operators;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::port::{InputPort, OutputPort};
 
@@ -146,8 +145,6 @@ impl Default for AllOp {
 }
 
 impl Operator for AllOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "All" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -220,8 +217,6 @@ impl Default for AnyOp {
 }
 
 impl Operator for AnyOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Any" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -272,46 +267,16 @@ impl OperatorMeta for AnyOp {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "And",
-            category: "Logic",
-            description: "Logical AND of two booleans",
-        },
-        || capture_meta(AndOp::new()),
+    // Operators using #[derive(Operator)]
+    register_operators!(
+        registry,
+        AndOp,
+        OrOp,
+        NotOp,
+        XorOp,
     );
 
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Or",
-            category: "Logic",
-            description: "Logical OR of two booleans",
-        },
-        || capture_meta(OrOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Not",
-            category: "Logic",
-            description: "Logical NOT",
-        },
-        || capture_meta(NotOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Xor",
-            category: "Logic",
-            description: "Exclusive OR",
-        },
-        || capture_meta(XorOp::new()),
-    );
-
+    // Multi-input operators (manual impl)
     registry.register(
         RegistryEntry {
             type_id: Id::new(),

@@ -1,6 +1,5 @@
 //! State operators: Delay, Previous, Changed, Trigger, Once, Counter
 
-use std::any::Any;
 use std::collections::VecDeque;
 
 use flux_core::context::EvalContext;
@@ -43,8 +42,6 @@ impl Default for DelayOp {
 }
 
 impl Operator for DelayOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Delay" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -124,8 +121,6 @@ impl Default for PreviousOp {
 }
 
 impl Operator for PreviousOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Previous" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -191,8 +186,6 @@ impl Default for ChangedOp {
 }
 
 impl Operator for ChangedOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Changed" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -262,8 +255,6 @@ impl Default for TriggerOp {
 }
 
 impl Operator for TriggerOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Trigger" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -335,8 +326,6 @@ impl Default for OnceOp {
 }
 
 impl Operator for OnceOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Once" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }
@@ -413,8 +402,6 @@ impl Default for CounterOp {
 }
 
 impl Operator for CounterOp {
-    fn as_any(&self) -> &dyn Any { self }
-    fn as_any_mut(&mut self) -> &mut dyn Any { self }
     fn id(&self) -> Id { self.id }
     fn name(&self) -> &'static str { "Counter" }
     fn inputs(&self) -> &[InputPort] { &self.inputs }

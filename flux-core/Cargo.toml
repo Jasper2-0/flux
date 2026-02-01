@@ -6,6 +6,7 @@ license = "MIT"
 description = "Core types for the Flux operator graph system"
 
 [dependencies]
+downcast-rs.workspace = true
 serde.workspace = true
 uuid.workspace = true
 thiserror.workspace = true

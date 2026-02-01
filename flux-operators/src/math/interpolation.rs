@@ -3,8 +3,7 @@
 //! Lerp and SmoothStep are polymorphic and work with:
 //! Float, Int, Vec2, Vec3, Vec4, Color
 
-use std::any::Any;
-
+use crate::register_operators;
 use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
 use flux_core::context::EvalContext;
 use flux_core::id::Id;
@@ -45,12 +44,6 @@ impl Default for LerpOp {
 }
 
 impl Operator for LerpOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -137,12 +130,6 @@ impl Default for SmoothStepOp {
 }
 
 impl Operator for SmoothStepOp {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
     fn id(&self) -> Id {
         self.id
     }
@@ -331,6 +318,15 @@ impl MapRangeOp {
 // =============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
+    // Operators using #[derive(Operator)]
+    register_operators!(
+        registry,
+        RemapOp,
+        InverseLerpOp,
+        MapRangeOp,
+    );
+
+    // Polymorphic operators (manual impl)
     registry.register(
         RegistryEntry {
             type_id: Id::new(),
@@ -349,36 +345,6 @@ pub fn register(registry: &OperatorRegistry) {
             description: "Hermite interpolation with smooth edges (per-component)",
         },
         || capture_meta(SmoothStepOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "Remap",
-            category: "Math",
-            description: "Remaps value from one range to another",
-        },
-        || capture_meta(RemapOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "InverseLerp",
-            category: "Math",
-            description: "Gets T from lerp result",
-        },
-        || capture_meta(InverseLerpOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "MapRange",
-            category: "Math",
-            description: "Maps value from one range to another",
-        },
-        || capture_meta(MapRangeOp::new()),
     );
 }
 

@@ -5,7 +5,8 @@ use flux_core::id::Id;
 use flux_core::operator::{InputResolver, Operator};
 use flux_core::OperatorMeta;
 use flux_macros::Operator;
-use crate::registry::{capture_meta, OperatorRegistry, RegistryEntry};
+use crate::register_operators;
+use crate::registry::OperatorRegistry;
 use flux_core::port::{InputPort, OutputPort};
 
 // ============================================================================
@@ -262,84 +263,16 @@ impl StringContainsOp {
 // ============================================================================
 
 pub fn register(registry: &OperatorRegistry) {
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "StringConcat",
-            category: "String",
-            description: "Concatenate two strings",
-        },
-        || capture_meta(StringConcatOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "StringFormat",
-            category: "String",
-            description: "Format string with value",
-        },
-        || capture_meta(StringFormatOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "StringLength",
-            category: "String",
-            description: "Get string length",
-        },
-        || capture_meta(StringLengthOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "SubString",
-            category: "String",
-            description: "Extract substring",
-        },
-        || capture_meta(SubStringOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "StringSplit",
-            category: "String",
-            description: "Split string by delimiter",
-        },
-        || capture_meta(StringSplitOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "FloatToString",
-            category: "String",
-            description: "Convert float to string",
-        },
-        || capture_meta(FloatToStringOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "IntToString",
-            category: "String",
-            description: "Convert integer to string",
-        },
-        || capture_meta(IntToStringOp::new()),
-    );
-
-    registry.register(
-        RegistryEntry {
-            type_id: Id::new(),
-            name: "StringContains",
-            category: "String",
-            description: "Check if string contains substring",
-        },
-        || capture_meta(StringContainsOp::new()),
+    register_operators!(
+        registry,
+        StringConcatOp,
+        StringFormatOp,
+        StringLengthOp,
+        SubStringOp,
+        StringSplitOp,
+        FloatToStringOp,
+        IntToStringOp,
+        StringContainsOp,
     );
 }
 

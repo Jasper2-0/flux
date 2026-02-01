@@ -2,8 +2,24 @@
 //!
 //! This module defines the [`Operator`] trait that all graph nodes must implement.
 //! The trait is object-safe to allow heterogeneous collections of operators.
+//!
+//! # Downcasting
+//!
+//! The `Operator` trait extends `Downcast` from the `downcast-rs` crate, which
+//! provides automatic `as_any()` implementations. You can downcast a `&dyn Operator`
+//! to a concrete type using:
+//!
+//! ```ignore
+//! use flux_core::Operator;
+//!
+//! fn process(op: &dyn Operator) {
+//!     if let Some(sin_op) = op.downcast_ref::<SinOp>() {
+//!         // Work with the concrete SinOp type
+//!     }
+//! }
+//! ```
 
-use std::any::Any;
+use downcast_rs::{impl_downcast, Downcast};
 
 use crate::context::EvalContext;
 use crate::id::Id;
@@ -21,6 +37,11 @@ pub type InputResolver<'a> = &'a dyn Fn(Id, usize) -> Value;
 /// Each operator can have multiple inputs and outputs, and performs
 /// computation during the `compute` phase.
 ///
+/// # Downcasting
+///
+/// The trait automatically provides downcasting via the `downcast-rs` crate.
+/// Use `downcast_ref::<T>()` or `downcast_mut::<T>()` on trait objects.
+///
 /// # Example
 ///
 /// ```ignore
@@ -36,10 +57,7 @@ pub type InputResolver<'a> = &'a dyn Fn(Id, usize) -> Value;
 ///     // ... implement other methods
 /// }
 /// ```
-pub trait Operator: Any {
-    /// For downcasting support
-    fn as_any(&self) -> &dyn Any;
-    fn as_any_mut(&mut self) -> &mut dyn Any;
+pub trait Operator: Downcast {
 
     /// Unique instance ID
     fn id(&self) -> Id;
@@ -269,3 +287,8 @@ pub trait Operator: Any {
         None
     }
 }
+
+// Enable downcasting for boxed Operator trait objects.
+// This provides methods like `downcast_ref::<T>()` and `downcast_mut::<T>()`
+// directly on `&dyn Operator` and `Box<dyn Operator>`.
+impl_downcast!(Operator);
