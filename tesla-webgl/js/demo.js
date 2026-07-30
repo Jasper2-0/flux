@@ -42,9 +42,12 @@ const TEXTURES = [
 ];
 
 export class Demo {
-  constructor(canvas, statusCallback = () => {}) {
+  // opts.pakBuffer: ArrayBuffer with data.pak (skips fetch)
+  // opts.audioSrc: URL or data: URI for the soundtrack
+  constructor(canvas, statusCallback = () => {}, opts = {}) {
     this.canvas = canvas;
     this.status = statusCallback;
+    this.opts = opts;
     this.effects = [];
     this.audio = null;
     this.startClock = 0;
@@ -56,10 +59,14 @@ export class Demo {
     this.status('initializing WebGL...');
     this.mgl = new MiniGL(this.canvas);
 
-    this.status('downloading data.pak...');
-    const pakResp = await fetch('data/data.pak');
-    if (!pakResp.ok) throw new Error('failed to fetch data.pak');
-    this.pak = new Pak(await pakResp.arrayBuffer());
+    let pakBuffer = this.opts.pakBuffer;
+    if (!pakBuffer) {
+      this.status('downloading data.pak...');
+      const pakResp = await fetch('data/data.pak');
+      if (!pakResp.ok) throw new Error('failed to fetch data.pak');
+      pakBuffer = await pakResp.arrayBuffer();
+    }
+    this.pak = new Pak(pakBuffer);
 
     this.status('decoding textures...');
     this.tex = new TexManager(this.mgl, this.pak);
@@ -90,7 +97,7 @@ export class Demo {
     ];
 
     this.status('loading soundtrack...');
-    this.audio = new Audio('data/tournesol.mp3');
+    this.audio = new Audio(this.opts.audioSrc || 'data/tournesol.mp3');
     this.audio.preload = 'auto';
 
     this.status('ready');
