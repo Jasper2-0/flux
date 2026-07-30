@@ -1,0 +1,42 @@
+
+
+
+ T E S L A  sunflower
+
+ zagorowicz konrad   yoghurt   electronics
+ ojala pauli   saffron   projections
+ svanholm jakob   radix   high fidelity
+ haessig anne   lluvia   high fidelity
+ 
+ additional personnel:
+
+ behr dominik   technomancer    singularity
+ podgorski wojtek   sunreal   radiator programming
+ borkowski janusz   division construction
+
+ 
+ we'd like to thank:
+
+ Ian Luck for bass sound system
+ Guy Eric Schalnat, Group 42, Inc. for pnglibrary
+ The Independent JPEG Group's JPEG software for jpglibrary
+ Jean-loup Gailly and Mark Adler for zlib
+
+
+
+ Intense 2-day demo hull integrity test sequence
+ conformant to SMPTE-B.602 standard (Wroclaw treaty subparagraph 80)
+
+
+
+ win32, uses OpenGL, and no, 3dfx voodoo 1/2/3 chipsets won't cut it
+ because the demo uses some textures larger than 256*256.
+
+
+
+ discover Sunflower:
+
+ http://sunflower.opengl.org.pl/
+
+
+
