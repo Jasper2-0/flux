@@ -1,13 +1,12 @@
-// TimScene — a replayer for the ARSE scene format: baked per-object
+// TimScene — replayer for the ARSE scene format: baked per-object
 // transforms at 30 fps, a baked camera track, meshes with normals and UVs.
 //
-// Approximation notes: the file provides geometry, animation, camera and
-// projection (fov/znear/zfar) — but not shading or blend state. This
-// replayer renders textured with a simple headlamp diffuse baked into
-// vertex colors (the XYZ|DIFFUSE|TEX1 layout the engine used). Handedness
-// is a best guess until frames can be compared against the AVI capture.
-
-import { Mat4 } from '../mathlib.js';
+// Camera convention CALIBRATED against the release AVI capture
+// (wireframe-projection comparison over the neuron scene):
+//   world = v · objRows + t          (row-basis object transform)
+//   eye   = camRowsᵀ · (world − camPos)
+//   +z is forward (D3D left-handed) — one z-flip converts to GL.
+// Shading and blend state are still reconstruction guesses.
 
 export class TimScene {
   constructor(mgl, tex, scene, textureName) {
@@ -15,7 +14,6 @@ export class TimScene {
     this.scene = scene;
     this.tex = tex.loadTexture(textureName);
 
-    // scratch buffers per object
     this.world = [];
     this.colors = [];
     for (const obj of scene.objects) {
@@ -33,26 +31,24 @@ export class TimScene {
 
     mgl.matrixMode(mgl.PROJECTION);
     mgl.loadIdentity();
-    // vertical fov from the file; 4:3 frame
-    const fovRad = scene.fov * Math.PI / 180;
-    const top = Math.tan(fovRad / 2) * scene.znear * 0.75;
-    mgl.frustum(-top * 4 / 3, top * 4 / 3, -top, top, scene.znear, scene.zfar);
+    // horizontal fov from the file; 4:3 frame
+    const half = Math.tan((scene.fov * Math.PI / 180) / 2) * scene.znear;
+    mgl.frustum(-half, half, -half * 0.75, half * 0.75, scene.znear, scene.zfar);
 
     mgl.matrixMode(mgl.MODELVIEW);
     mgl.loadIdentity();
 
-    // camera: track record is camera-to-world; view = inverse
     const cam = scene.camera[frame];
-    const view = new Mat4();
-    const m = cam.m, ct = cam.t;
-    // rows of the 3x3 become columns (transpose = inverse rotation)
-    view.m.set([
-      m[0], m[3], m[6], 0,
-      m[1], m[4], m[7], 0,
-      m[2], m[5], m[8], 0,
-      -(ct[0] * m[0] + ct[1] * m[1] + ct[2] * m[2]),
-      -(ct[0] * m[3] + ct[1] * m[4] + ct[2] * m[5]),
-      -(ct[0] * m[6] + ct[1] * m[7] + ct[2] * m[8]),
+    const cm = cam.m, ct = cam.t;
+    // view = transpose(camRows) · translate(−camPos), with the D3D→GL z flip
+    // baked into the third component. Column-major GL layout.
+    const view = new Float32Array([
+      cm[0], cm[1], -cm[2], 0,
+      cm[3], cm[4], -cm[5], 0,
+      cm[6], cm[7], -cm[8], 0,
+      -(cm[0] * ct[0] + cm[3] * ct[1] + cm[6] * ct[2]),
+      -(cm[1] * ct[0] + cm[4] * ct[1] + cm[7] * ct[2]),
+      +(cm[2] * ct[0] + cm[5] * ct[1] + cm[8] * ct[2]),
       1,
     ]);
     mgl.multMatrix(view);
@@ -73,20 +69,19 @@ export class TimScene {
 
       for (let v = 0; v < obj.nVerts; v++) {
         const px = obj.positions[v * 3], py = obj.positions[v * 3 + 1], pz = obj.positions[v * 3 + 2];
-        w[v * 3] = px * om[0] + py * om[3] + pz * om[6] + ot[0];
-        w[v * 3 + 1] = px * om[1] + py * om[4] + pz * om[7] + ot[1];
-        w[v * 3 + 2] = px * om[2] + py * om[5] + pz * om[8] + ot[2];
+        // row-basis: world = v.x·row0 + v.y·row1 + v.z·row2 + t
+        w[v * 3] = px * om[0] + py * om[1] + pz * om[2] + ot[0];
+        w[v * 3 + 1] = px * om[3] + py * om[4] + pz * om[5] + ot[1];
+        w[v * 3 + 2] = px * om[6] + py * om[7] + pz * om[8] + ot[2];
 
-        // headlamp diffuse from the baked normals (world-rotated)
         const nx = obj.normals[v * 3], ny = obj.normals[v * 3 + 1], nz = obj.normals[v * 3 + 2];
-        const wnx = nx * om[0] + ny * om[3] + nz * om[6];
-        const wny = nx * om[1] + ny * om[4] + nz * om[7];
-        const wnz = nx * om[2] + ny * om[5] + nz * om[8];
-        // light direction: from camera toward scene
-        const lx = -cam.m[6], ly = -cam.m[7], lz = -cam.m[8];
-        let d = wnx * lx + wny * ly + wnz * lz;
-        d = 0.25 + 0.75 * Math.max(0, Math.abs(d));
-        col[v * 4] = d; col[v * 4 + 1] = d; col[v * 4 + 2] = d; col[v * 4 + 3] = 1;
+        const wnx = nx * om[0] + ny * om[1] + nz * om[2];
+        const wny = nx * om[3] + ny * om[4] + nz * om[5];
+        const wnz = nx * om[6] + ny * om[7] + nz * om[8];
+        // headlamp: light along the camera's forward row
+        const d = Math.abs(wnx * cm[2] + wny * cm[5] + wnz * cm[8]);
+        const s = 0.3 + 0.7 * d;
+        col[v * 4] = s; col[v * 4 + 1] = s; col[v * 4 + 2] = s; col[v * 4 + 3] = 1;
       }
 
       mgl.drawElements(w, obj.uv, obj.faces, col);

@@ -96,9 +96,10 @@ const demo = new Demo(canvas, (msg) => { statusEl.textContent = msg; }, {
   onActiveChange(time, active) {
     let html = 't = ' + time.toFixed(1) + 's<br>';
     for (const a of active) {
-      html += '<span class="' + (a.implemented ? 'on' : 'stub') + '">' +
-        (a.implemented ? '▶ ' : '· ') + a.name + ' #' + a.id +
-        (a.implemented ? '' : ' (not ported yet)') + '</span><br>';
+      const cls = a.rendering ? 'on' : 'stub';
+      const mark = a.rendering ? '▶ ' : '· ';
+      const note = a.implemented ? (a.rendering ? '' : ' (idle)') : ' (not ported yet)';
+      html += '<span class="' + cls + '">' + mark + a.name + ' #' + a.id + note + '</span><br>';
     }
     partsEl.innerHTML = html;
   },

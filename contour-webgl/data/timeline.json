@@ -25,7 +25,17 @@
    "time": 0.0,
    "handler": "0x41a0f0",
    "params": "0x438584",
-   "params_hex": "0000e0400000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c984300"
+   "params_hex": "0000e0400000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c984300",
+   "params_refs": [
+    {
+     "offset": 12,
+     "str": "THE BLACK LOTUS"
+    },
+    {
+     "offset": 60,
+     "str": "YOUR VOICE"
+    }
+   ]
   },
   {
    "va": "0x438970",
@@ -36,7 +46,17 @@
    "time": 0.0,
    "handler": "0x41a000",
    "params": "0x438584",
-   "params_hex": "0000e0400000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c984300"
+   "params_hex": "0000e0400000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c984300",
+   "params_refs": [
+    {
+     "offset": 12,
+     "str": "THE BLACK LOTUS"
+    },
+    {
+     "offset": 60,
+     "str": "YOUR VOICE"
+    }
+   ]
   },
   {
    "va": "0x438998",
@@ -130,7 +150,17 @@
    "time": 0.0,
    "handler": "0x41ffc0",
    "params": "0x438560",
-   "params_hex": "cdcc4c3ecdcccc3e9a99993e9a99193f000000006666e63effffff0000000000b89843000000e0400000a04000000000a8984300020000000200000000000000"
+   "params_hex": "cdcc4c3ecdcccc3e9a99993e9a99193f000000006666e63effffff0000000000b89843000000e0400000a04000000000a8984300020000000200000000000000",
+   "params_refs": [
+    {
+     "offset": 32,
+     "str": "c:\\todemo\\data\\scenes\\neuron.bin"
+    },
+    {
+     "offset": 48,
+     "str": "THE BLACK LOTUS"
+    }
+   ]
   },
   {
    "va": "0x438b00",
@@ -274,7 +304,17 @@
    "time": 0.0,
    "handler": "0x41d3b0",
    "params": "0x438590",
-   "params_hex": "a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c9843000100000000000000cdccccbe"
+   "params_hex": "a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c9843000100000000000000cdccccbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "THE BLACK LOTUS"
+    },
+    {
+     "offset": 48,
+     "str": "YOUR VOICE"
+    }
+   ]
   },
   {
    "va": "0x439730",
@@ -427,7 +467,17 @@
    "time": 45.0,
    "handler": "0x41d3b0",
    "params": "0x4385c0",
-   "params_hex": "9c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f00004040909843000100000000000000cdcccc3e"
+   "params_hex": "9c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f00004040909843000100000000000000cdcccc3e",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "YOUR VOICE"
+    },
+    {
+     "offset": 48,
+     "str": "YOUR EYES"
+    }
+   ]
   },
   {
    "va": "0x438f60",
@@ -438,7 +488,17 @@
    "time": 47.5,
    "handler": "0x41d3b0",
    "params": "0x4385f0",
-   "params_hex": "909843000100000000000000cdcccc3ecdcccc3e0000003f9a99993e9a99993e0000803f000000000000803f00004040849843000100000000000000cdccccbe"
+   "params_hex": "909843000100000000000000cdcccc3ecdcccc3e0000003f9a99993e9a99993e0000803f000000000000803f00004040849843000100000000000000cdccccbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "YOUR EYES"
+    },
+    {
+     "offset": 48,
+     "str": "YOUR HANDS"
+    }
+   ]
   },
   {
    "va": "0x438f88",
@@ -516,7 +576,17 @@
    "time": 57.0,
    "handler": "0x41d3b0",
    "params": "0x438620",
-   "params_hex": "849843000100000000000000cdccccbecdccccbe0000003f9a9999be9a9999be0000803f000000000000803f00004040789843000100000000000000cdcccc3e"
+   "params_hex": "849843000100000000000000cdccccbecdccccbe0000003f9a9999be9a9999be0000803f000000000000803f00004040789843000100000000000000cdcccc3e",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "YOUR HANDS"
+    },
+    {
+     "offset": 48,
+     "str": "YOUR LIPS"
+    }
+   ]
   },
   {
    "va": "0x4390c8",
@@ -527,7 +597,17 @@
    "time": 58.0,
    "handler": "0x41d3b0",
    "params": "0x438650",
-   "params_hex": "789843000100000000000000cdcccc3ecdccccbe0000003f9a99993e9a9999be0000803f000000000000803f000040406c9843000100000000000000cdccccbe"
+   "params_hex": "789843000100000000000000cdcccc3ecdccccbe0000003f9a99993e9a9999be0000803f000000000000803f000040406c9843000100000000000000cdccccbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "YOUR LIPS"
+    },
+    {
+     "offset": 48,
+     "str": "THE SILENCE"
+    }
+   ]
   },
   {
    "va": "0x4390f0",
@@ -547,7 +627,17 @@
    "time": 62.2,
    "handler": "0x41d3b0",
    "params": "0x438680",
-   "params_hex": "6c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f000040405c9843000100000000000000cdccccbe"
+   "params_hex": "6c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f000040405c9843000100000000000000cdccccbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "THE SILENCE"
+    },
+    {
+     "offset": 48,
+     "str": "AND OUR WORDS"
+    }
+   ]
   },
   {
    "va": "0x439140",
@@ -558,7 +648,17 @@
    "time": 62.2,
    "handler": "0x41d3b0",
    "params": "0x4386b0",
-   "params_hex": "5c9843000100000000000000cdccccbe000000000000003f9a9999becdccccbd0000803f000000000000803f00004040389843000100000000000000cdccccbe"
+   "params_hex": "5c9843000100000000000000cdccccbe000000000000003f9a9999becdccccbd0000803f000000000000803f00004040389843000100000000000000cdccccbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "AND OUR WORDS"
+    },
+    {
+     "offset": 48,
+     "str": "THE LIGHT THAT DEPARTS AND RETURNS"
+    }
+   ]
   },
   {
    "va": "0x439168",
@@ -645,7 +745,17 @@
    "time": 68.2,
    "handler": "0x41d3b0",
    "params": "0x4386e0",
-   "params_hex": "389843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e66660640000000000000803f00004040189843000100000000000000cdcc4cbe"
+   "params_hex": "389843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e66660640000000000000803f00004040189843000100000000000000cdcc4cbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "THE LIGHT THAT DEPARTS AND RETURNS"
+    },
+    {
+     "offset": 48,
+     "str": "AND A SINGLE SMILE BETWEEN US"
+    }
+   ]
   },
   {
    "va": "0x4392d0",
@@ -665,7 +775,17 @@
    "time": 76.1,
    "handler": "0x41d3b0",
    "params": "0x438710",
-   "params_hex": "189843000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be00000040000000000000803f00004040009843000100000000000000cdccccbe"
+   "params_hex": "189843000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be00000040000000000000803f00004040009843000100000000000000cdccccbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "AND A SINGLE SMILE BETWEEN US"
+    },
+    {
+     "offset": 48,
+     "str": "BY THE NEED OF KNOWING"
+    }
+   ]
   },
   {
    "va": "0x439320",
@@ -721,7 +841,17 @@
    "time": 84.0,
    "handler": "0x41d3b0",
    "params": "0x438740",
-   "params_hex": "009843000100000000000000cdccccbecdcc4c3d0000003fcdccccbe0000000033331340000000000000803f00004040e49743000100000000000000cdcc4cbe"
+   "params_hex": "009843000100000000000000cdccccbecdcc4c3d0000003fcdccccbe0000000033331340000000000000803f00004040e49743000100000000000000cdcc4cbe",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "BY THE NEED OF KNOWING"
+    },
+    {
+     "offset": 48,
+     "str": "I SAW NIGHT CREATE THE DAY"
+    }
+   ]
   },
   {
    "va": "0x439410",
@@ -759,7 +889,17 @@
    "time": 90.3,
    "handler": "0x41d3b0",
    "params": "0x438770",
-   "params_hex": "e49743000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be33331340000000000000803f00004040c49743000100000000000000cdccccbd"
+   "params_hex": "e49743000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be33331340000000000000803f00004040c49743000100000000000000cdccccbd",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "I SAW NIGHT CREATE THE DAY"
+    },
+    {
+     "offset": 48,
+     "str": "WITHOUT US CHANGING APPEARANCE"
+    }
+   ]
   },
   {
    "va": "0x4394b0",
@@ -797,7 +937,13 @@
    "time": 96.3,
    "handler": "0x41d3b0",
    "params": "0x4387a0",
-   "params_hex": "c49743000100000000000000cdccccbdcdcccc3d0000003fcdcc4cbe000000009a991940000000000000803f00004040000000000000a0400000a0c10000a041"
+   "params_hex": "c49743000100000000000000cdccccbdcdcccc3d0000003fcdcc4cbe000000009a991940000000000000803f00004040000000000000a0400000a0c10000a041",
+   "params_refs": [
+    {
+     "offset": 0,
+     "str": "WITHOUT US CHANGING APPEARANCE"
+    }
+   ]
   },
   {
    "va": "0x439550",

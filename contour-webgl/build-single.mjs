@@ -39,7 +39,9 @@ const engine = MODULES
 // everything demo.js touches at runtime
 const ASSETS = [
   ['data/timeline.json', 'application/json'],
+  ['data/saftext/fx4.jpg', 'image/jpeg'],
   ['data/saftext/fx8.jpg', 'image/jpeg'],
+  ['data/saftext/fx9.jpg', 'image/jpeg'],
   ['data/textures/flare1.jpg', 'image/jpeg'],
   ['data/textures/flare8.jpg', 'image/jpeg'],
   ['data/textures/dildo.jpg', 'image/jpeg'],
@@ -160,9 +162,10 @@ const EMBED = `, embedJson, `;
     onActiveChange(time, active) {
       let html = 't = ' + time.toFixed(1) + 's<br>';
       for (const a of active) {
-        html += '<span class="' + (a.implemented ? 'on' : 'stub') + '">' +
-          (a.implemented ? '▶ ' : '· ') + a.name + ' #' + a.id +
-          (a.implemented ? '' : ' (not ported yet)') + '</span><br>';
+        const cls = a.rendering ? 'on' : 'stub';
+        const mark = a.rendering ? '▶ ' : '· ';
+        const note = a.implemented ? (a.rendering ? '' : ' (idle)') : ' (not ported yet)';
+        html += '<span class="' + cls + '">' + mark + a.name + ' #' + a.id + note + '</span><br>';
       }
       partsEl.innerHTML = html;
     },

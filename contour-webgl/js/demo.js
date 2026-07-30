@@ -43,7 +43,9 @@ class TexManager {
 }
 
 const TEXTURES = [
+  'data/saftext/fx4.jpg',
   'data/saftext/fx8.jpg',
+  'data/saftext/fx9.jpg',
   'data/textures/flare1.jpg',
   'data/textures/flare8.jpg',
   'data/textures/dildo.jpg',
@@ -102,19 +104,35 @@ export class Demo {
 
   // Effect factory: instance-name keyed. Everything unimplemented returns
   // null and shows up in the placeholder readout instead.
+  //
+  // Timing caveat: most creates fire at t=0 as preloads; visibility is
+  // driven by kind-2/3 messages that are not decoded yet. Until they are,
+  // implemented effects carry an AVI-calibrated visible window
+  // [start, end] observed from the release capture.
   _makeEffect(record) {
-    const key = record.class + '/' + record.instance;
     switch (record.instance) {
       case 'bloem':
-        return new Bloem(this.mgl, this.tex);
+        return { effect: new Bloem(this.mgl, this.tex), window: [88, 108.5] };
       case 'rogplay':
-        return new Rogplay(this.mgl, this.tex);
+        return { effect: new Rogplay(this.mgl, this.tex), window: [64, 82] };
       default:
         break;
     }
-    // TimScene rides on records whose params point at a scene file
-    if (record.params_str && record.params_str.includes('dildo.bin')) {
-      return new TimScene(this.mgl, this.tex, this.dildoScene, 'data/textures/dildo.jpg');
+    // scene files ride in parameter blocks: dildo.bin on the static
+    // credit5 record, neuron.bin on the linefx id=455 preload
+    const refs = (record.params_refs || []).map((r) => r.str).join(' ') +
+      ' ' + (record.params_str || '');
+    if (refs.includes('neuron.bin')) {
+      // texture guess: the capture shows coppery surfaces — fx8/dildo.jpg
+      return {
+        effect: new TimScene(this.mgl, this.tex, this.neuronScene, 'data/saftext/fx8.jpg'),
+        window: [52, 65.5],
+      };
+    }
+    if (refs.includes('dildo.bin')) {
+      // not yet located in the capture; parked until the messages are
+      // decoded (the scene is 17 s long — plausibly the intro)
+      return null;
     }
     return null;
   }
@@ -164,11 +182,16 @@ export class Demo {
       if (this.processed.has(stamp)) continue;
       this.processed.add(stamp);
       if (r.kind === 0) {
-        let effect = null;
+        let made = null;
         try {
-          effect = this._makeEffect(r);
+          made = this._makeEffect(r);
         } catch (e) { /* placeholder instead */ }
-        this.instances.set(r.id, { record: r, effect, born: r.time });
+        this.instances.set(r.id, {
+          record: r,
+          effect: made && made.effect,
+          window: made && made.window,
+          born: r.time,
+        });
       } else if (r.kind === 1) {
         this.instances.delete(r.id);
       }
@@ -183,14 +206,17 @@ export class Demo {
 
     const active = [];
     for (const [id, inst] of this.instances) {
+      const inWindow = !inst.window || (time >= inst.window[0] && time <= inst.window[1]);
       active.push({
         id,
         name: inst.record.class + '/' + inst.record.instance,
         implemented: !!inst.effect,
+        rendering: !!inst.effect && inWindow,
       });
-      if (inst.effect) {
+      if (inst.effect && inWindow) {
         try {
-          inst.effect.do(time, inst.born);
+          // effect-local time runs from its window start (AVI-calibrated)
+          inst.effect.do(time, inst.window ? inst.window[0] : inst.born);
         } catch (e) { /* keep the loop alive */ }
       }
     }

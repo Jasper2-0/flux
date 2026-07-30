@@ -21,6 +21,7 @@ export class Rogplay {
   constructor(mgl, tex, mode = 0) {
     this.mgl = mgl;
     this.tex = tex.loadTexture('data/textures/flare1.jpg');
+    this.bgTex = tex.loadTexture('data/saftext/fx9.jpg');
     this.mode = mode;
     this.orbit = this._computeOrbit(MODES[mode]);
   }
@@ -54,11 +55,37 @@ export class Rogplay {
     mgl.loadIdentity();
 
     mgl.enableTexture(true);
-    mgl.enableBlend(true);
-    mgl.blendFunc(mgl.SRC_ALPHA, mgl.ONE);
     mgl.enableCullFace(false);
     mgl.enableDepthTest(false);
     mgl.depthMask(false);
+
+    // golden cloud backdrop (AVI: the sparkle clouds sit over warm texture
+    // for most of the section, dropping to black near its end)
+    const bgFade = Math.max(0, Math.min(1, 1 - (t - 11) * 0.4));
+    if (bgFade > 0) {
+      mgl.enableBlend(false);
+      mgl.bindTexture(this.bgTex);
+      mgl.color4(0.75 * bgFade, 0.65 * bgFade, 0.5 * bgFade, 1);
+      mgl.begin(mgl.QUADS);
+      const s = 0.03 * t;
+      mgl.texCoord2(s, 0); mgl.vertex3(-1.35, 1, -1.5);
+      mgl.texCoord2(1.4 + s, 0); mgl.vertex3(1.35, 1, -1.5);
+      mgl.texCoord2(1.4 + s, 1); mgl.vertex3(1.35, -1, -1.5);
+      mgl.texCoord2(s, 1); mgl.vertex3(-1.35, -1, -1.5);
+      mgl.end();
+    } else {
+      mgl.enableTexture(false);
+      mgl.enableBlend(false);
+      mgl.color4(0, 0, 0, 1);
+      mgl.begin(mgl.QUADS);
+      mgl.vertex3(-1.35, 1, -1.5); mgl.vertex3(1.35, 1, -1.5);
+      mgl.vertex3(1.35, -1, -1.5); mgl.vertex3(-1.35, -1, -1.5);
+      mgl.end();
+      mgl.enableTexture(true);
+    }
+
+    mgl.enableBlend(true);
+    mgl.blendFunc(mgl.SRC_ALPHA, mgl.ONE);
 
     mgl.translate(0, 0, -4.2);
     mgl.rotate(t * 12, 0, 1, 0);
@@ -78,8 +105,9 @@ export class Rogplay {
     mgl.begin(mgl.QUADS);
     for (let i = 0; i < reveal; i++) {
       const px = this.orbit[i * 3], py = this.orbit[i * 3 + 1], pz = this.orbit[i * 3 + 2];
-      const a = 0.05 + 0.12 * (i / reveal);
-      mgl.color4(0.7, 0.85, 1, a);
+      // AVI: pearly white sparkles, warm-tinted, dense
+      const a = 0.25 + 0.35 * (i / reveal);
+      mgl.color4(1, 0.97, 0.9, a);
       mgl.texCoord2(0, 0);
       mgl.vertex3(px - bx.x + by.x, py - bx.y + by.y, pz - bx.z + by.z);
       mgl.texCoord2(1, 0);

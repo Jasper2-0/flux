@@ -146,6 +146,17 @@ for rec_va in range(TABLE_START, TABLE_END, RECORD):
             s = cstr(params)
             if s and len(s) > 3:
                 rec['params_str'] = s
+            # resolve any dwords inside the block that point at strings —
+            # this is how records name their scene files and textures
+            refs = []
+            for i in range(0, 64, 4):
+                ptr = struct.unpack_from('<I', blob, i)[0] if i + 4 <= len(blob) else 0
+                if 0x432000 <= ptr < 0x43a000:
+                    rs = cstr(ptr)
+                    if rs and len(rs) > 3:
+                        refs.append({'offset': i, 'str': rs})
+            if refs:
+                rec['params_refs'] = refs
     records.append(rec)
 
 records.sort(key=lambda r: (r['time'], r['va']))
