@@ -286,6 +286,52 @@ td.num { color: var(--amber); }
 .math i { color: var(--accent); font-style: normal; }
 .math em { color: var(--amber); font-style: normal; }
 
+/* ---- plain-words formula translations ---- */
+.plainwords {
+  font-size: 14.5px;
+  color: var(--ink);
+  border-left: 2px solid var(--amber);
+  padding: 2px 0 2px 14px;
+  margin: -6px 0 20px;
+  max-width: 66ch;
+}
+.plainwords em { color: var(--amber); font-style: normal; }
+
+/* ---- glossary ---- */
+.glossary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+  font-size: 13px;
+  color: var(--dim);
+}
+.glossary > div {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  line-height: 1.55;
+}
+.glossary b {
+  font-family: var(--mono);
+  color: var(--accent);
+  font-weight: 400;
+  display: block;
+  margin-bottom: 2px;
+  letter-spacing: 0.06em;
+}
+
+/* ---- viewer annotation overlay ---- */
+.viewer .anno {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4; /* above the GL canvas (2) and the scanlines (3) */
+  pointer-events: none;
+}
+
 /* ---- math labs ---- */
 .lab {
   background: var(--panel);

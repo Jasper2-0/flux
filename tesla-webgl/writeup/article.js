@@ -6,6 +6,21 @@
   const gateStatus = $('#gate-status');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Shared registry for the secondary scripts (math labs, primer). Created
+  // synchronously — those scripts execute before the async asset work below
+  // finishes, and must be able to register hooks immediately. Asset handles
+  // (pak, scenes) are filled in later; `ready` resolves when they exist.
+  const onTimeHooks = {}; // key -> [fn(localTime)] for plot/lab playheads
+  const addTimeHook = (key, fn) => { (onTimeHooks[key] = onTimeHooks[key] || []).push(fn); };
+  const annotators = {}; // key -> fn(ctx2d, W, H, localTime)
+  let labsReadyResolve;
+  window.__teslaLabs = {
+    onTime: addTimeHook,
+    annotators,
+    reducedMotion,
+    ready: new Promise((resolve) => { labsReadyResolve = resolve; }),
+  };
+
   const setGate = (msg) => { if (gateStatus) gateStatus.textContent = msg; };
 
   function b64ToBuffer(b64) {
@@ -347,10 +362,9 @@
   ];
 
   let active = null;
-  const onTimeHooks = {}; // key -> [fn(localTime)] for plot/lab playheads
-  const addTimeHook = (key, fn) => { (onTimeHooks[key] = onTimeHooks[key] || []).push(fn); };
-  // secondary scripts (math labs) register their own playhead listeners here
-  window.__teslaLabs = { onTime: addTimeHook, scenes, reducedMotion };
+  window.__teslaLabs.scenes = scenes;
+  window.__teslaLabs.pak = pak;
+  labsReadyResolve();
 
   function buildViewer(def) {
     const host = document.querySelector('[data-viewer="' + def.key + '"]');
@@ -368,6 +382,14 @@
     ph.className = 'placeholder';
     ph.textContent = glFailed ? ('webgl2 unavailable: ' + glFailed) : 'scroll here to activate';
     hole.appendChild(ph);
+    // per-viewer annotation layer, drawn over the GL canvas when enabled
+    const anno = document.createElement('canvas');
+    anno.className = 'anno';
+    anno.width = 640;
+    anno.height = 480;
+    hole.appendChild(anno);
+    def.anno = anno;
+    def.annoCtx = anno.getContext('2d');
     host.appendChild(hole);
     def.hole = hole;
 
@@ -406,6 +428,19 @@
     wire.appendChild(wcb);
     wire.appendChild(document.createTextNode('wireframe'));
     bar.appendChild(wire);
+
+    const nums = document.createElement('label');
+    const ncb = document.createElement('input');
+    ncb.type = 'checkbox';
+    ncb.checked = true;
+    def.showNums = true;
+    ncb.addEventListener('change', () => {
+      def.showNums = ncb.checked;
+      if (!ncb.checked) def.annoCtx.clearRect(0, 0, 640, 480);
+    });
+    nums.appendChild(ncb);
+    nums.appendChild(document.createTextNode('show the numbers'));
+    bar.appendChild(nums);
 
     if (def.overlay) {
       const ol = document.createElement('label');
@@ -511,6 +546,13 @@
     def.hud.innerHTML = 'debug — array draws <b>' + counters.draws +
       '</b> · immediate batches <b>' + counters.imm +
       '</b> · vertices/frame <b>' + counters.verts + '</b>';
+
+    // live annotation overlay: the formulas' current values, on the picture
+    const annotate = annotators[def.key];
+    if (annotate && def.showNums) {
+      def.annoCtx.clearRect(0, 0, 640, 480);
+      annotate(def.annoCtx, 640, 480, def.t);
+    }
 
     const hooks = onTimeHooks[def.key];
     if (hooks) for (const fn of hooks) fn(def.t);

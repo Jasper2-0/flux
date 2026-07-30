@@ -67,11 +67,16 @@
     if (!g) return;
     const { cv, ctx } = g;
     const sIn = $('#sz-s'), thIn = $('#sz-th'), readout = $('#sz-read');
+    const glowIn = $('#sz-glow'), exagIn = $('#sz-exag');
     const visible = watchVisible(cv);
     let phase = 0;
 
     function draw() {
       const s = parseFloat(sIn.value), th = parseFloat(thIn.value) * Math.PI / 180;
+      const glow = glowIn && glowIn.checked;
+      // honest mode uses the true s^i spacing; exaggerated mode raises the
+      // exponent so the 18 copies separate enough to read as a diagram
+      const exp = (exagIn && exagIn.checked) ? 1.4 : 1.0;
       const W = cv.width, H = cv.height;
       ctx.clearRect(0, 0, W, H);
       ctx.save();
@@ -81,19 +86,25 @@
       for (let i = 0; i < 18; i++) {
         ctx.save();
         ctx.rotate(ang);
-        ctx.strokeStyle = 'rgba(111,195,255,0.5)';
-        ctx.fillStyle = 'rgba(111,195,255,0.055)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.rect(-scale, -scale * 0.75, scale * 2, scale * 1.5);
-        ctx.fill();
-        ctx.stroke();
+        if (glow) {
+          // filled soft quads: outlines melt into the smoke of the effect
+          const grd = ctx.createRadialGradient(0, 0, scale * 0.1, 0, 0, scale * 1.1);
+          grd.addColorStop(0, 'rgba(140,190,235,0.16)');
+          grd.addColorStop(1, 'rgba(140,190,235,0)');
+          ctx.fillStyle = grd;
+          ctx.fillRect(-scale, -scale * 0.75, scale * 2, scale * 1.5);
+        } else {
+          ctx.strokeStyle = 'rgba(111,195,255,0.5)';
+          ctx.fillStyle = 'rgba(111,195,255,0.055)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.rect(-scale, -scale * 0.75, scale * 2, scale * 1.5);
+          ctx.fill();
+          ctx.stroke();
+        }
         ctx.restore();
-        // the demo multiplies the current matrix by R(θ)·S(s) each copy, so
-        // copy i carries rotation i·θ and scale s^i — but s > 1 shrinks here
-        // because we walk outward-in for readability
         ang += th;
-        scale /= s === 0 ? 1 : Math.pow(s, 1.4);
+        scale /= s === 0 ? 1 : Math.pow(s, exp);
       }
       ctx.restore();
       readout.textContent = 's = ' + s.toFixed(3) + ' · θ = ' + (th * 180 / Math.PI).toFixed(0) +
@@ -107,8 +118,8 @@
       }
       requestAnimationFrame(loop);
     })();
-    sIn.addEventListener('input', draw);
-    thIn.addEventListener('input', draw);
+    for (const el of [sIn, thIn]) el.addEventListener('input', draw);
+    for (const el of [glowIn, exagIn]) if (el) el.addEventListener('change', draw);
     draw();
   })();
 
@@ -125,7 +136,10 @@
     function draw() {
       const W = cv.width, H = cv.height, pad = 30;
       ctx.clearRect(0, 0, W, H);
-      const window0 = T - 6, window1 = T + 0.5;
+      // window sized to the trail itself, so the comb always fills the axis
+      const step0 = 0.014 * (8 * Math.sin(T) + 12);
+      const span = step0 * 19;
+      const window0 = T - span - span * 0.15, window1 = T + span * 0.15;
       const xOf = (t) => pad + ((t - window0) / (window1 - window0)) * (W - pad * 2);
 
       ctx.strokeStyle = COL.grid;
@@ -135,18 +149,36 @@
       ctx.stroke();
       ctx.fillStyle = COL.dim;
       mono(ctx, 10);
-      for (let t = Math.ceil(window0); t <= window1; t++) {
-        ctx.fillText(t.toFixed(0) + 's', xOf(t) - 6, H - 18);
+      const tickEvery = span > 3 ? 1 : 0.5;
+      for (let t = Math.ceil(window0 / tickEvery) * tickEvery; t <= window1; t += tickEvery) {
+        ctx.fillText(t.toFixed(1) + 's', xOf(t) - 10, H - 18);
         ctx.fillRect(xOf(t), H - 38, 1, 8);
       }
 
-      // the 20 shells: each drawn at an earlier time, dimmer and smaller
+      // the 20 shells: each drawn at an earlier time, dimmer and smaller.
+      // above each tick, a ghost circle — the sphere as it looked at that
+      // sample time — so the comb visibly becomes a motion trail
       let t = T;
       const step = 0.014 * (8 * Math.sin(T) + 12);
+      const ghostY = 74;
+      for (let i = 19; i >= 0; i--) {
+        let tt = T;
+        for (let k = 0; k < i; k++) tt -= 0.014 * (8 * Math.sin(T) + 12);
+        const alpha = Math.max(0, 1 - i / 12);
+        const x = xOf(tt);
+        if (alpha > 0) {
+          ctx.strokeStyle = 'rgba(138,208,200,' + (0.12 + alpha * 0.55) + ')';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(x, ghostY, 8 + alpha * 20, 0, TAU);
+          ctx.stroke();
+        }
+      }
+      ctx.lineWidth = 1;
       for (let i = 0; i < 20; i++) {
         const alpha = Math.max(0, 1 - i / 12);
         const x = xOf(t);
-        const h = 18 + alpha * 52;
+        const h = 14 + alpha * 34;
         ctx.strokeStyle = alpha > 0 ? 'rgba(138,208,200,' + (0.25 + alpha * 0.75) + ')' : 'rgba(255,155,176,0.5)';
         ctx.lineWidth = alpha > 0 ? 2 : 1;
         ctx.beginPath();
@@ -161,8 +193,9 @@
       }
       ctx.fillStyle = COL.dim;
       ctx.fillText('spacing now: Δ = 0.014·(8·sin t + 12) = ' + step.toFixed(3) + ' s', pad, 16);
+      ctx.fillText('the circles are the ball at each sample time — overlapped, they are the trail', pad, 32);
       ctx.fillStyle = COL.e;
-      ctx.fillText('α = 1 − i/12 goes negative past i = 12 → shells 13…19 clamp invisible', pad, 32);
+      ctx.fillText('α = 1 − i/12 goes negative past i = 12 → shells 13…19 clamp invisible', pad, 48);
     }
 
     labs.onTime('shadeball', (t) => { T = t; if (visible.v) draw(); });
@@ -882,5 +915,122 @@
       requestAnimationFrame(loop);
     })();
     draw();
+  })();
+
+  /* ================================================================
+   * Viewer annotations — "show the numbers": the formulas' live values
+   * drawn directly over the running effect.
+   * ================================================================ */
+  (function annotations() {
+    if (!labs.annotators) return;
+    const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
+    function panelBg(ctx, x, y, w, h) {
+      ctx.fillStyle = 'rgba(4,6,10,0.62)';
+      ctx.fillRect(x, y, w, h);
+    }
+    function meter(ctx, x, y, w, label, value, color) {
+      mono(ctx, 12);
+      ctx.fillStyle = '#9fb0bd';
+      ctx.fillText(label, x, y - 6);
+      ctx.fillStyle = '#1b2431';
+      ctx.fillRect(x, y, w, 8);
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w * clamp01(value), 8);
+      ctx.fillStyle = color;
+      ctx.fillText(value.toFixed(2), x + w + 8, y + 8);
+    }
+    function line(ctx, x, y, text, color) {
+      mono(ctx, 12);
+      ctx.fillStyle = color || '#9fb0bd';
+      ctx.fillText(text, x, y);
+    }
+    const piecewise = (pts) => (t) => {
+      if (t <= pts[0][0]) return pts[0][1];
+      for (let i = 0; i < pts.length - 1; i++) {
+        if (t >= pts[i][0] && t < pts[i + 1][0]) {
+          const f = (t - pts[i][0]) / (pts[i + 1][0] - pts[i][0]);
+          return pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f;
+        }
+      }
+      return pts[pts.length - 1][1];
+    };
+
+    const szEnv = piecewise([[0, 0], [3.3, 0], [6.5, 1], [8, 1], [9, 0], [10, 0], [13, 1], [15, 0], [16, 1], [20, 0], [22, 1], [24, 0]]);
+    labs.annotators.spinzoom = (ctx, W, H, t) => {
+      panelBg(ctx, 12, 12, 296, 64);
+      meter(ctx, 22, 36, 180, 'envelope brightness (the graph below, now)', szEnv(Math.max(0, t - 0.1)), '#6fc3ff');
+      line(ctx, 22, 64, 'each quad drawn at α = 0.23 × this', '#67737f');
+    };
+
+    const sbKeys = piecewise([[0, 0], [1.5, 1], [5, 1], [7, 0], [9, 1], [14.5, 1], [16, 0], [18, 1], [20, 1], [24, 0]]);
+    labs.annotators.shadeball = (ctx, W, H, t) => {
+      panelBg(ctx, 12, 12, 316, 64);
+      meter(ctx, 22, 36, 180, 'title/ball envelope', clamp01(sbKeys(t)), '#8ad0c8');
+      line(ctx, 22, 64, 'shell spacing Δ = ' + (0.014 * (8 * Math.sin(t) + 12)).toFixed(3) + ' s (see comb below)', '#67737f');
+    };
+
+    labs.annotators.splines = (ctx, W, H, t) => {
+      panelBg(ctx, 12, 12, 306, 64);
+      meter(ctx, 22, 36, 180, 'cage sphere alpha 0.3 + 0.1·sin(2t)', 0.3 + 0.1 * Math.sin(t * 2), '#f0e28a');
+      line(ctx, 22, 64, '16 trails × 64 sprites, each at p(t − 0.036·i)', '#67737f');
+    };
+
+    labs.annotators.ffdenv = (ctx, W, H, t) => {
+      const cycle = (t * 0.5) % 6;
+      const A = Math.floor(cycle), B = (A + 1) % 6;
+      const frac = cycle - A;
+      const fT = Math.cos((1 - frac) * Math.PI) * 0.5 + 0.5;
+      panelBg(ctx, 12, 12, 306, 84);
+      line(ctx, 22, 32, 'morphing shape ' + A + ' → ' + B + '   (the ring below)', '#b48cff');
+      meter(ctx, 22, 56, 180, 'mix fT (eased)', fT, '#f0b46a');
+      meter(ctx, 22, 82, 180, 'raw t before easing', frac, '#67737f');
+    };
+
+    labs.annotators.energystream = (ctx, W, H, t) => {
+      const m = t > 38 ? 2.5 : t > 25 ? 2 : 1;
+      panelBg(ctx, 12, 12, 322, 64);
+      line(ctx, 22, 32, 'phase: speed multiplier m = ' + m + (t > 15 ? '  · texture 2' : '  · texture 1'), '#f0b46a');
+      line(ctx, 22, 52, 'flares wrap: x = fmod(x₀ + v·' + m + '·t, 800) − 400', '#9fb0bd');
+      line(ctx, 22, 68, 'fog eats everything past 500 units', '#67737f');
+    };
+
+    labs.annotators.tubes = (ctx, W, H, t) => {
+      const ring = (v) => 50 + 10 * Math.sin(2.14 * t * v * 0.55);
+      panelBg(ctx, 12, 12, 322, 64);
+      line(ctx, 22, 32, 'ring radii breathe: r(v=1) = ' + ring(1).toFixed(0) + ' · r(v=3) = ' + ring(3).toFixed(0) + ' · r(v=6) = ' + ring(6).toFixed(0), '#8ae0a0');
+      line(ctx, 22, 52, 'every frame the whole surface re-splines (drag the', '#9fb0bd');
+      line(ctx, 22, 68, 'curve toy below to feel what that means)', '#9fb0bd');
+    };
+
+    labs.annotators.polkalike = (ctx, W, H, t) => {
+      const phase = t < 10 ? 1 : t < 20 ? 2 : 3;
+      panelBg(ctx, 12, 12, 322, 48);
+      line(ctx, 22, 32, 'emitter path: phase ' + phase + ' of 3 (see paths below)', '#ff9bb0');
+      line(ctx, 22, 52, 'sprite α = −z/300 + 0.2 — born dark, brighten as they near', '#67737f');
+    };
+
+    labs.annotators.facemorph = (ctx, W, H, t) => {
+      const seq = [1, 0, 3, 0];
+      const cycle = (t * 0.5) % 4;
+      const A = seq[Math.floor(cycle)], B = seq[(Math.floor(cycle) + 1) % 4];
+      const frac = cycle - Math.floor(cycle);
+      const fT = Math.cos((1 - frac) * Math.PI) * 0.5 + 0.5;
+      panelBg(ctx, 12, 12, 306, 84);
+      line(ctx, 22, 32, 'head ' + A + ' → head ' + B + '   (sequence 1→0→3→0)', '#e0a0ff');
+      meter(ctx, 22, 56, 180, 'mix fT (eased)', fT, '#f0b46a');
+      line(ctx, 22, 82, 'skin UVs rotating +30°/s and −20°/s (grids below)', '#67737f');
+    };
+
+    labs.annotators.thing = (ctx, W, H, t) => {
+      const global = t > 26.5 ? clamp01(1 + 26.5 - t) : 1;
+      const l1 = (t < 8 ? clamp01((8 - t) * 0.3) : 0) * global;
+      const l2 = (t >= 8 ? clamp01((t - 16) * 0.3) : 0) * global;
+      const l3 = (t < 8 ? 1 - clamp01((8 - t) * 0.3) : 1 - clamp01((t - 16) * 0.3)) * global;
+      panelBg(ctx, 12, 12, 306, 104);
+      meter(ctx, 22, 36, 180, 'credit: saffron', l1, '#f0e28a');
+      meter(ctx, 22, 62, 180, 'credit: radix / lluvia', l3, '#ff9bb0');
+      meter(ctx, 22, 88, 180, 'credit: yoghurt', l2, '#b48cff');
+    };
   })();
 })();

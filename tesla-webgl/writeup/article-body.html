@@ -221,9 +221,155 @@ vEyeDist = -eye.z;</code></pre>
   </div>
 </section>
 
-<section id="s-effects">
+<section id="s-primer">
   <div class="col">
     <div class="eyebrow">05</div>
+    <h2>Five pictures before the formulas</h2>
+    <p>
+      Everything the effects do is built from five small ideas. If formulas
+      make you tense, hold on to these pictures instead — every formula on
+      this page is just one of them wearing symbols. If your math education
+      was rough: none of what follows needs anything you were graded on.
+      Each picture is a toy — play with it until it feels obvious, then move
+      on.
+    </p>
+
+    <h3>1 &middot; sin() is a wheel, seen from the side</h3>
+    <p>
+      Whenever code says <code>sin(t)</code>, picture a point riding a
+      spinning wheel and only watch its <em>height</em>. The height wobbles
+      smoothly between &minus;1 and +1 forever. That&rsquo;s all sine is:
+      the smoothest possible wobble, free to rescale
+      (<code>30&middot;sin(t)</code> wobbles between &plusmn;30) and to speed
+      up (<code>sin(2t)</code> spins twice as fast). Demos lean on it because
+      one cheap function gives you organic, endless motion.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab">
+      <canvas id="toy-sine" width="960" height="260"></canvas>
+      <div class="controls">
+        <label>wheel speed <input type="range" id="sine-speed" min="0.2" max="4" step="0.1" value="1.2" style="width:140px"></label>
+      </div>
+    </div>
+    <div class="labcap">the orange bar is the only thing sine measures &mdash; watch it become the wave</div>
+  </div>
+  <div class="col">
+    <p class="note">
+      One vocabulary note so the formulas read cleanly: angles come in two
+      flavors. Degrees (a full turn = 360&deg;) appear where the code calls
+      <code>glRotatef</code>; radians (a full turn = 2&pi; &asymp; 6.28)
+      appear inside <code>sin()</code>. Same idea, different rulers. And
+      throughout this page, <i>t</i> just means <em>seconds of the
+      soundtrack</em>.
+    </p>
+
+    <h3>2 &middot; mixing: the slider between two things</h3>
+    <p>
+      Take any two shapes with the same number of points. Pick a number
+      <i>t</i> between 0 and 1. Move every point of A toward its partner in
+      B, exactly <i>t</i> of the way. At t&nbsp;=&nbsp;0.25 you have a shape
+      that&rsquo;s 75% A and 25% B. Programmers call it <em>lerp</em>
+      (linear interpolation); artists call it a crossfade. The morphing
+      metaballs and the morphing heads later on this page are nothing more
+      than this slider, moving on its own.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab">
+      <canvas id="toy-lerp" width="960" height="300"></canvas>
+      <div class="controls">
+        <input type="range" id="lerp-t" min="0" max="1" step="0.005" value="0.4" aria-label="mix amount">
+        <label><input type="checkbox" id="lerp-ease"> ease it (the demo&rsquo;s trick)</label>
+        <span class="kv" id="lerp-read"></span>
+      </div>
+    </div>
+    <div class="labcap">drag the slider &mdash; then turn on easing and feel the difference: eased motion rests at both ends instead of jerking</div>
+  </div>
+
+  <div class="col">
+    <h3>3 &middot; a matrix is a recorded move</h3>
+    <p>
+      The scariest-looking notation ahead is the matrix product
+      M&nbsp;=&nbsp;M&middot;R&middot;S. Here is everything it means:
+      a matrix is a <em>recorded move</em> (&ldquo;turn 12&deg;&rdquo;,
+      &ldquo;shrink to 90%&rdquo;), and multiplying matrices means
+      <em>&ldquo;then also do this.&rdquo;</em> Moves stack: turn-then-shrink
+      eighteen times is one matrix you built up step by step. Press the
+      buttons below &mdash; each one records a move onto the pile, and the
+      trail shows every pose along the way. Press
+      <em>repeat &times;18</em> and you will accidentally build the
+      demo&rsquo;s opening effect.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab">
+      <canvas id="toy-stack" width="960" height="360"></canvas>
+      <div class="controls">
+        <button id="stack-turn">turn 12&deg;</button>
+        <button id="stack-shrink">shrink &times;0.9</button>
+        <button id="stack-grow">grow &times;1.1</button>
+        <button id="stack-both">turn + shrink</button>
+        <button id="stack-x18">repeat &times;18</button>
+        <button id="stack-reset">reset</button>
+        <span class="kv" id="stack-read"></span>
+      </div>
+    </div>
+    <div class="labcap">every press multiplies one more move onto the stack &mdash; the glow is additive, like the demo</div>
+  </div>
+
+  <div class="col">
+    <h3>4 &middot; UV: an image address between 0 and 1</h3>
+    <p>
+      How does a flat picture wrap around a 3D shape? Every corner of every
+      triangle carries a pair of numbers (u,&nbsp;v) &mdash; an
+      <em>address</em> into the image, where (0,0) is one corner and (1,1)
+      the opposite one. The GPU looks up the color at that address. Slide the
+      addresses around over time and the picture crawls across the surface
+      &mdash; that&rsquo;s the &ldquo;scrolling texture&rdquo; trick used in
+      half the effects here.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="toy-uv" width="960" height="330"></canvas></div>
+    <div class="labcap">move your pointer over the image &mdash; you are reading texture addresses</div>
+  </div>
+
+  <div class="col">
+    <h3>5 &middot; paint vs light</h3>
+    <p>
+      Normal transparency works like paint: each new layer covers what&rsquo;s
+      underneath. The demo mostly uses the other mode &mdash;
+      <em>additive</em> blending, which works like stage lights: each layer
+      <em>adds</em> its energy, and overlaps build toward white. Once you
+      know to look for it, you can read the whole demo this way: almost
+      everything glowing is many dim copies of something cheap, added
+      together.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="toy-blend" width="960" height="360"></canvas></div>
+    <div class="labcap">same three blobs, two rules &mdash; the right panel is the demo&rsquo;s world</div>
+  </div>
+
+  <div class="col">
+    <h3>tiny glossary</h3>
+    <div class="glossary">
+      <div><b>normal</b> an arrow sticking straight out of a surface, one per point &mdash; tells the code which way the surface faces</div>
+      <div><b>lerp</b> the mixing slider from picture 2</div>
+      <div><b>envelope</b> a hand-drawn volume curve over time &mdash; keyframes with straight lines between them</div>
+      <div><b>mod</b> wrap-around counting: <code>fmod(x, 800)</code> keeps x inside 0&ndash;800 like a clock face keeps hours inside 12</div>
+      <div><b>clamp</b> squeeze a number into a range: below 0 becomes 0, above 1 becomes 1</div>
+      <div><b>&lfloor;x&rfloor;</b> round down: &lfloor;3.9&rfloor; = 3</div>
+      <div><b>U(&minus;1,1)</b> a random number, anywhere between &minus;1 and 1, all equally likely</div>
+      <div><b>t<sub>i</sub></b> a small label, not math: &ldquo;the i-th one of these&rdquo;</div>
+    </div>
+  </div>
+</section>
+
+<section id="s-effects">
+  <div class="col">
+    <div class="eyebrow">06</div>
     <h2>The eleven effects</h2>
     <p>
       Each effect is a stateless-ish object with one entry point: given the
@@ -233,6 +379,14 @@ vEyeDist = -eye.z;</code></pre>
       &mdash; same classes, same data &mdash; with a scrubber, a play button,
       wireframe x-ray, and the draw-call HUD. Only one WebGL context exists
       on this page; it docks into whichever viewer you scroll to.
+    </p>
+    <p class="note">
+      Two reading aids are on by default. <em>Show the numbers</em> draws the
+      formulas&rsquo; current values directly on the picture &mdash; the same
+      quantities the diagrams below each viewer plot, so you can watch a
+      value move in the graph and on screen at the same moment. And every
+      formula block is followed by an orange <em>&ldquo;in words&rdquo;</em>
+      translation; if the symbols ever stop making sense, drop down one line.
     </p>
   </div>
 
@@ -267,6 +421,11 @@ vEyeDist = -eye.z;</code></pre>
     </p>
     <div class="math">M<sub>i</sub> = M<sub>i&minus;1</sub> &middot; <i>R</i>(axis, &theta;(t)) &middot; <i>S</i>(s, s, 1),&nbsp;&nbsp;s = 1.02
 &rArr; copy i carries rotation i&middot;&theta; and scale s<sup>i</sup>  (s<sup>18</sup> &asymp; 1.43&times;)</div>
+    <div class="plainwords">In words: <em>start where the last copy was, turn a
+      little, grow 2%, draw the quad — do that 18 times.</em> That is
+      picture&nbsp;3 (recorded moves), pressed &ldquo;repeat &times;18.&rdquo;
+      Copy one has turned once and grown once; copy eighteen has turned 18
+      times and grown 18 times.</div>
     <p>
       A geometric progression of scales with a constant angular offset is the
       recipe for a logarithmic spiral &mdash; the copies form an exponential
@@ -284,10 +443,12 @@ vEyeDist = -eye.z;</code></pre>
       <div class="controls">
         <label>s <input type="range" id="sz-s" min="1.005" max="1.09" step="0.001" value="1.02" style="width:120px"></label>
         <label>&theta; <input type="range" id="sz-th" min="1" max="28" step="1" value="9" style="width:120px"></label>
+        <label><input type="checkbox" id="sz-glow"> make it glow</label>
+        <label><input type="checkbox" id="sz-exag" checked> exaggerate spacing</label>
         <span class="kv" id="sz-read"></span>
       </div>
     </div>
-    <div class="labcap">the transform cascade in 2D, additively composited like the effect &mdash; drag the sliders</div>
+    <div class="labcap">the same 18-copy cascade in 2D. honesty note: &ldquo;exaggerate spacing&rdquo; spreads the copies so you can see the structure &mdash; switch it off to feel how subtle the real s&nbsp;=&nbsp;1.02 is, and switch &ldquo;make it glow&rdquo; on to watch outlines melt into the smoke you see in the viewer above</div>
   </div>
 
   <div class="col">
@@ -318,6 +479,12 @@ vEyeDist = -eye.z;</code></pre>
     <div class="math">t<sub>0</sub> = t,&nbsp;&nbsp;t<sub>i+1</sub> = t<sub>i</sub> &minus; 0.014 &middot; (8&middot;sin t + 12)
 &Delta; &isin; [0.056, 0.28] s &mdash; the comb of samples stretches and squeezes with the music&rsquo;s sway
 &alpha;<sub>i</sub> = 0.3 &middot; (1 &minus; i/12) &middot; envelope(t)</div>
+    <div class="plainwords">In words: <em>draw the ball where it is now; then
+      draw it again where it was a moment ago, slightly dimmer and smaller;
+      repeat 20 times, stepping further into the past each time.</em> Like
+      the pages of a flipbook held up to the light at once. The step size
+      itself wobbles (there&rsquo;s the sine wheel again), so the trail
+      bunches and fans with the music.</div>
     <p>
       Because the step size itself depends on <code>sin&nbsp;t</code>, the
       trail breathes: when the sine is low the 20 shells bunch into a tight
@@ -331,7 +498,7 @@ vEyeDist = -eye.z;</code></pre>
   </div>
   <div class="wide">
     <div class="lab"><canvas id="lab-shadeball" width="960" height="220"></canvas></div>
-    <div class="labcap">the time comb, live &mdash; each tine is one shell&rsquo;s sample time; height = its alpha; play the viewer above and watch the spacing breathe</div>
+    <div class="labcap">the time comb, live and synced to the viewer &mdash; press play up there and watch this breathe. each tine is one shell&rsquo;s sample time; the circles above are the ball at those moments, overlapping into the trail you see on screen</div>
   </div>
 
   <div class="col">
@@ -361,6 +528,11 @@ vEyeDist = -eye.z;</code></pre>
     </p>
     <div class="math">p(t) = A &middot; ( sin(f<sub>1</sub>t) + sin(f<sub>2</sub>t + 1) )   per axis, with (f<sub>1</sub>, f<sub>2</sub>, A) different per axis
 sprite i samples p(t &minus; 0.036&middot;i) &mdash; the trail is time-shifted evaluation, no history buffer</div>
+    <div class="plainwords">In words: <em>two sine wheels of different speeds,
+      added together, steer each axis</em> — like a Spirograph whose pens
+      never quite sync up. And the glowing tail isn&rsquo;t stored anywhere:
+      sprite number 12 simply asks &ldquo;where was the curve 12 moments
+      ago?&rdquo; and draws itself there.</div>
     <p>
       The billboarding is the classic fixed-function trick. The modelview
       matrix <i>V</i> maps world to camera; its inverse maps camera axes back
@@ -409,6 +581,10 @@ sprite i samples p(t &minus; 0.036&middot;i) &mdash; the trail is time-shifted e
     <div class="math">cycle = 0.5&middot;t,&nbsp; A = &lfloor;cycle&rfloor; mod 6,&nbsp; B = (A+1) mod 6
 fT = cos((1 &minus; frac)&middot;&pi;)/2 + 1/2      <em>&larr; slope is zero at both ends</em>
 v = (1 &minus; fT)&middot;v<sub>A</sub> + fT&middot;v<sub>B</sub>,&nbsp;&nbsp;n = (1 &minus; fT)&middot;n<sub>A</sub> + fT&middot;n<sub>B</sub></div>
+    <div class="plainwords">In words: <em>every two seconds, point the mixing
+      slider (picture 2) at the next shape around the ring, with easing
+      switched on.</em> The bottom line is the slider itself, applied to
+      every point and every surface arrow. That&rsquo;s the entire morph.</div>
     <p>
       The cosine ease is what sells it: its derivative vanishes at the
       endpoints, so each shape <em>rests</em> for a beat before flowing into
@@ -428,7 +604,7 @@ v = (1 &minus; fT)&middot;v<sub>A</sub> + fT&middot;v<sub>B</sub>,&nbsp;&nbsp;n 
   </div>
   <div class="wide">
     <div class="lab"><canvas id="lab-ffdenv" width="960" height="300"></canvas></div>
-    <div class="labcap">left: the six-target morph ring, synced to the viewer above &mdash; right: the cosine ease vs. linear</div>
+    <div class="labcap">the six-target morph ring, synced to the viewer &mdash; scrub or play above and the orange arc follows; right: the cosine ease (curved) against plain linear (dashed)</div>
     <div class="lab"><canvas id="lab-envmap" width="960" height="300"></canvas></div>
     <div class="labcap">sphere-mapping: each camera-space normal picks its texel by dropping z</div>
   </div>
@@ -441,6 +617,10 @@ v = (1 &minus; fT)&middot;v<sub>A</sub> + fT&middot;v<sub>B</sub>,&nbsp;&nbsp;n 
     </p>
     <div class="math">a<sub>new</sub> = (a<sub>prev</sub> + U(&minus;1, 1)) mod 2&pi;,&nbsp;&nbsp;r = 1 + 0.3&middot;U(0,1)
 edge&nbsp;0 = c + r&middot;(sin a, cos a),&nbsp;&nbsp;edge&nbsp;1 = c + r&middot;(sin(a + w), cos(a + w))</div>
+    <div class="plainwords">In words: <em>each new piece of ribbon sits on a
+      circle, turned a random nudge left or right from the previous
+      piece.</em> Wander enough nudges in a row and you get a twist —
+      the same way a dropped garden hose ends up coiled.</div>
     <p>
       Both ribbon edges sit on the same circle, offset by the band&rsquo;s
       width angle <i>w</i> &mdash; so the ribbon is a strip of chords whose
@@ -480,6 +660,11 @@ edge&nbsp;0 = c + r&middot;(sin a, cos a),&nbsp;&nbsp;edge&nbsp;1 = c + r&middot
     </p>
     <div class="math">x(t) = fmod(x<sub>0</sub> + v&middot;m&middot;t, 800) &minus; 400        <em>m snaps 1 &rarr; 2 &rarr; 2.5 at the phase times</em>
 y(t) = y<sub>0</sub> + 2&middot;sin(7t + x<sub>0</sub>),&nbsp;&nbsp;z(t) = z<sub>0</sub> + 2&middot;cos(7t + 3.14&middot;i)</div>
+    <div class="plainwords">In words: <em>every flare slides steadily to the
+      right; when it falls off the edge it reappears on the left</em> (that
+      is all <code>fmod</code> does — clock-face counting). A small sine
+      wobble on the other two axes keeps the river from looking like rows
+      of dots on rails.</div>
     <p>
       Seeding the phase with <code>x<sub>0</sub></code> is the elegant bit
       &mdash; position doubles as a random phase, so no extra state is
@@ -522,6 +707,13 @@ y(t) = y<sub>0</sub> + 2&middot;sin(7t + x<sub>0</sub>),&nbsp;&nbsp;z(t) = z<sub
     <div class="math">q(t) = f<sub>a</sub>t&sup3; + f<sub>b</sub>t&sup2; + f<sub>c</sub>t + b
 f<sub>a</sub> = &frac12;(3b + d &minus; a &minus; 3c),&nbsp; f<sub>b</sub> = a + 2c &minus; &frac12;(5b + d),&nbsp; f<sub>c</sub> = &frac12;(c &minus; a)
 q(0) = b,&nbsp; q(1) = c,&nbsp; q&prime;(0) = (c&minus;a)/2,&nbsp; q&prime;(1) = (d&minus;b)/2   <em>&larr; C&sup1; across segments</em></div>
+    <div class="plainwords">In words: a spline point is a <em>weighted
+      average of its four nearest control points</em> — like mixing four
+      paint pots whose proportions shift smoothly as you walk along the
+      curve. The bottom line is the guarantee that matters: where one
+      segment ends, the next begins <em>at the same place, moving in the
+      same direction</em> — so the joins are invisible. You don&rsquo;t need
+      to follow the middle line; the toy below <em>is</em> that math.</div>
     <p>
       Because each segment&rsquo;s end tangent equals the next
       segment&rsquo;s start tangent, chained segments join with continuous
@@ -594,6 +786,11 @@ q(0) = b,&nbsp; q(1) = c,&nbsp; q&prime;(0) = (c&minus;a)/2,&nbsp; q&prime;(1) =
     <div class="math">(u,v,w) = (p &minus; bbox<sub>min</sub>) / cell        <em>lattice-space position</em>
 16 x-splines &rarr; 4 y-splines &rarr; 1 z-spline = 21 spline evaluations per vertex
 &asymp; 1,700 verts &times; 21 &asymp; 35k cubic evaluations per frame &mdash; on a 2000-era CPU</div>
+    <div class="plainwords">In words: <em>the mesh lives inside a jelly made
+      of control points; bend the jelly and everything inside bends with
+      it.</em> Each vertex asks its 4&times;4&times;4 neighborhood of jelly
+      points where it should be now, using the same smooth mixing as the
+      spline above — once along x, then y, then z.</div>
     <p>
       Because Catmull-Rom passes through its control points, an undeformed
       lattice reproduces the mesh exactly; every deviation of a control point
@@ -641,6 +838,11 @@ q(0) = b,&nbsp; q(1) = c,&nbsp; q&prime;(0) = (c&minus;a)/2,&nbsp; q&prime;(1) =
     </p>
     <div class="math">pass 1: uv&prime; = R(+30&deg;&middot;t) &middot; uv + (0.05t, 0.10t)
 pass 2: uv&prime; = R(&minus;20&deg;&middot;t) &middot; uv + (0.05t, &minus;0.05t)</div>
+    <div class="plainwords">In words: <em>the skin image&rsquo;s addresses
+      (picture 4) are slowly rotated and slid — twice, in opposite
+      directions, on two copies of the surface.</em> Two drifting copies of
+      the same picture interfere like two window screens sliding across
+      each other.</div>
     <p>
       Two copies of the surface texture sliding across each other at
       different angular velocities produce a beat pattern &mdash; the
@@ -654,7 +856,7 @@ pass 2: uv&prime; = R(&minus;20&deg;&middot;t) &middot; uv + (0.05t, &minus;0.05
   </div>
   <div class="wide">
     <div class="lab"><canvas id="lab-facemorph" width="960" height="340"></canvas></div>
-    <div class="labcap">the two UV lattices, synced to the viewer &mdash; the shimmer is their interference</div>
+    <div class="labcap">the two UV lattices, synced to the viewer above (scrub it and these follow) &mdash; the shimmer on the head is exactly this interference</div>
   </div>
 
   <div class="col">
@@ -688,7 +890,7 @@ pass 2: uv&prime; = R(&minus;20&deg;&middot;t) &middot; uv + (0.05t, &minus;0.05
 
 <section id="s-timing">
   <div class="col">
-    <div class="eyebrow">06</div>
+    <div class="eyebrow">07</div>
     <h2>Clocks, seeds, and staying honest</h2>
     <p>
       The original started a hardware timer on the first frame and played the
@@ -713,7 +915,7 @@ pass 2: uv&prime; = R(&minus;20&deg;&middot;t) &middot; uv + (0.05t, &minus;0.05
 
 <section id="s-ios">
   <div class="col">
-    <div class="eyebrow">07</div>
+    <div class="eyebrow">08</div>
     <h2>Getting it onto an iPhone</h2>
     <p>
       The port ran perfectly in desktop Chromium on the first full pass
@@ -753,7 +955,7 @@ pass 2: uv&prime; = R(&minus;20&deg;&middot;t) &middot; uv + (0.05t, &minus;0.05
 
 <section id="s-testing">
   <div class="col">
-    <div class="eyebrow">08</div>
+    <div class="eyebrow">09</div>
     <h2>Testing a demo without eyes</h2>
     <p>
       The port was developed in a headless environment &mdash; no window, no
