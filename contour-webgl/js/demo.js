@@ -8,6 +8,10 @@ import { Bloem } from './effects/bloem.js';
 import { Rogplay } from './effects/rogplay.js';
 import { TimScene } from './effects/timscene.js';
 import { Zoomer } from './effects/zoomer.js';
+import { Letters } from './effects/letters.js';
+import { Credit, resetCreditOrder } from './effects/credits.js';
+import { Grid1fx } from './effects/grid1fx.js';
+import { Flarefx } from './effects/flarefx.js';
 import { IntroBurst, CreditsRough, ContLogoRough, EndCard } from './effects/quickparts.js';
 
 const DEMO_LENGTH = 194; // shipped soundtrack runs 3:14
@@ -51,7 +55,10 @@ const TEXTURES = [
   'data/textures/flare1.jpg',
   'data/textures/flare8.jpg',
   'data/textures/dildo.jpg',
+  'data/textures/line6.jpg',
   'data/logo.jpg',
+  'data/letters/abc.jpg',
+  'data/credits/credits-tekst.jpg',
   'data/contourlogo-overlay-image01.jpg',
   'data/credits/credbk-1-image.jpg',
   'data/credits/credbk-2-image.jpg',
@@ -96,6 +103,7 @@ export class Demo {
     this.status('loading timeline…');
     const tl = JSON.parse(new TextDecoder().decode(await this._bytes('data/timeline.json')));
     this.timeline = tl.records.filter((r) => r.class);
+    this.font = JSON.parse(new TextDecoder().decode(await this._bytes('data/font-abc.json')));
 
     this.status('loading textures…');
     for (const t of TEXTURES) await this.tex.preload(t);
@@ -136,9 +144,20 @@ export class Demo {
     if (refs.includes('dildo.bin')) {
       return { effect: new TimScene(this.mgl, this.tex, this.dildoScene, 'data/saftext/fx8.jpg') };
     }
-    // id 455 carries neuron.bin in its parameter block (shown 94 s)
+    // neuron.bin is named inside id 455's parameter struct (a jace/flash,
+    // not the ARSE replayer itself), so this attribution is inferred from
+    // the path rather than from the constructor. The capture shows a dark
+    // mass over this section, so it is presented dim and additive.
     if (refs.includes('neuron.bin')) {
-      return { effect: new TimScene(this.mgl, this.tex, this.neuronScene, 'data/saftext/fx8.jpg') };
+      return {
+        effect: new TimScene(this.mgl, this.tex, this.neuronScene,
+                             'data/saftext/fx8.jpg', { additive: true, gain: 0.22 }),
+      };
+    }
+
+    // Scid's poem: the parameter block carries text, drift and timing
+    if (record.letters) {
+      return { effect: new Letters(this.mgl, this.tex, this.font, record.letters) };
     }
 
     switch (record.instance) {
@@ -146,8 +165,14 @@ export class Demo {
         return { effect: new Bloem(this.mgl, this.tex) };
       case 'rogplay':
         return { effect: new Rogplay(this.mgl, this.tex) };
+      case 'grid1fx':
+        return { effect: new Grid1fx(this.mgl, this.tex) };
+      case 'flarefx':
+        return { effect: new Flarefx(this.mgl, this.tex) };
       case 'zoomer':
         return { effect: new Zoomer(this.mgl, this.tex, { ending: this.opts.zoomerEnding || 'original' }) };
+      case 'credit3':
+        return { effect: new Credit(this.mgl, this.tex) };
       default:
         return null;
     }
@@ -181,6 +206,7 @@ export class Demo {
     // rebuild instance state from scratch for a clean seek
     this.instances.clear();
     this.processed.clear();
+    resetCreditOrder();
   }
 
   getTime() {

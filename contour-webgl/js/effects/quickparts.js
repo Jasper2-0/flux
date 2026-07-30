@@ -82,11 +82,12 @@ export class CreditsRough {
   }
 }
 
-// 41.5–52 s: the contour logo over rippling copper
+// 41.5–52 s: the contour wordmark. The rippling copper underneath is the
+// real nixfx/contlogo (Tim's replayer on dildo.bin), so this draws only
+// the overlay artwork on top of it.
 export class ContLogoRough {
   constructor(mgl, tex) {
     this.mgl = mgl;
-    this.bg = tex.loadTexture('data/saftext/fx8.jpg');
     this.logo = tex.loadTexture('data/contourlogo-overlay-image01.jpg');
   }
   do(time, timeStart) {
@@ -96,12 +97,6 @@ export class ContLogoRough {
     mgl.depthMask(false);
     mgl.enableCullFace(false);
     mgl.enableTexture(true);
-    mgl.enableBlend(false);
-    const s = 0.04 * t;
-    mgl.bindTexture(this.bg);
-    const dim = 0.65 + 0.1 * Math.sin(t * 1.7);
-    mgl.color4(dim, dim * 0.92, dim * 0.8, 1);
-    fullQuad(mgl, 0, s, s * 0.6, 1.3 + s, 1 + s * 0.6);
     mgl.enableBlend(true);
     mgl.blendFunc(mgl.SRC_ALPHA, mgl.ONE);
     mgl.bindTexture(this.logo);

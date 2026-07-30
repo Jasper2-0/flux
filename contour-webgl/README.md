@@ -65,11 +65,43 @@ effects — camera moves, sprite sizes, blend intensities, texture tiling —
 is reconstruction judgment awaiting comparison against the release AVI
 capture. Handedness in the TimScene replayer is a best guess until then.
 
+## The type is real
+
+Two of the demo's most visible parts are now driven by the original
+artwork and data rather than approximated:
+
+- **Scid's poem** (`js/effects/letters.js`). Each `Letters` instance's
+  48-byte parameter block decodes to a text pointer, a type, a start and
+  end position, a scale and a duration — so the eleven lines, their
+  corner placements, their inward drift and their timings all come out of
+  the executable. Glyphs are cut from `letters/abc.jpg`; the proportional
+  boxes were measured from the artwork into `data/font-abc.json`.
+  Reconstructed: cap height per unit of scale, tracking, the fit-to-width
+  rule for long lines, and the fade envelope.
+- **Balance's credits** (`js/effects/credits.js`). `credits-tekst.jpg` is
+  a type atlas holding every name and role label; the eighteen boxes were
+  measured from it. The timeline creates eight `credit3` instances on a
+  3.5-second grid but does not say which credit each shows, so the order
+  and placement follow the release capture.
+
+`grid1fx` and `flarefx` are implemented from the mathematics recovered
+out of the binary — the standing-wave radius field and the Pickover
+attractor parameter sets respectively.
+
+### A caveat worth stating
+
+`scenes/neuron.bin` is named *inside* the parameter struct of instance
+455, which is a `jace/flash` (constructor `0x41ffc0`), not the ARSE
+replayer (`0x419330`). Only the dildo scene is definitely a `TimScene`.
+The port renders the neuron scene over 455's window as dim additive
+geometry because the capture shows a dark mass there, but that
+attribution is inferred from the path, not proven from the constructor.
+
 ## Not yet ported
 
-`flarefx`, `grid1fx` (formula recovered, not yet implemented), `linefx`,
-`picflash`, `flash`, the `bally` credits, Scid's `Letters` (the poem
-renderer), and the contour logo overlay treatment. The zoomer is
+`linefx`, `picflash`, `flash`, the credit backdrop layers (`credit1`,
+`credit4`, `credit5` — currently a crossfade of the shipped paintings),
+the intro burst and the contour logo overlay treatment. The zoomer is
 integrated (`js/effects/zoomer.js`), ported from the standalone
 recreation with its measured nesting, feathered largest-first stack and
 both endings — shipped (default) and the intended aligned landing.

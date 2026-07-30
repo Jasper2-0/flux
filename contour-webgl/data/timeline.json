@@ -344,6 +344,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x438590",
+   "letters": {
+    "text": "THE BLACK LOTUS",
+    "type": 2,
+    "x0": 0.0,
+    "y0": 0.0,
+    "scale": 1.0,
+    "x1": 0.0,
+    "y1": 0.0,
+    "duration": 1.0,
+    "fade0": 4.8,
+    "fade1": 6.2
+   },
    "params_hex": "a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c9843000100000000000000cdccccbe",
    "params_refs": [
     {
@@ -509,6 +521,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x4385c0",
+   "letters": {
+    "text": "YOUR VOICE",
+    "type": 1,
+    "x0": -0.4,
+    "y0": 0.4,
+    "scale": 0.5,
+    "x1": -0.3,
+    "y1": 0.3,
+    "duration": 1.0,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "9c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f00004040909843000100000000000000cdcccc3e",
    "params_refs": [
     {
@@ -531,6 +555,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x4385f0",
+   "letters": {
+    "text": "YOUR EYES",
+    "type": 1,
+    "x0": 0.4,
+    "y0": 0.4,
+    "scale": 0.5,
+    "x1": 0.3,
+    "y1": 0.3,
+    "duration": 1.0,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "909843000100000000000000cdcccc3ecdcccc3e0000003f9a99993e9a99993e0000803f000000000000803f00004040849843000100000000000000cdccccbe",
    "params_refs": [
     {
@@ -627,6 +663,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x438620",
+   "letters": {
+    "text": "YOUR HANDS",
+    "type": 1,
+    "x0": -0.4,
+    "y0": -0.4,
+    "scale": 0.5,
+    "x1": -0.3,
+    "y1": -0.3,
+    "duration": 1.0,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "849843000100000000000000cdccccbecdccccbe0000003f9a9999be9a9999be0000803f000000000000803f00004040789843000100000000000000cdcccc3e",
    "params_refs": [
     {
@@ -649,6 +697,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x438650",
+   "letters": {
+    "text": "YOUR LIPS",
+    "type": 1,
+    "x0": 0.4,
+    "y0": -0.4,
+    "scale": 0.5,
+    "x1": 0.3,
+    "y1": -0.3,
+    "duration": 1.0,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "789843000100000000000000cdcccc3ecdccccbe0000003f9a99993e9a9999be0000803f000000000000803f000040406c9843000100000000000000cdccccbe",
    "params_refs": [
     {
@@ -681,6 +741,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x438680",
+   "letters": {
+    "text": "THE SILENCE",
+    "type": 1,
+    "x0": -0.4,
+    "y0": 0.4,
+    "scale": 0.5,
+    "x1": -0.3,
+    "y1": 0.3,
+    "duration": 1.0,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "6c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f000040405c9843000100000000000000cdccccbe",
    "params_refs": [
     {
@@ -703,6 +775,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x4386b0",
+   "letters": {
+    "text": "AND OUR WORDS",
+    "type": 1,
+    "x0": -0.4,
+    "y0": 0.0,
+    "scale": 0.5,
+    "x1": -0.3,
+    "y1": -0.1,
+    "duration": 1.0,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "5c9843000100000000000000cdccccbe000000000000003f9a9999becdccccbd0000803f000000000000803f00004040389843000100000000000000cdccccbe",
    "params_refs": [
     {
@@ -808,6 +892,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x4386e0",
+   "letters": {
+    "text": "THE LIGHT THAT DEPARTS AND RETURNS",
+    "type": 1,
+    "x0": -0.4,
+    "y0": 0.4,
+    "scale": 0.5,
+    "x1": -0.3,
+    "y1": 0.3,
+    "duration": 2.1,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "389843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e66660640000000000000803f00004040189843000100000000000000cdcc4cbe",
    "params_refs": [
     {
@@ -840,6 +936,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x438710",
+   "letters": {
+    "text": "AND A SINGLE SMILE BETWEEN US",
+    "type": 1,
+    "x0": -0.2,
+    "y0": -0.4,
+    "scale": 0.5,
+    "x1": -0.3,
+    "y1": -0.3,
+    "duration": 2.0,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "189843000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be00000040000000000000803f00004040009843000100000000000000cdccccbe",
    "params_refs": [
     {
@@ -910,6 +1018,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x438740",
+   "letters": {
+    "text": "BY THE NEED OF KNOWING",
+    "type": 1,
+    "x0": -0.4,
+    "y0": 0.05,
+    "scale": 0.5,
+    "x1": -0.4,
+    "y1": 0.0,
+    "duration": 2.3,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "009843000100000000000000cdccccbecdcc4c3d0000003fcdccccbe0000000033331340000000000000803f00004040e49743000100000000000000cdcc4cbe",
    "params_refs": [
     {
@@ -962,6 +1082,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x438770",
+   "letters": {
+    "text": "I SAW NIGHT CREATE THE DAY",
+    "type": 1,
+    "x0": -0.2,
+    "y0": -0.4,
+    "scale": 0.5,
+    "x1": -0.3,
+    "y1": -0.3,
+    "duration": 2.3,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "e49743000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be33331340000000000000803f00004040c49743000100000000000000cdccccbd",
    "params_refs": [
     {
@@ -1013,6 +1145,18 @@
    "instance": "Letters",
    "ctor": "0x41d3b0",
    "params": "0x4387a0",
+   "letters": {
+    "text": "WITHOUT US CHANGING APPEARANCE",
+    "type": 1,
+    "x0": -0.1,
+    "y0": 0.1,
+    "scale": 0.5,
+    "x1": -0.2,
+    "y1": 0.0,
+    "duration": 2.4,
+    "fade0": 0.0,
+    "fade1": 1.0
+   },
    "params_hex": "c49743000100000000000000cdccccbdcdcccc3d0000003fcdcc4cbe000000009a991940000000000000803f00004040000000000000a0400000a0c10000a041",
    "params_refs": [
     {

@@ -160,6 +160,29 @@ while rec_va < TABLE_LIMIT:
     elif kind in (4, 5):
         rec['arg'] = a
 
+    # Scid's Letters parameter block (48 bytes), layout confirmed against
+    # the strings and the release capture:
+    #   +0x00 char* text · +0x04 type (1 poem line, 2 title card)
+    #   +0x0c,+0x10 start x,y · +0x14 scale · +0x18,+0x1c end x,y
+    #   +0x20 duration · +0x24,+0x28 (title card only) fade-in window
+    if kind == 0 and b:
+        poff = va2off(b)
+        if poff is not None:
+            tptr = struct.unpack_from('<I', data, poff)[0]
+            ttype = struct.unpack_from('<I', data, poff + 4)[0]
+            txt = cstr(tptr) if 0x432000 <= tptr < 0x43a000 else None
+            if txt and ttype in (1, 2) and len(txt) > 2:
+                f = struct.unpack_from('<11f', data, poff + 4)
+                rec['letters'] = {
+                    'text': txt,
+                    'type': ttype,
+                    'x0': round(f[2], 4), 'y0': round(f[3], 4),
+                    'scale': round(f[4], 4),
+                    'x1': round(f[5], 4), 'y1': round(f[6], 4),
+                    'duration': round(f[7], 4),
+                    'fade0': round(f[8], 4), 'fade1': round(f[9], 4),
+                }
+
     # annotate pointer-ish fields with resolved strings / hexdumps
     for key, ptr in (('params', b if kind == 0 else 0), ('param', b if kind == 3 else 0)):
         if not ptr:

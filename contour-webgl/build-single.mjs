@@ -20,6 +20,10 @@ const MODULES = [
   'js/effects/rogplay.js',
   'js/effects/timscene.js',
   'js/effects/zoomer.js',
+  'js/effects/letters.js',
+  'js/effects/credits.js',
+  'js/effects/grid1fx.js',
+  'js/effects/flarefx.js',
   'js/effects/quickparts.js',
   'js/demo.js',
 ];
@@ -41,6 +45,10 @@ const engine = MODULES
 // everything demo.js touches at runtime
 const ASSETS = [
   ['data/timeline.json', 'application/json'],
+  ['data/font-abc.json', 'application/json'],
+  ['data/letters/abc.jpg', 'image/jpeg'],
+  ['data/credits/credits-tekst.jpg', 'image/jpeg'],
+  ['data/textures/line6.jpg', 'image/jpeg'],
   ['data/saftext/fx4.jpg', 'image/jpeg'],
   ['data/saftext/fx8.jpg', 'image/jpeg'],
   ['data/saftext/fx9.jpg', 'image/jpeg'],

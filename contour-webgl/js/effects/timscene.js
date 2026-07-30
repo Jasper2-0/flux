@@ -9,9 +9,14 @@
 // Shading and blend state are still reconstruction guesses.
 
 export class TimScene {
-  constructor(mgl, tex, scene, textureName) {
+  // opts.additive / opts.gain present the scene as dim glowing geometry
+  // rather than lit solids — used where the capture shows the mesh as a
+  // dark presence rather than a surface.
+  constructor(mgl, tex, scene, textureName, opts = {}) {
     this.mgl = mgl;
     this.scene = scene;
+    this.additive = !!opts.additive;
+    this.gain = opts.gain === undefined ? 1 : opts.gain;
     this.tex = tex.loadTexture(textureName);
 
     this.duration = scene.frames / scene.fps;
@@ -56,10 +61,17 @@ export class TimScene {
     mgl.multMatrix(view);
 
     mgl.enableTexture(true);
-    mgl.enableBlend(false);
-    mgl.enableDepthTest(true);
-    mgl.depthMask(true);
     mgl.enableCullFace(false);
+    if (this.additive) {
+      mgl.enableBlend(true);
+      mgl.blendFunc(mgl.SRC_ALPHA, mgl.ONE);
+      mgl.enableDepthTest(false);
+      mgl.depthMask(false);
+    } else {
+      mgl.enableBlend(false);
+      mgl.enableDepthTest(true);
+      mgl.depthMask(true);
+    }
 
     mgl.bindTexture(this.tex);
 
@@ -82,8 +94,9 @@ export class TimScene {
         const wnz = nx * om[6] + ny * om[7] + nz * om[8];
         // headlamp: light along the camera's forward row
         const d = Math.abs(wnx * cm[2] + wny * cm[5] + wnz * cm[8]);
-        const s = 0.3 + 0.7 * d;
-        col[v * 4] = s; col[v * 4 + 1] = s; col[v * 4 + 2] = s; col[v * 4 + 3] = 1;
+        const s = (0.3 + 0.7 * d) * this.gain;
+        col[v * 4] = s; col[v * 4 + 1] = s; col[v * 4 + 2] = s;
+        col[v * 4 + 3] = this.additive ? this.gain : 1;
       }
 
       mgl.drawElements(w, obj.uv, obj.faces, col);
