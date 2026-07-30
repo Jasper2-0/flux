@@ -1,0 +1,507 @@
+<div id="gate">
+  <div class="t">T E S L A</div>
+  <div class="s" id="gate-status">decoding data.pak&hellip;</div>
+</div>
+
+<header>
+  <div class="col">
+    <div class="eyebrow">porting notes &middot; demoscene archaeology</div>
+    <h1>TESLA</h1>
+    <div class="subtitle">sunflower, july 2000 &rarr; javascript / webgl2, 2026</div>
+    <p class="lede">
+      How a Windows demo from the year 2000 was brought to the browser:
+      reverse-engineering its data archive, replaying its fixed-function
+      OpenGL habits on WebGL2, and re-timing eleven effects against the
+      soundtrack. Every viewer on this page runs the <em>actual engine</em> of
+      the port against the <em>actual data files</em> of the original release
+      &mdash; scrub them, x-ray them, and watch their draw calls.
+    </p>
+    <div class="metaline">
+      <span>runtime <b>4:14</b></span>
+      <span>effects <b>11</b></span>
+      <span>assets in pak <b>22</b></span>
+      <span>port <b>&asymp;3.4k lines JS</b></span>
+      <span>original <b>&asymp;5.8k lines C++</b></span>
+    </div>
+  </div>
+  <div class="wide">
+    <svg id="timeline" role="img" aria-label="Demo timeline: eleven effects across 254 seconds"></svg>
+    <div class="plotcap">the demo&rsquo;s master timeline &mdash; click a block to jump to its section; overlapping lanes really do render on top of each other</div>
+  </div>
+</header>
+
+<section id="s-original">
+  <div class="col">
+    <div class="eyebrow">01</div>
+    <h2>The patient on the table</h2>
+    <p>
+      <em>Tesla</em> was released by the Polish/Nordic group Sunflower in July
+      2000 &mdash; a Win32 demo on OpenGL, from the era when a readme could
+      brag that a Voodoo card &ldquo;won&rsquo;t cut it because the demo uses
+      some textures larger than 256&times;256.&rdquo; The release is three
+      files: <code>tesla.exe</code>, a 3.4&nbsp;MB archive called
+      <code>data.pak</code>, and the soundtrack
+      <code>tournesol.mp3</code>. The group also published the C++ source,
+      which is what made a faithful port possible instead of a remake.
+    </p>
+    <p>
+      The architecture is pleasantly blunt. There is an effect manager holding
+      up to 64 effects, each with a start and end time in seconds. Every frame
+      it walks the list and calls <code>Do(time)</code> on whichever effects
+      are live. No scene graph, no scripting, no message bus &mdash; the
+      soundtrack is the conductor and wall-clock time is the score. The entire
+      show is eleven <code>AddEffect</code> calls. That timing table, copied
+      digit for digit, is the spine of the port; everything else hangs off it.
+    </p>
+    <p>
+      Two details of the original build tell you a lot about its year: the
+      main loop has a built-in AVI recorder (frame-by-frame
+      <code>glReadPixels</code> into a Video-for-Windows compressor &mdash;
+      how demos got captured before screen recording was easy), and the
+      effects freely mix per-frame CPU vertex math with immediate-mode
+      OpenGL. The whole demo never once uses hardware lighting: every surface
+      is either textured, alpha-blended, or both.
+    </p>
+  </div>
+</section>
+
+<section id="s-pak">
+  <div class="col">
+    <div class="eyebrow">02</div>
+    <h2>Cracking <span class="idx">data.pak</span></h2>
+    <p>
+      The release only ships <code>data.pak</code>, and the source&rsquo;s
+      archive reader wasn&rsquo;t included. Opening the file in a hex viewer
+      gives it away immediately: it starts with <code>4D 4D</code> &mdash;
+      the magic of a 3DS mesh file. So the pak stores its files as raw,
+      uncompressed blobs back to back, which means the directory must live at
+      the end. And it does: the last four bytes are a pointer to a directory
+      of <code>[offset, size, reserved, nameLen, name]</code> records with
+      DOS-style paths like <code>DATA\TEXTURES\SPHERE.JPG</code>.
+    </p>
+    <pre><code>offset 0x36B317 &larr; tail pointer (last 4 bytes of file)
+  u32 count = 22
+  entry: u32 offset &middot; u32 size &middot; u32 0 &middot; u32 nameLen &middot; char name[nameLen]</code></pre>
+    <p>
+      The port fetches the pak once and parses this directory in about forty
+      lines of JavaScript &mdash; the browser build you&rsquo;re reading this
+      on did exactly that a moment ago. Below is the <em>live</em> directory,
+      decoded from the real archive embedded in this page, with every texture
+      thumbnailed by the same decoders the demo uses (browser-native JPEG/PNG,
+      plus a hand-written TGA reader that flips rows and swizzles BGRA, just
+      like the original&rsquo;s image library). Click any tile to enlarge.
+    </p>
+    <p class="note">
+      A fun archaeology detail: the source references two textures &mdash;
+      <code>scape.jpg</code> and <code>spheresmall.png</code> &mdash; that are
+      not in the shipped pak at all. They belong to effects that were cut or
+      re-textured before the party version. The port only loads what the
+      timeline actually uses.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="assets" id="assets"></div>
+    <div class="tablewrap"><table id="paktable"></table></div>
+  </div>
+</section>
+
+<section id="s-3ds">
+  <div class="col">
+    <div class="eyebrow">03</div>
+    <h2>Reading the meshes</h2>
+    <p>
+      Three 3DS files drive the geometry effects: <code>meta.3ds</code> (six
+      blobby morph targets), <code>faces.3ds</code> (four heads), and
+      <code>kbuu2.3ds</code> (the &ldquo;tree&rdquo;). 3DS is a chunk format
+      &mdash; a tree of <code>[id, length]</code> headers &mdash; and parsing
+      it is the easy half. The hard half is reproducing the <em>quirks</em> of
+      the loader the demo linked against, because the effects depend on every
+      one of them:
+    </p>
+    <ul>
+      <li><b>Axis swap.</b> 3DS is Z-up; the loader reads every vertex as
+        <code>(x,&nbsp;z,&nbsp;y)</code> to make it Y-up.</li>
+      <li><b>UV flip.</b> Texture V is stored as <code>1&nbsp;&minus;&nbsp;v</code> on load.</li>
+      <li><b>Per-vertex collapse.</b> 3DS UVs are per-face-corner, but the
+        effects index UVs per vertex &mdash; last writer wins. The port
+        collapses them the same way rather than &ldquo;fixing&rdquo; it.</li>
+      <li><b>Averaged normals.</b> Vertex normals are the plain average of
+        adjacent face normals &mdash; not re-normalized. The env-mapping
+        passes feed on these directly, so their length matters.</li>
+      <li><b>Pivot space.</b> The MATRIX chunk (read with the same axis
+        shuffle, then inverted) maps world vertices into each object&rsquo;s
+        pivot space. The morphing effects lerp these
+        <em>pivot-space</em> positions &mdash; skip this and the morph
+        targets drift apart mid-blend.</li>
+    </ul>
+    <p>
+      The inspector below renders the parsed meshes as raw wireframes &mdash;
+      no engine, just the parser&rsquo;s output projected onto a 2D canvas.
+      The morph slider does exactly what the demo&rsquo;s morph effects do:
+      linear interpolation between two objects&rsquo; vertex arrays with a
+      cosine-eased parameter.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="meshlab" id="meshlab">
+      <canvas id="meshcanvas" width="960" height="540"></canvas>
+      <div class="controls">
+        <label>file
+          <select id="mesh-scene">
+            <option value="meta">meta.3ds</option>
+            <option value="faces" selected>faces.3ds</option>
+            <option value="kbuu">kbuu2.3ds</option>
+          </select>
+        </label>
+        <label>object <select id="mesh-a"></select></label>
+        <label>morph &rarr; <select id="mesh-b"></select></label>
+        <input type="range" id="mesh-t" min="0" max="1" step="0.001" value="0" aria-label="morph amount">
+        <span class="kv" id="mesh-info"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s-gl">
+  <div class="col">
+    <div class="eyebrow">04</div>
+    <h2>Faking fixed-function GL on WebGL2</h2>
+    <p>
+      The effects speak OpenGL&nbsp;1.2: <code>glBegin/glEnd</code>, matrix
+      stacks, <code>glColor4f</code>, blend modes, fog. None of that exists
+      in WebGL. Instead of rewriting eleven effects against a modern API
+      &mdash; and introducing eleven opportunities to change their look
+      &mdash; the port implements a ~450-line emulation layer,
+      <code>minigl.js</code>, so each effect could be translated
+      almost line by line.
+    </p>
+    <p>
+      An audit of the original source showed the effects use a surprisingly
+      small slice of GL: no lighting, no multitexture, one fog mode, five
+      blend factor combinations, three matrix modes. Everything funnels into
+      a single shader pair:
+    </p>
+    <pre><code>// vertex                          // fragment
+eye = uModelView * pos;            c = uUseVertexColor ? vColor : uColor;
+gl_Position = uProjection * eye;   if (uTexEnabled) c *= texture(uSampler, vUV);
+vUV = (uTexMatrix * uv).xy;        if (fog) c.rgb *= clamp((end - dist) / (end - start));
+vEyeDist = -eye.z;</code></pre>
+    <div class="tablewrap"><table>
+      <tr><th>fixed-function habit</th><th>port equivalent</th></tr>
+      <tr><td><code>glMatrixMode / glPushMatrix / glRotatef&hellip;</code></td>
+          <td>CPU-side matrix stacks; the top of projection, modelview and texture stacks upload as uniforms per draw</td></tr>
+      <tr><td><code>glBegin(GL_QUADS) &hellip; glEnd()</code></td>
+          <td>vertices buffered into one interleaved stream VBO; quads drawn via a pre-built shared index pattern</td></tr>
+      <tr><td><code>glVertexPointer + glDrawElements</code></td>
+          <td>per-call upload of position/UV arrays (the effects rewrite them every frame anyway)</td></tr>
+      <tr><td><code>glColor4f</code> before an array draw</td>
+          <td>a uniform &mdash; <em>not</em> a constant vertex attribute; see the iOS section for why</td></tr>
+      <tr><td><code>GL_FOG</code>, linear, black</td>
+          <td>two lines in the fragment shader scaling RGB by eye distance</td></tr>
+      <tr><td><code>glGetFloatv(GL_MODELVIEW_MATRIX)</code></td>
+          <td>read back from the CPU stack &mdash; the effects use it to build camera-facing billboards, via the demo&rsquo;s own 4&times;3 affine inverse, ported verbatim</td></tr>
+    </table></div>
+    <p>
+      Two demo-era details survive in the port on purpose. The math library
+      reproduces the original <code>CMatrix</code> memory layout and its
+      hand-rolled affine inverse exactly &mdash; billboard orientation falls
+      out of that code, and &ldquo;close enough&rdquo; math produces subtly
+      wrong sprite orientations. And <code>rand()</code> is an
+      MSVC-compatible LCG, so effects seeded by C-runtime randomness (flare
+      streams, band spawns, the scanline flicker) draw from the same
+      distribution the original did.
+    </p>
+    <p>
+      Every live viewer below shows the emulation layer&rsquo;s debug
+      counters: how many array draws, immediate-mode batches and vertices the
+      active effect pushes per frame &mdash; and a wireframe switch that
+      re-indexes every triangle as lines, which is the fastest way to see how
+      cheap this geometry really is.
+    </p>
+  </div>
+</section>
+
+<section id="s-effects">
+  <div class="col">
+    <div class="eyebrow">05</div>
+    <h2>The eleven effects</h2>
+    <p>
+      Each effect is a stateless-ish object with one entry point: given the
+      absolute time and its own start time, draw yourself. That design is why
+      the port can scrub: rendering at <code>t&nbsp;=&nbsp;40</code> requires
+      no replay of frames 0&ndash;39. The viewers below embed the real port
+      &mdash; same classes, same data &mdash; with a scrubber, a play button,
+      wireframe x-ray, and the draw-call HUD. Only one WebGL context exists
+      on this page; it docks into whichever viewer you scroll to.
+    </p>
+  </div>
+
+  <div class="col">
+    <h3 id="e-spinzoom">0:00&ndash;0:24 &middot; SPINZOOM &mdash; the flicker intro</h3>
+    <p>
+      Eighteen copies of one textured quad, each rotated and scaled a little
+      more than the last, drawn additively so they smear into a tunnel of
+      light. The choreography lives in a keyframe envelope &mdash; a list of
+      <code>(time, brightness)</code> pairs &mdash; and the envelope
+      <em>segment index</em> doubles as a mode switch: segments 5&ndash;6 spin
+      one way, 7&ndash;8 tumble fast, 9&ndash;10 breathe. Between blackouts,
+      randomized dark scanline bands (<code>CDarkQuads</code>) flicker over
+      everything &mdash; the effect this page&rsquo;s viewers pay homage to.
+    </p>
+    <p class="note">
+      This envelope is also where the iOS black-screen bug lived: the effect
+      offsets its clock by &minus;0.1&nbsp;s, so the lookup must tolerate
+      negative time. The plot&rsquo;s playhead tracks the viewer.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="spinzoom"></div>
+    <canvas class="plot" id="plot-spinzoom" width="960" height="180"></canvas>
+    <div class="plotcap">brightness envelope unrTab: 0&ndash;24 s &mdash; the blackouts between pulses are authored, not rendered</div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-shadeball">0:24&ndash;0:48 &middot; SHADEBALL &mdash; the title</h3>
+    <p>
+      A 13&times;13-segment sphere drawn <em>twenty times</em>, each copy
+      evaluated at a slightly earlier time (<code>t &minus;=
+      0.014&middot;(8&nbsp;sin&nbsp;t + 12)</code>) with a smaller scale and
+      dimmer alpha &mdash; motion trails made of time travel rather than
+      accumulation buffers. Front faces are culled so you look through each
+      shell&rsquo;s near side onto its far side, which is what gives the ball
+      its X-ray glow. The TESLA lettering is simply a full-screen PNG
+      composited over the top, faded by its own keyframe envelope.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="shadeball"></div>
+    <canvas class="plot" id="plot-shadeball" width="960" height="180"></canvas>
+    <div class="plotcap">title/ball alpha envelope &mdash; three pulses, hard zero crossings on the beat</div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-splines">0:48&ndash;1:07 &middot; SPLINES &mdash; light writing</h3>
+    <p>
+      Sixteen trails, each a chain of 64 camera-facing billboards laid along a
+      sum-of-sines path &mdash; a 3D Lissajous figure. The trail isn&rsquo;t
+      stored anywhere: sprite <em>i</em> just evaluates the same curve at
+      <code>t &minus; 0.036i</code>. The billboards face the camera via the
+      inverted modelview matrix, and blend with
+      <code>SRC_COLOR,&nbsp;ONE</code> &mdash; a self-multiplying additive
+      mode that blows out to white where trails cross. Behind them, a cage of
+      eight nested 600-unit spheres rotates in a second projection with a
+      much wider field of view.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="splines"></div>
+    <canvas class="plot" id="plot-splines" width="960" height="320"></canvas>
+    <div class="plotcap">trail no. 0&rsquo;s path, x/y projection, one 20-second window &mdash; the knots are where the additive blend flares</div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-ffdenv">1:07&ndash;1:27 &middot; FFDENV + BANDS &mdash; the morph</h3>
+    <p>
+      Two effects overlap here, exactly as in the original timeline. The
+      morph cycles through the six objects of <code>meta.3ds</code> in a
+      ring, cosine-blending pivot-space vertices <em>and normals</em>. It
+      renders twice per frame: a textured pass, then an additive
+      environment-map pass whose UVs are the morphed normals rotated into
+      camera space &mdash; 1999&rsquo;s chrome, computed on the CPU. On top:
+      <em>Bands</em>, forty ribbon trails flying at the camera, each new
+      segment angled randomly off the last so the ribbons twist.
+      Toggle the overlay off to study the morph alone.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="ffdenv"></div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-energystream">1:27&ndash;2:25 &middot; ENERGYSTREAM &mdash; the long haul</h3>
+    <p>
+      Fifty-eight seconds from one effect &mdash; a third of the demo. The
+      trick is phased reconfiguration: a fan of sixteen (later eight)
+      600-unit textured planes rotates around the X axis while scrolling its
+      UVs, and at hard-coded times the whole rig snaps 90&deg; or 180&deg;
+      and swaps texture, reading as a scene change for free. Sixteen streams
+      of 150 billboard flares race along the X axis with sine-wobbled Y/Z,
+      wrapped by <code>fmod</code> into an endless river. This is the one
+      effect that uses fog &mdash; linear, black, 200 to 500 units &mdash;
+      to sink the plane fan&rsquo;s far edge into darkness.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="energystream"></div>
+    <canvas class="plot" id="plot-energystream" width="960" height="180"></canvas>
+    <div class="plotcap">master alpha over the effect&rsquo;s 58 s &mdash; each notch is a hard-coded phase snap (15 / 25 / 38 / 58 s)</div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-tubes">2:25&ndash;2:45 &middot; TUBES &mdash; the spline organ</h3>
+    <p>
+      The most engineering-heavy effect: a 6&times;8 grid of control nodes,
+      wrapped into a cylinder, each node&rsquo;s radius driven by two beating
+      sine pulses. A Catmull-Rom patch tessellator subdivides every grid cell
+      at render time &mdash; position, UV, color <em>and</em> normals all
+      spline-interpolated &mdash; and the surface renders twice, UV-mapped
+      and camera-space env-mapped. Around it, eight rigid textured cylinders
+      spin at different rates. The seed sliders below change the
+      tessellation density live &mdash; the original shipped locked at
+      4&times;6.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="tubes"></div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-polkalike">2:45&ndash;3:23 &middot; POLKALIKE + TREE</h3>
+    <p>
+      Four tracks of 128 sprites stream toward the camera through a tunnel of
+      rotating background quads. Each track&rsquo;s spawn point traces a
+      sum-of-sines curve that switches equations at 10 s and 20 s &mdash; the
+      plot below shows all three phases. This is the demo&rsquo;s only
+      genuinely stateful effect: sprites integrate velocity frame by frame,
+      so the port steps them on a fixed 60 Hz accumulator to stay
+      speed-correct on any display. Twenty-one seconds in, the <em>Tree</em>
+      fades up on top: the <code>kbuu2.3ds</code> mesh pushed through a
+      5&times;5&times;5 Catmull-Rom free-form-deformation lattice whose
+      control points breathe with independent sine phases.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="polkalike"></div>
+    <canvas class="plot" id="plot-polkalike" width="960" height="320"></canvas>
+    <div class="plotcap">emitter paths, x/y plane &mdash; phase 1 (0&ndash;10 s), phase 2 (10&ndash;20 s), phase 3 (20 s+)</div>
+    <canvas class="plot" id="plot-tree" width="960" height="320"></canvas>
+    <div class="plotcap">live 2D slice of the tree&rsquo;s FFD lattice &mdash; the mesh is resampled through this grid every frame</div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-facemorph">3:23&ndash;3:42 &middot; FACEMORPH &mdash; the heads</h3>
+    <p>
+      The four heads of <code>faces.3ds</code> morph in the authored sequence
+      1&nbsp;&rarr;&nbsp;0&nbsp;&rarr;&nbsp;3&nbsp;&rarr;&nbsp;0, cosine-eased.
+      Three passes per frame: two UV-textured passes whose texture
+      <em>matrices</em> drift and counter-rotate against each other (the
+      liquid surface shimmer), then the additive camera-space env pass that
+      gives the bronze sheen. Depth testing is on and front faces are culled
+      &mdash; one of only two places in the demo where the depth buffer
+      matters at all. Behind the head, four of the tube cylinders return at
+      increasing scales; over everything, a full-screen vignette PNG.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="facemorph"></div>
+  </div>
+
+  <div class="col">
+    <h3 id="e-thing">3:42&ndash;4:14 &middot; THING &mdash; credits</h3>
+    <p>
+      The comedown: eight big additive quads under a tilted camera, UVs
+      drifting on independent sine phases, forming a slow aurora. The credit
+      screens are full-frame PNGs cross-faded in a fixed schedule, and the
+      scene opens with a pure white flash quad inherited from the previous
+      effect&rsquo;s final frame &mdash; a cut disguised as an exposure. When
+      the envelope of the last credit reaches zero at 254 s, the demo simply
+      stops calling effects. Roll credits, literally.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="viewer" data-viewer="thing"></div>
+    <canvas class="plot" id="plot-thing" width="960" height="180"></canvas>
+    <div class="plotcap">the three credit layers&rsquo; alphas across the outro &mdash; saffron &rarr; radix/lluvia &rarr; yoghurt</div>
+  </div>
+</section>
+
+<section id="s-timing">
+  <div class="col">
+    <div class="eyebrow">06</div>
+    <h2>Clocks, seeds, and staying honest</h2>
+    <p>
+      The original started a hardware timer on the first frame and played the
+      MP3 at the same instant, trusting the two never to drift over four
+      minutes. The port inverts that dependency: the soundtrack <em>is</em>
+      the clock. Every frame reads <code>audio.currentTime</code>, which
+      makes sync survive tab throttling, dropped frames, and seeking &mdash;
+      the arrow keys in the player literally just move the audio position and
+      the picture follows.
+    </p>
+    <p>
+      Two things resist scrubbing. Effects that integrate state
+      (PolkaLike&rsquo;s sprite tracks, Bands&rsquo; ribbons) get fixed-step
+      accumulators and are simply rebuilt when time jumps backward. And
+      C-runtime randomness had to be replayed faithfully: the port implements
+      the exact MSVC LCG (<code>seed &times; 214013 + 2531011</code>) so
+      that, e.g., the sixteen flare streams scatter the way the original
+      seeded them.
+    </p>
+  </div>
+</section>
+
+<section id="s-ios">
+  <div class="col">
+    <div class="eyebrow">07</div>
+    <h2>Getting it onto an iPhone</h2>
+    <p>
+      The port ran perfectly in desktop Chromium on the first full pass
+      &mdash; and produced <em>audio over a black screen</em> on iOS Safari.
+      That symptom was three separate bugs deep:
+    </p>
+    <ul>
+      <li><b>ImageBitmap uploads.</b> The textures were decoded with
+        <code>createImageBitmap</code> and handed to
+        <code>texImage2D</code> &mdash; a path where WebKit has shipped
+        black-texture bugs. Since every surface in the demo is textured,
+        one bug blacked out the entire show. Fix: decode through a 2D canvas
+        and upload raw RGBA bytes; identical everywhere, slightly slower,
+        bulletproof.</li>
+      <li><b>Constant vertex attributes.</b> Mesh draws set their color via
+        <code>vertexAttrib4f</code> with the array disabled &mdash;
+        historically unreliable on Safari&rsquo;s Metal-backed WebGL. Fix:
+        route the constant color through a uniform and a shader branch.</li>
+      <li><b>The real killer: a port bug hiding at t &lt; 0.1&nbsp;s.</b>
+        SpinZoom&rsquo;s clock starts at &minus;0.1 s; its envelope lookup
+        ran off the end of the table and threw &mdash; on the very first
+        frame, killing the render loop while the audio played on. Desktop
+        testing never caught it because the harness rendered fixed
+        mid-timeline stamps and never pressed play from zero.</li>
+    </ul>
+    <p>
+      The lasting fixes were procedural as much as technical: the render loop
+      now sandboxes each effect (one crash shows a red diagnostic bar instead
+      of eternal blackness), GL context loss and GL errors report themselves
+      on screen, and the test harness gained a &ldquo;press play and let it
+      actually run from zero&rdquo; test plus a sweep of every effect&rsquo;s
+      boundary timestamps &mdash; 36 edge cases that would have caught the
+      crash instantly.
+    </p>
+  </div>
+</section>
+
+<section id="s-testing">
+  <div class="col">
+    <div class="eyebrow">08</div>
+    <h2>Testing a demo without eyes</h2>
+    <p>
+      The port was developed in a headless environment &mdash; no window, no
+      GPU display, no speakers. Verification ran through Playwright driving
+      headless Chromium on a software rasterizer: load the page, force the
+      clock with a <code>timeOverride</code> hook, render, screenshot. Twenty
+      timestamps across the timeline gave a filmstrip of every scene to
+      eyeball against memory of the original; the boundary sweep and the
+      play-from-zero test guard the edges numerically. The same
+      <code>timeOverride</code> hook is what the viewers on this page use to
+      scrub &mdash; the debugging affordance became the exhibit.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="col">
+    <div>TESLA &mdash; &copy; 2000 Sunflower &middot; code yoghurt &middot; graphics saffron &middot; music radix &amp; lluvia</div>
+    <div>port &amp; write-up &mdash; 2026, from the group&rsquo;s released source and data files &middot; soundtrack &ldquo;Tournesol&rdquo;</div>
+    <div>the full demo with sound: <a id="demo-link" href="https://claude.ai/code/artifact/c26d5331-4a63-4ab7-ab5f-4e98eddb4bca">play the port</a></div>
+  </div>
+</footer>

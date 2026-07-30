@@ -1,0 +1,360 @@
+/* Tesla port write-up — committed single-theme dark: the subject is a
+   demoscene production; a light theme would betray it. */
+
+:root {
+  color-scheme: dark;
+  --bg: #06080a;
+  --panel: #0b0f14;
+  --panel-2: #0e131a;
+  --line: #1b2431;
+  --ink: #c9d4dd;
+  --dim: #67737f;
+  --faint: #3a434e;
+  --accent: #6fc3ff;   /* arc blue */
+  --accent-2: #b48cff; /* coil violet */
+  --amber: #f0b46a;
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --sans: -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+::selection { background: rgba(111, 195, 255, 0.25); }
+
+a { color: var(--accent); text-decoration-color: rgba(111, 195, 255, 0.4); }
+a:hover { text-decoration-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.col {
+  width: min(72ch, calc(100% - 40px));
+  margin: 0 auto;
+}
+.wide {
+  width: min(960px, calc(100% - 40px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ---- loading gate ---- */
+#gate {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 99;
+  font-family: var(--mono);
+  transition: opacity 0.5s;
+}
+#gate .t { letter-spacing: 0.55em; font-size: 20px; color: var(--ink); }
+#gate .s { font-size: 12px; color: var(--dim); }
+#gate.done { opacity: 0; pointer-events: none; }
+
+/* ---- hero ---- */
+header {
+  padding: 9vh 0 4vh;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+h1 {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: clamp(30px, 7vw, 54px);
+  letter-spacing: 0.5em;
+  margin: 10px 0 4px;
+  color: #e8eef3;
+  text-wrap: balance;
+}
+.subtitle {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  margin-bottom: 26px;
+}
+.lede { font-size: 18px; color: var(--ink); max-width: 60ch; }
+.metaline {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--dim);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-top: 22px;
+  font-variant-numeric: tabular-nums;
+}
+.metaline b { color: var(--amber); font-weight: 400; }
+
+/* ---- timeline map ---- */
+#timeline { display: block; width: 100%; height: auto; margin-top: 34px; }
+#timeline .blk { cursor: pointer; }
+#timeline .blk rect { transition: opacity 0.15s; }
+#timeline .blk:hover rect, #timeline .blk:focus rect { opacity: 1; }
+#timeline text {
+  font-family: var(--mono);
+  fill: var(--ink);
+  pointer-events: none;
+}
+#timeline .tick { fill: var(--faint); }
+
+/* ---- sections ---- */
+section { padding: 52px 0 12px; }
+section + section { border-top: 1px solid var(--line); }
+h2 {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: 0.14em;
+  color: #e4ebf1;
+  margin: 6px 0 18px;
+  text-wrap: balance;
+}
+h2 .idx { color: var(--accent-2); margin-right: 10px; }
+h3 {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+  margin: 34px 0 10px;
+}
+p { margin: 0 0 16px; max-width: 68ch; }
+p.note { font-size: 14px; color: var(--dim); }
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+pre {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: #b6c2cc;
+}
+pre code { background: none; border: 0; padding: 0; white-space: pre; }
+ul { padding-left: 22px; }
+li { margin-bottom: 8px; max-width: 64ch; }
+
+table {
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+th, td {
+  text-align: left;
+  padding: 6px 12px 6px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th {
+  color: var(--dim);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+td.num { color: var(--amber); }
+.tablewrap { overflow-x: auto; margin: 18px 0; }
+
+/* ---- live viewer ---- */
+.viewer {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 22px 0 8px;
+  overflow: hidden;
+}
+.viewer .screenhole {
+  position: relative;
+  background: #000;
+  aspect-ratio: 4 / 3;
+}
+.viewer .screenhole::after {
+  /* a nod to CDarkQuads: faint scanlines over every viewer */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0, 0, 0, 0.16) 3px 4px);
+}
+.viewer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2; /* above the placeholder once docked */
+}
+.viewer .placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--panel-2);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.controls button {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--faint);
+  border-radius: 4px;
+  padding: 4px 14px;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+}
+.controls button:hover { border-color: var(--accent); color: var(--accent); }
+.controls input[type="range"] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+.controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dim);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.controls input[type="checkbox"] { accent-color: var(--accent); }
+.controls .tlabel { color: var(--amber); min-width: 15ch; font-variant-numeric: tabular-nums; }
+.hud {
+  width: 100%;
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+.hud b { color: var(--accent); font-weight: 400; }
+
+/* ---- debug plots ---- */
+.plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin: 14px 0;
+}
+.plotcap {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  margin: -8px 0 18px;
+}
+
+/* ---- asset browser ---- */
+.assets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+.assets figure {
+  margin: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.assets figure:hover { border-color: var(--accent); }
+.assets figure.big { grid-column: 1 / -1; cursor: zoom-out; }
+.assets img, .assets canvas {
+  display: block;
+  width: 100%;
+  image-rendering: auto;
+  border-radius: 3px;
+  background: #000;
+}
+.assets figcaption {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--dim);
+  margin-top: 6px;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+/* ---- mesh lab ---- */
+.meshlab {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 22px 0;
+}
+.meshlab canvas { display: block; width: 100%; height: auto; background: #04060a; }
+.meshlab .controls select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--faint);
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+
+.kv {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--dim);
+}
+.kv b { color: var(--ink); font-weight: 400; }
+
+footer {
+  border-top: 1px solid var(--line);
+  margin-top: 60px;
+  padding: 40px 0 70px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #gate { transition: none; }
+}

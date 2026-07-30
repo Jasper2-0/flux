@@ -131,6 +131,13 @@ export class MiniGL {
     this._quadIndexCount = 0;
     this._growQuadIndices(4096);
 
+    // debug: render everything as line skeletons instead of filled triangles
+    this.wireframe = false;
+    this.quadLineIBO = gl.createBuffer();
+    this._quadLineIndexCount = 0;
+    this.triLineIBO = gl.createBuffer();
+    this._triLineIndexCount = 0;
+
     // scratch buffers for array draws
     this.posVBO = gl.createBuffer();
     this.uvVBO = gl.createBuffer();
@@ -168,6 +175,32 @@ export class MiniGL {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.quadIBO);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
     this._quadIndexCount = nQuads * 6;
+  }
+
+  _growQuadLineIndices(nQuads) {
+    if (this._quadLineIndexCount >= nQuads * 8) return;
+    const idx = new Uint32Array(nQuads * 8);
+    for (let q = 0; q < nQuads; q++) {
+      const b = q * 4;
+      idx.set([b, b + 1, b + 1, b + 2, b + 2, b + 3, b + 3, b], q * 8);
+    }
+    const gl = this.gl;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.quadLineIBO);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
+    this._quadLineIndexCount = nQuads * 8;
+  }
+
+  _growTriLineIndices(nTris) {
+    if (this._triLineIndexCount >= nTris * 6) return;
+    const idx = new Uint32Array(nTris * 6);
+    for (let t = 0; t < nTris; t++) {
+      const b = t * 3;
+      idx.set([b, b + 1, b + 1, b + 2, b + 2, b], t * 6);
+    }
+    const gl = this.gl;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.triLineIBO);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
+    this._triLineIndexCount = nTris * 6;
   }
 
   // ----- texture management -----
@@ -311,11 +344,24 @@ export class MiniGL {
 
     if (this.immMode === this.QUADS) {
       const quads = n >> 2;
-      this._growQuadIndices(quads);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.quadIBO);
-      gl.drawElements(gl.TRIANGLES, quads * 6, gl.UNSIGNED_INT, 0);
+      if (this.wireframe) {
+        this._growQuadLineIndices(quads);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.quadLineIBO);
+        gl.drawElements(gl.LINES, quads * 8, gl.UNSIGNED_INT, 0);
+      } else {
+        this._growQuadIndices(quads);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.quadIBO);
+        gl.drawElements(gl.TRIANGLES, quads * 6, gl.UNSIGNED_INT, 0);
+      }
     } else if (this.immMode === this.TRIANGLES) {
-      gl.drawArrays(gl.TRIANGLES, 0, n);
+      if (this.wireframe) {
+        const tris = Math.floor(n / 3);
+        this._growTriLineIndices(tris);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.triLineIBO);
+        gl.drawElements(gl.LINES, tris * 6, gl.UNSIGNED_INT, 0);
+      } else {
+        gl.drawArrays(gl.TRIANGLES, 0, n);
+      }
     } else if (this.immMode === this.LINES) {
       gl.drawArrays(gl.LINES, 0, n);
     }
@@ -344,7 +390,18 @@ export class MiniGL {
     gl.uniform4fv(this.uColor, this.curColor);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.idxIBO);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STREAM_DRAW);
-    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
+    if (this.wireframe) {
+      const tris = Math.floor(indices.length / 3);
+      const lines = new Uint32Array(tris * 6);
+      for (let t = 0; t < tris; t++) {
+        const a = indices[t * 3], b = indices[t * 3 + 1], c = indices[t * 3 + 2];
+        lines.set([a, b, b, c, c, a], t * 6);
+      }
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, lines, gl.STREAM_DRAW);
+      gl.drawElements(gl.LINES, lines.length, gl.UNSIGNED_INT, 0);
+    } else {
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STREAM_DRAW);
+      gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
+    }
   }
 }
