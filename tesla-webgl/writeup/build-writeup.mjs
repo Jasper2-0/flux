@@ -50,9 +50,10 @@ const engine = MODULES
 const css = readFileSync(join(here, 'style.css'), 'utf8');
 const body = readFileSync(join(here, 'article-body.html'), 'utf8');
 const article = readFileSync(join(here, 'article.js'), 'utf8');
+const mathlabs = readFileSync(join(here, 'mathlabs.js'), 'utf8');
 const pakB64 = readFileSync(join(root, 'data/data.pak')).toString('base64');
 
-for (const [name, text] of [['engine', engine], ['article.js', article]]) {
+for (const [name, text] of [['engine', engine], ['article.js', article], ['mathlabs.js', mathlabs]]) {
   if (text.includes('</scr' + 'ipt>')) throw new Error(name + ' contains a script-closing tag');
 }
 
@@ -65,6 +66,7 @@ const html = [
   '\n<script>\nconst G = {};\n', engine, '\nwindow.G = G;\n</script>\n',
   '<script>\nconst PAK_B64 = "', pakB64, '";\n</script>\n',
   '<script>\n', article, '\n</script>\n',
+  '<script>\n', mathlabs, '\n</script>\n',
   '</body>\n</html>\n',
 ].join('');
 

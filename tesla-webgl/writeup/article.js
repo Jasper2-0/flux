@@ -347,7 +347,10 @@
   ];
 
   let active = null;
-  const onTimeHooks = {}; // key -> fn(localTime) for plot playheads
+  const onTimeHooks = {}; // key -> [fn(localTime)] for plot/lab playheads
+  const addTimeHook = (key, fn) => { (onTimeHooks[key] = onTimeHooks[key] || []).push(fn); };
+  // secondary scripts (math labs) register their own playhead listeners here
+  window.__teslaLabs = { onTime: addTimeHook, scenes, reducedMotion };
 
   function buildViewer(def) {
     const host = document.querySelector('[data-viewer="' + def.key + '"]');
@@ -509,8 +512,8 @@
       '</b> · immediate batches <b>' + counters.imm +
       '</b> · vertices/frame <b>' + counters.verts + '</b>';
 
-    const hook = onTimeHooks[def.key];
-    if (hook) hook(def.t);
+    const hooks = onTimeHooks[def.key];
+    if (hooks) for (const fn of hooks) fn(def.t);
   }
 
   for (const def of VIEWERS) buildViewer(def);
@@ -576,7 +579,7 @@
     }
     draw();
     if (key) {
-      onTimeHooks[key] = (t) => { playhead = t; draw(); };
+      addTimeHook(key, (t) => { playhead = t; draw(); });
     }
   }
 

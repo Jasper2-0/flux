@@ -268,6 +268,46 @@ td.num { color: var(--amber); }
 }
 .hud b { color: var(--accent); font-weight: 400; }
 
+/* ---- formulas ---- */
+.math {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  color: #d8e2ea;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent-2);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.8;
+}
+.math i { color: var(--accent); font-style: normal; }
+.math em { color: var(--amber); font-style: normal; }
+
+/* ---- math labs ---- */
+.lab {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 18px 0 8px;
+}
+.lab canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #04060a;
+}
+.labcap {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  margin: 6px 0 26px;
+}
+
 /* ---- debug plots ---- */
 .plot {
   display: block;

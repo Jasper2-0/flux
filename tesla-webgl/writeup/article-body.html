@@ -259,6 +259,36 @@ vEyeDist = -eye.z;</code></pre>
     <canvas class="plot" id="plot-spinzoom" width="960" height="180"></canvas>
     <div class="plotcap">brightness envelope unrTab: 0&ndash;24 s &mdash; the blackouts between pulses are authored, not rendered</div>
   </div>
+  <div class="col">
+    <p>
+      <b>The math.</b> The tunnel is one matrix product iterated. Each of the
+      18 copies multiplies the current modelview by a small rotation and a
+      near-unit scale, so copy <i>i</i> accumulates:
+    </p>
+    <div class="math">M<sub>i</sub> = M<sub>i&minus;1</sub> &middot; <i>R</i>(axis, &theta;(t)) &middot; <i>S</i>(s, s, 1),&nbsp;&nbsp;s = 1.02
+&rArr; copy i carries rotation i&middot;&theta; and scale s<sup>i</sup>  (s<sup>18</sup> &asymp; 1.43&times;)</div>
+    <p>
+      A geometric progression of scales with a constant angular offset is the
+      recipe for a logarithmic spiral &mdash; the copies form an exponential
+      tunnel whose walls are the same quad seen at 18 depths. Because
+      blending is additive with &alpha;&nbsp;&asymp;&nbsp;0.23, regions where
+      many copies overlap saturate toward white while the rim stays dim:
+      brightness is effectively <em>counting coverage</em>. Try it below:
+      steeper &theta; twists the spiral; s closer to 1 packs the copies
+      tighter and brightens the core.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab">
+      <canvas id="lab-spinzoom" width="960" height="420"></canvas>
+      <div class="controls">
+        <label>s <input type="range" id="sz-s" min="1.005" max="1.09" step="0.001" value="1.02" style="width:120px"></label>
+        <label>&theta; <input type="range" id="sz-th" min="1" max="28" step="1" value="9" style="width:120px"></label>
+        <span class="kv" id="sz-read"></span>
+      </div>
+    </div>
+    <div class="labcap">the transform cascade in 2D, additively composited like the effect &mdash; drag the sliders</div>
+  </div>
 
   <div class="col">
     <h3 id="e-shadeball">0:24&ndash;0:48 &middot; SHADEBALL &mdash; the title</h3>
@@ -277,6 +307,31 @@ vEyeDist = -eye.z;</code></pre>
     <div class="viewer" data-viewer="shadeball"></div>
     <canvas class="plot" id="plot-shadeball" width="960" height="180"></canvas>
     <div class="plotcap">title/ball alpha envelope &mdash; three pulses, hard zero crossings on the beat</div>
+  </div>
+  <div class="col">
+    <p>
+      <b>The math.</b> The sphere is the standard latitude/longitude
+      parametrization; the interesting part is the sampling of <em>time</em>.
+      Shell <i>i</i> is not a stored trail &mdash; it re-evaluates the same
+      rotation formulas at a receding instant:
+    </p>
+    <div class="math">t<sub>0</sub> = t,&nbsp;&nbsp;t<sub>i+1</sub> = t<sub>i</sub> &minus; 0.014 &middot; (8&middot;sin t + 12)
+&Delta; &isin; [0.056, 0.28] s &mdash; the comb of samples stretches and squeezes with the music&rsquo;s sway
+&alpha;<sub>i</sub> = 0.3 &middot; (1 &minus; i/12) &middot; envelope(t)</div>
+    <p>
+      Because the step size itself depends on <code>sin&nbsp;t</code>, the
+      trail breathes: when the sine is low the 20 shells bunch into a tight
+      afterimage, when high they fan out into long streaks. And note the
+      alpha law: <code>1&nbsp;&minus;&nbsp;i/12</code> crosses zero at
+      i&nbsp;=&nbsp;12, so seven of the twenty shells are drawn with negative
+      alpha &mdash; clamped to invisible. The original renders 35% more
+      geometry than you can ever see; the port reproduces that faithfully
+      (watch the vertices counter in the viewer).
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="lab-shadeball" width="960" height="220"></canvas></div>
+    <div class="labcap">the time comb, live &mdash; each tine is one shell&rsquo;s sample time; height = its alpha; play the viewer above and watch the spacing breathe</div>
   </div>
 
   <div class="col">
@@ -298,6 +353,36 @@ vEyeDist = -eye.z;</code></pre>
     <canvas class="plot" id="plot-splines" width="960" height="320"></canvas>
     <div class="plotcap">trail no. 0&rsquo;s path, x/y projection, one 20-second window &mdash; the knots are where the additive blend flares</div>
   </div>
+  <div class="col">
+    <p>
+      <b>The math.</b> Each coordinate of a trail&rsquo;s center is a
+      two-frequency sine sum &mdash; three incommensurate pairs make a curve
+      that never repeats within the scene:
+    </p>
+    <div class="math">p(t) = A &middot; ( sin(f<sub>1</sub>t) + sin(f<sub>2</sub>t + 1) )   per axis, with (f<sub>1</sub>, f<sub>2</sub>, A) different per axis
+sprite i samples p(t &minus; 0.036&middot;i) &mdash; the trail is time-shifted evaluation, no history buffer</div>
+    <p>
+      The billboarding is the classic fixed-function trick. The modelview
+      matrix <i>V</i> maps world to camera; its inverse maps camera axes back
+      to world. So the first two columns of <i>V</i><sup>&minus;1</sup> are
+      &ldquo;screen right&rdquo; and &ldquo;screen up&rdquo; expressed in
+      world coordinates, and a quad built as
+      p&nbsp;&plusmn;&nbsp;10b<sub>x</sub>&nbsp;&plusmn;&nbsp;10b<sub>y</sub>
+      faces the camera exactly, no matter how the scene tumbles. For a pure
+      rotation the inverse is just the transpose, but the demo runs its full
+      4&times;3 affine inverse &mdash; ported bit-for-bit, because this is
+      the code that decides which way every sprite in the demo leans.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab">
+      <canvas id="lab-splines" width="960" height="420"></canvas>
+      <div class="controls">
+        <label>camera orbit <input type="range" id="bb-cam" min="0" max="360" step="1" value="30" style="width:160px"></label>
+      </div>
+    </div>
+    <div class="labcap">billboards from above: blue strokes are the sprites &mdash; whatever the camera angle, they lie along b&#8339; and stay face-on</div>
+  </div>
 
   <div class="col">
     <h3 id="e-ffdenv">1:07&ndash;1:27 &middot; FFDENV + BANDS &mdash; the morph</h3>
@@ -315,6 +400,57 @@ vEyeDist = -eye.z;</code></pre>
   </div>
   <div class="wide">
     <div class="viewer" data-viewer="ffdenv"></div>
+  </div>
+  <div class="col">
+    <p>
+      <b>The math.</b> The morph is piecewise-linear in space but eased in
+      time. With six targets on a two-second cadence:
+    </p>
+    <div class="math">cycle = 0.5&middot;t,&nbsp; A = &lfloor;cycle&rfloor; mod 6,&nbsp; B = (A+1) mod 6
+fT = cos((1 &minus; frac)&middot;&pi;)/2 + 1/2      <em>&larr; slope is zero at both ends</em>
+v = (1 &minus; fT)&middot;v<sub>A</sub> + fT&middot;v<sub>B</sub>,&nbsp;&nbsp;n = (1 &minus; fT)&middot;n<sub>A</sub> + fT&middot;n<sub>B</sub></div>
+    <p>
+      The cosine ease is what sells it: its derivative vanishes at the
+      endpoints, so each shape <em>rests</em> for a beat before flowing into
+      the next &mdash; linear interpolation would look like a machine part.
+      Note the normals are lerped with the same weight and <em>not</em>
+      re-normalized; their slight mid-blend shrinkage subtly dims the chrome
+      at the halfway point, an accident of 1999 the port preserves.
+    </p>
+    <p>
+      The chrome itself is a sphere map: rotate the vertex normal into camera
+      space, throw away z, and use
+      (n&#8339;/2&nbsp;+&nbsp;&frac12;,&nbsp;n<sub>y</sub>/2&nbsp;+&nbsp;&frac12;)
+      as texture coordinates. A normal facing the camera samples the texture
+      center; grazing normals sample the rim &mdash; a poor man&rsquo;s
+      reflection that costs one matrix multiply per vertex.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="lab-ffdenv" width="960" height="300"></canvas></div>
+    <div class="labcap">left: the six-target morph ring, synced to the viewer above &mdash; right: the cosine ease vs. linear</div>
+    <div class="lab"><canvas id="lab-envmap" width="960" height="300"></canvas></div>
+    <div class="labcap">sphere-mapping: each camera-space normal picks its texel by dropping z</div>
+  </div>
+  <div class="col">
+    <p>
+      <b>Bands&rsquo; math</b> is a constrained random walk. Each time the
+      nearest segment scrolls past the near plane, the whole ribbon shifts
+      down one slot and a fresh far-plane segment is spawned from the
+      previous one:
+    </p>
+    <div class="math">a<sub>new</sub> = (a<sub>prev</sub> + U(&minus;1, 1)) mod 2&pi;,&nbsp;&nbsp;r = 1 + 0.3&middot;U(0,1)
+edge&nbsp;0 = c + r&middot;(sin a, cos a),&nbsp;&nbsp;edge&nbsp;1 = c + r&middot;(sin(a + w), cos(a + w))</div>
+    <p>
+      Both ribbon edges sit on the same circle, offset by the band&rsquo;s
+      width angle <i>w</i> &mdash; so the ribbon is a strip of chords whose
+      orientation random-walks as it recedes. That&rsquo;s the entire twist:
+      no torsion math, just accumulated uniform noise wrapped mod&nbsp;2&pi;.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="lab-bands" width="960" height="300"></canvas></div>
+    <div class="labcap">left: live far-plane cross-section, chords spawning as the walk drifts &mdash; right: the angle walk itself</div>
   </div>
 
   <div class="col">
@@ -336,6 +472,29 @@ vEyeDist = -eye.z;</code></pre>
     <canvas class="plot" id="plot-energystream" width="960" height="180"></canvas>
     <div class="plotcap">master alpha over the effect&rsquo;s 58 s &mdash; each notch is a hard-coded phase snap (15 / 25 / 38 / 58 s)</div>
   </div>
+  <div class="col">
+    <p>
+      <b>The math.</b> The flare river is a sawtooth: each of 2,400 flares
+      advances linearly and wraps through <code>fmod</code>, with small
+      per-flare sine wobbles decorrelating the lanes:
+    </p>
+    <div class="math">x(t) = fmod(x<sub>0</sub> + v&middot;m&middot;t, 800) &minus; 400        <em>m snaps 1 &rarr; 2 &rarr; 2.5 at the phase times</em>
+y(t) = y<sub>0</sub> + 2&middot;sin(7t + x<sub>0</sub>),&nbsp;&nbsp;z(t) = z<sub>0</sub> + 2&middot;cos(7t + 3.14&middot;i)</div>
+    <p>
+      Seeding the phase with <code>x<sub>0</sub></code> is the elegant bit
+      &mdash; position doubles as a random phase, so no extra state is
+      stored per flare. The depth is handled by the demo&rsquo;s only use of
+      fog: a linear ramp that multiplies RGB by
+      <code>clamp((500&nbsp;&minus;&nbsp;d)/300)</code>. Under additive
+      blending, black fog doesn&rsquo;t &ldquo;grey out&rdquo; distant flares
+      &mdash; it makes them contribute <em>less light</em>, which is exactly
+      the right physics for glowing particles.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="lab-energystream" width="960" height="320"></canvas></div>
+    <div class="labcap">top: the fmod conveyor &mdash; flares exit right, re-enter left; bottom: the linear fog ramp that swallows them</div>
+  </div>
 
   <div class="col">
     <h3 id="e-tubes">2:25&ndash;2:45 &middot; TUBES &mdash; the spline organ</h3>
@@ -353,6 +512,40 @@ vEyeDist = -eye.z;</code></pre>
   </div>
   <div class="wide">
     <div class="viewer" data-viewer="tubes"></div>
+  </div>
+  <div class="col">
+    <p>
+      <b>The math.</b> Everything here rests on the Catmull-Rom spline: a
+      cubic through four control values that passes exactly through the
+      middle two. The demo&rsquo;s kernel, in the arrangement it computes:
+    </p>
+    <div class="math">q(t) = f<sub>a</sub>t&sup3; + f<sub>b</sub>t&sup2; + f<sub>c</sub>t + b
+f<sub>a</sub> = &frac12;(3b + d &minus; a &minus; 3c),&nbsp; f<sub>b</sub> = a + 2c &minus; &frac12;(5b + d),&nbsp; f<sub>c</sub> = &frac12;(c &minus; a)
+q(0) = b,&nbsp; q(1) = c,&nbsp; q&prime;(0) = (c&minus;a)/2,&nbsp; q&prime;(1) = (d&minus;b)/2   <em>&larr; C&sup1; across segments</em></div>
+    <p>
+      Because each segment&rsquo;s end tangent equals the next
+      segment&rsquo;s start tangent, chained segments join with continuous
+      velocity &mdash; that&rsquo;s why the tube reads as one smooth organ
+      rather than a stack of rings. The surface is the tensor-product
+      version: for each patch, four <em>column</em> splines are evaluated,
+      then those results feed a <em>row</em> spline &mdash; and not just
+      positions: UVs, colors and env-normals ride the same interpolation.
+      The tube&rsquo;s shape is the radius field
+      r(v)&nbsp;=&nbsp;pulse<sub>1</sub>(t&middot;v) with a second pulse
+      <em>accumulating</em> around each ring, which is why the cross-section
+      spirals rather than merely bulging.
+    </p>
+    <p>
+      Play with the spline below &mdash; it uses the port&rsquo;s exact
+      kernel. The yellow ticks are the demo&rsquo;s shipped tessellation
+      density (6 samples per segment); the inset shows the four basis
+      weights, including their negative lobes &mdash; the reason a
+      Catmull-Rom curve can locally overshoot its control cage.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="lab-tubes" width="960" height="420"></canvas></div>
+    <div class="labcap">draggable Catmull-Rom &mdash; the exact kernel from the port; inset: basis weights w&#8342;(t), which sum to 1 but dip negative</div>
   </div>
 
   <div class="col">
@@ -377,6 +570,50 @@ vEyeDist = -eye.z;</code></pre>
     <canvas class="plot" id="plot-tree" width="960" height="320"></canvas>
     <div class="plotcap">live 2D slice of the tree&rsquo;s FFD lattice &mdash; the mesh is resampled through this grid every frame</div>
   </div>
+  <div class="col">
+    <p>
+      <b>PolkaLike&rsquo;s math</b> is forward integration plus a rotation
+      basis. Each sprite advances
+      p&nbsp;+=&nbsp;v&middot;&Delta;t at a fixed
+      &Delta;t&nbsp;=&nbsp;1/60, and builds its corners from a rotating
+      orthogonal pair: with
+      u&nbsp;=&nbsp;(cos&nbsp;a,&nbsp;sin&nbsp;a)&middot;5 and
+      u&#8869;&nbsp;=&nbsp;(sin&nbsp;a,&nbsp;&minus;cos&nbsp;a), the quad is
+      p&nbsp;&plusmn;&nbsp;u&nbsp;&plusmn;&nbsp;u&#8869; &mdash; a square
+      spinning in the screen plane as it flies. Alpha is a pure depth ramp,
+      &alpha;&nbsp;=&nbsp;&minus;z/300&nbsp;+&nbsp;0.2, so sprites materialize
+      out of the far darkness.
+    </p>
+    <p>
+      <b>The Tree&rsquo;s math</b> is the demo&rsquo;s heaviest per-vertex
+      pipeline: free-form deformation through a 5&times;5&times;5 lattice.
+      Each mesh vertex is expressed in normalized lattice coordinates, then
+      re-interpolated through its 4&times;4&times;4 neighborhood of control
+      points with tricubic Catmull-Rom:
+    </p>
+    <div class="math">(u,v,w) = (p &minus; bbox<sub>min</sub>) / cell        <em>lattice-space position</em>
+16 x-splines &rarr; 4 y-splines &rarr; 1 z-spline = 21 spline evaluations per vertex
+&asymp; 1,700 verts &times; 21 &asymp; 35k cubic evaluations per frame &mdash; on a 2000-era CPU</div>
+    <p>
+      Because Catmull-Rom passes through its control points, an undeformed
+      lattice reproduces the mesh exactly; every deviation of a control point
+      bends all geometry in its 4-cell neighborhood, smoothly. The sandbox
+      below is the same algorithm in 2D &mdash; the same
+      <code>catmull()</code> kernel, one dimension removed. Drag the lattice
+      and watch the embedded disc follow; press <em>breathe</em> to run the
+      demo&rsquo;s actual lattice animation formulas.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab">
+      <canvas id="lab-tree" width="960" height="480"></canvas>
+      <div class="controls">
+        <button id="ffd-breathe">freeze</button>
+        <button id="ffd-reset">reset</button>
+      </div>
+    </div>
+    <div class="labcap">hands-on FFD: green control lattice, blue sample points re-interpolated through 2-pass Catmull-Rom every frame</div>
+  </div>
 
   <div class="col">
     <h3 id="e-facemorph">3:23&ndash;3:42 &middot; FACEMORPH &mdash; the heads</h3>
@@ -395,6 +632,30 @@ vEyeDist = -eye.z;</code></pre>
   <div class="wide">
     <div class="viewer" data-viewer="facemorph"></div>
   </div>
+  <div class="col">
+    <p>
+      <b>The math.</b> The morph reuses the cosine-eased lerp from FFDEnv
+      (sequence 1&rarr;0&rarr;3&rarr;0, period 2 s). What&rsquo;s new is the
+      use of the <em>texture</em> matrix as an animation channel. Each of the
+      two skin passes transforms its UVs by a drifting rotation:
+    </p>
+    <div class="math">pass 1: uv&prime; = R(+30&deg;&middot;t) &middot; uv + (0.05t, 0.10t)
+pass 2: uv&prime; = R(&minus;20&deg;&middot;t) &middot; uv + (0.05t, &minus;0.05t)</div>
+    <p>
+      Two copies of the surface texture sliding across each other at
+      different angular velocities produce a beat pattern &mdash; the
+      liquid-metal shimmer is literally moir&eacute;. The rotation rates
+      differ by 50&deg;/s, so the interference figure completes a cycle
+      roughly every 7 seconds, which is why the skin never visibly repeats
+      within the scene. The additive env pass on top uses the same
+      sphere-mapping as FFDEnv, fed by the <em>morphed</em> normals &mdash;
+      so highlights slide around the face as the identity changes.
+    </p>
+  </div>
+  <div class="wide">
+    <div class="lab"><canvas id="lab-facemorph" width="960" height="340"></canvas></div>
+    <div class="labcap">the two UV lattices, synced to the viewer &mdash; the shimmer is their interference</div>
+  </div>
 
   <div class="col">
     <h3 id="e-thing">3:42&ndash;4:14 &middot; THING &mdash; credits</h3>
@@ -412,6 +673,16 @@ vEyeDist = -eye.z;</code></pre>
     <div class="viewer" data-viewer="thing"></div>
     <canvas class="plot" id="plot-thing" width="960" height="180"></canvas>
     <div class="plotcap">the three credit layers&rsquo; alphas across the outro &mdash; saffron &rarr; radix/lluvia &rarr; yoghurt</div>
+  </div>
+  <div class="col">
+    <p class="note">
+      The aurora&rsquo;s only mathematics is incommensurate phases: quad
+      <i>i</i> drifts its UVs by sums like
+      0.4&middot;sin(t&nbsp;+&nbsp;6i)&nbsp;+&nbsp;0.4&middot;cos(2t&nbsp;+&nbsp;4i)
+      &mdash; eight quads, no two phase-locked, so the sheet of light never
+      settles. A fitting last trick: the whole demo, reduced to its simplest
+      ingredient &mdash; sines added to sines, drawn additively.
+    </p>
   </div>
 </section>
 
