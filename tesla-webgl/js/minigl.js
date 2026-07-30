@@ -31,10 +31,14 @@ in vec4 vColor;
 in float vEyeDist;
 uniform sampler2D uSampler;
 uniform bool uTexEnabled;
+uniform bool uUseVertexColor;
+uniform vec4 uColor;
 uniform vec3 uFog; // x: enabled, y: start, z: end (linear fog, black)
 out vec4 outColor;
 void main() {
-  vec4 c = vColor;
+  // uniform color for array draws: constant vertex attributes are
+  // historically unreliable on Safari's Metal-backed WebGL
+  vec4 c = uUseVertexColor ? vColor : uColor;
   if (uTexEnabled) c *= texture(uSampler, vUV);
   if (uFog.x > 0.5) {
     float f = clamp((uFog.z - vEyeDist) / (uFog.z - uFog.y), 0.0, 1.0);
@@ -47,14 +51,17 @@ const MAX_IMM_VERTS = 65536;
 
 export class MiniGL {
   constructor(canvas) {
-    const gl = canvas.getContext('webgl2', {
-      alpha: false,
-      antialias: true,
-      depth: true,
-      preserveDrawingBuffer: false,
-    });
+    const attribs = { alpha: false, antialias: true, depth: true, preserveDrawingBuffer: false };
+    let gl = canvas.getContext('webgl2', attribs);
+    if (!gl) gl = canvas.getContext('webgl2', { ...attribs, antialias: false });
     if (!gl) throw new Error('WebGL2 not available');
     this.gl = gl;
+
+    this.contextLost = false;
+    canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.contextLost = true;
+    });
 
     // enums
     this.QUADS = 1; this.TRIANGLES = 2; this.LINES = 3;
@@ -91,6 +98,8 @@ export class MiniGL {
     this.uProjection = gl.getUniformLocation(prog, 'uProjection');
     this.uTexMatrix = gl.getUniformLocation(prog, 'uTexMatrix');
     this.uTexEnabled = gl.getUniformLocation(prog, 'uTexEnabled');
+    this.uUseVertexColor = gl.getUniformLocation(prog, 'uUseVertexColor');
+    this.uColor = gl.getUniformLocation(prog, 'uColor');
     this.uFog = gl.getUniformLocation(prog, 'uFog');
     this.aPos = gl.getAttribLocation(prog, 'aPos');
     this.aUV = gl.getAttribLocation(prog, 'aUV');
@@ -298,6 +307,7 @@ export class MiniGL {
     gl.vertexAttribPointer(this.aUV, 2, gl.FLOAT, false, 36, 12);
     gl.enableVertexAttribArray(this.aColor);
     gl.vertexAttribPointer(this.aColor, 4, gl.FLOAT, false, 36, 20);
+    gl.uniform1i(this.uUseVertexColor, 1);
 
     if (this.immMode === this.QUADS) {
       const quads = n >> 2;
@@ -330,8 +340,8 @@ export class MiniGL {
     gl.vertexAttribPointer(this.aUV, 2, gl.FLOAT, false, 0, 0);
 
     gl.disableVertexAttribArray(this.aColor);
-    gl.vertexAttrib4f(this.aColor,
-      this.curColor[0], this.curColor[1], this.curColor[2], this.curColor[3]);
+    gl.uniform1i(this.uUseVertexColor, 0);
+    gl.uniform4fv(this.uColor, this.curColor);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.idxIBO);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STREAM_DRAW);

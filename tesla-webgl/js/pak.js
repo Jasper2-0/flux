@@ -70,6 +70,32 @@ export function decodeTGA(bytes) {
 
 const MIME = { JPG: 'image/jpeg', PNG: 'image/png' };
 
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Decode an image to raw RGBA via a 2D canvas. Slower than createImageBitmap
+// but behaves identically everywhere — iOS Safari has shipped WebGL texture
+// upload bugs for ImageBitmap sources, and raw pixel uploads dodge all of it.
+async function decodeToPixels(bytes, mime) {
+  const dataUrl = await blobToDataURL(new Blob([bytes], { type: mime }));
+  const img = new Image();
+  img.src = dataUrl;
+  await img.decode();
+  const cv = document.createElement('canvas');
+  cv.width = img.naturalWidth;
+  cv.height = img.naturalHeight;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+  const id = ctx.getImageData(0, 0, cv.width, cv.height);
+  return { width: cv.width, height: cv.height, data: new Uint8Array(id.data.buffer) };
+}
+
 // Texture manager: mirrors CTextureManager but async. All textures are
 // preloaded before the demo starts; loadTexture() then returns synchronously.
 export class TexManager {
@@ -89,10 +115,8 @@ export class TexManager {
       const img = decodeTGA(bytes);
       tex = this.mgl.createTextureFromData(img.data, img.width, img.height, mipmap);
     } else {
-      const blob = new Blob([bytes], { type: MIME[ext] || 'application/octet-stream' });
-      const bitmap = await createImageBitmap(blob);
-      tex = this.mgl.createTextureFromImage(bitmap, mipmap);
-      bitmap.close();
+      const img = await decodeToPixels(bytes, MIME[ext] || 'application/octet-stream');
+      tex = this.mgl.createTextureFromData(img.data, img.width, img.height, mipmap);
     }
     this.cache.set(key, tex);
     return tex;

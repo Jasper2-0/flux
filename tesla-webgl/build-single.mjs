@@ -114,6 +114,16 @@ const html = `<!DOCTYPE html>
   }
   #play:hover { background: #112; }
   #hint { font-size: 11px; color: #445; margin-top: 10px; }
+  #problem {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: #faa;
+    background: rgba(40, 0, 0, 0.8);
+    display: none;
+  }
 </style>
 </head>
 <body>
@@ -127,6 +137,7 @@ const html = `<!DOCTYPE html>
   </div>
   <canvas id="screen" width="960" height="720"></canvas>
 </div>
+<div id="problem"></div>
 <script>
 const G = {};
 ${bundled}
@@ -147,9 +158,17 @@ function b64ToBuffer(b64) {
   const statusEl = document.getElementById('status');
   const playBtn = document.getElementById('play');
 
+  const problemEl = document.getElementById('problem');
+  const showProblem = (msg) => {
+    problemEl.textContent = msg;
+    problemEl.style.display = 'block';
+  };
+  window.addEventListener('error', (e) => showProblem('error: ' + e.message));
+
   const demo = new G.Demo(canvas, (msg) => { statusEl.textContent = msg; }, {
     pakBuffer: b64ToBuffer(PAK_B64),
     audioSrc: 'data:audio/mpeg;base64,' + MP3_B64,
+    onProblem: showProblem,
   });
   window.demo = demo;
 

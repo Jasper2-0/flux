@@ -53,6 +53,9 @@ export class Demo {
     this.startClock = 0;
     this.running = false;
     this.timeOverride = null; // for testing: fixed timeline position
+    this.onProblem = opts.onProblem || (() => {});
+    this._frameCount = 0;
+    this._glErrorReported = false;
   }
 
   async load() {
@@ -143,6 +146,13 @@ export class Demo {
 
   renderFrame(time) {
     const mgl = this.mgl;
+
+    if (mgl.contextLost || mgl.gl.isContextLost()) {
+      this.onProblem('WebGL context lost — reload the page');
+      this.stop();
+      return;
+    }
+
     mgl.clear();
 
     if (time >= DEMO_LENGTH) {
@@ -153,6 +163,15 @@ export class Demo {
     for (const [effect, tStart, tEnd] of this.effects) {
       if (time > tStart && time < tEnd) {
         effect.do(time, tStart);
+      }
+    }
+
+    // periodic GL error check so failures surface instead of staying black
+    if (!this._glErrorReported && (this._frameCount++ & 63) === 0) {
+      const err = mgl.gl.getError();
+      if (err !== 0) {
+        this._glErrorReported = true;
+        this.onProblem('GL error 0x' + err.toString(16));
       }
     }
   }
