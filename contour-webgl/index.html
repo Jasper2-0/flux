@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Contour by The Black Lotus — WebGL port scaffold</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    color: #9aa;
+    font-family: "Lucida Console", Monaco, monospace;
+    overflow: hidden;
+  }
+  #wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+  }
+  #stage { position: relative; display: none; }
+  #screen {
+    background: #000;
+    max-width: 100vw;
+    max-height: 92vh;
+    aspect-ratio: 4 / 3;
+  }
+  #parts {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #667;
+    text-shadow: 0 1px 2px #000;
+  }
+  #parts .on { color: #8fd0a0; }
+  #parts .stub { color: #776; }
+  #panel { text-align: center; max-width: 38em; line-height: 1.6; padding: 0 16px; }
+  #panel h1 {
+    font-size: 18px;
+    font-weight: normal;
+    letter-spacing: 0.5em;
+    color: #dde;
+    margin-bottom: 4px;
+  }
+  #panel .sub { font-size: 12px; }
+  #status { font-size: 12px; color: #667; min-height: 1.6em; }
+  #play {
+    margin-top: 12px;
+    padding: 10px 42px;
+    background: transparent;
+    color: #dde;
+    border: 1px solid #556;
+    font: inherit;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    display: none;
+  }
+  #play:hover { background: #112; }
+  #hint { font-size: 11px; color: #445; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="panel">
+    <h1>C O N T O U R</h1>
+    <div class="sub">the black lotus, 1999 &mdash; webgl port scaffold</div>
+    <div class="sub" style="color:#665; margin-top:8px">
+      timeline + soundtrack + first effects; unimplemented parts are listed
+      live in the corner as the timeline creates them
+    </div>
+    <div id="status">loading…</div>
+    <button id="play">play</button>
+    <div id="hint">esc stops · left/right arrows seek ±5s</div>
+  </div>
+  <div id="stage">
+    <canvas id="screen" width="960" height="720"></canvas>
+    <div id="parts"></div>
+  </div>
+</div>
+<script type="module">
+import { Demo } from './js/demo.js';
+
+const canvas = document.getElementById('screen');
+const stage = document.getElementById('stage');
+const panel = document.getElementById('panel');
+const statusEl = document.getElementById('status');
+const playBtn = document.getElementById('play');
+const partsEl = document.getElementById('parts');
+
+const demo = new Demo(canvas, (msg) => { statusEl.textContent = msg; }, {
+  onActiveChange(time, active) {
+    let html = 't = ' + time.toFixed(1) + 's<br>';
+    for (const a of active) {
+      html += '<span class="' + (a.implemented ? 'on' : 'stub') + '">' +
+        (a.implemented ? '▶ ' : '· ') + a.name + ' #' + a.id +
+        (a.implemented ? '' : ' (not ported yet)') + '</span><br>';
+    }
+    partsEl.innerHTML = html;
+  },
+});
+window.demo = demo;
+
+try {
+  await demo.load();
+  statusEl.textContent = 'ready — scaffold build, 3:14 soundtrack';
+  playBtn.style.display = 'inline-block';
+} catch (err) {
+  statusEl.textContent = 'error: ' + err.message;
+  throw err;
+}
+
+playBtn.addEventListener('click', () => {
+  panel.style.display = 'none';
+  stage.style.display = 'block';
+  demo.start();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    demo.stop();
+    stage.style.display = 'none';
+    panel.style.display = 'block';
+    statusEl.textContent = 'stopped';
+  } else if (e.key === 'ArrowRight') {
+    demo.seek(demo.getTime() + 5);
+  } else if (e.key === 'ArrowLeft') {
+    demo.seek(demo.getTime() - 5);
+  }
+});
+</script>
+</body>
+</html>
