@@ -53,13 +53,16 @@ export class SpinZoom {
 
     mgl.bindTexture(this.tex);
 
-    // envelope segment lookup
+    // envelope segment lookup (t can be slightly negative right at the
+    // start because of the -0.1 offset — clamp instead of running off
+    // the end of the table)
+    const tt = Math.max(t, 0);
     let u = 0;
-    for (u = 0; u < ENV.length - 1; u++) {
-      if (t > ENV[u][0] && t < ENV[u + 1][0]) break;
+    for (u = 0; u < ENV.length - 2; u++) {
+      if (tt >= ENV[u][0] && tt < ENV[u + 1][0]) break;
     }
-    const span = ENV[u + 1][0] - ENV[u][0];
-    const bTime = (t - ENV[u][0]) / span;
+    const span = ENV[u + 1][0] - ENV[u][0] || 1;
+    const bTime = (tt - ENV[u][0]) / span;
     const unrMult = ENV[u][1] + (ENV[u + 1][1] - ENV[u][1]) * bTime;
 
     mgl.color4(1, 1, 1, unrMult * 0.23);

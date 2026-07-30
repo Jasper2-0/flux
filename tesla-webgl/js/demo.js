@@ -162,7 +162,15 @@ export class Demo {
 
     for (const [effect, tStart, tEnd] of this.effects) {
       if (time > tStart && time < tEnd) {
-        effect.do(time, tStart);
+        // one failing effect must not kill the whole render loop
+        try {
+          effect.do(time, tStart);
+        } catch (err) {
+          if (!this._glErrorReported) {
+            this._glErrorReported = true;
+            this.onProblem('effect error: ' + err.message);
+          }
+        }
       }
     }
 
