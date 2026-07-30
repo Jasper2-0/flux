@@ -7,6 +7,7 @@ import { parseARSE } from './arse.js';
 import { Bloem } from './effects/bloem.js';
 import { Rogplay } from './effects/rogplay.js';
 import { TimScene } from './effects/timscene.js';
+import { IntroBurst, CreditsRough, ContLogoRough, ZoomerLite, EndCard } from './effects/quickparts.js';
 
 const DEMO_LENGTH = 194; // shipped soundtrack runs 3:14
 
@@ -50,6 +51,16 @@ const TEXTURES = [
   'data/textures/flare8.jpg',
   'data/textures/dildo.jpg',
   'data/logo.jpg',
+  'data/contourlogo-overlay-image01.jpg',
+  'data/credits/credbk-1-image.jpg',
+  'data/credits/credbk-2-image.jpg',
+  'data/credits/credbk-3-image.jpg',
+  'data/credits/credbk-4-image.jpg',
+  'data/credits/credbk-5-image.jpg',
+  'data/zoomer/image0a.jpg', 'data/zoomer/image1a.jpg', 'data/zoomer/image2a.jpg',
+  'data/zoomer/image3a.jpg', 'data/zoomer/image4a.jpg', 'data/zoomer/image5a.jpg',
+  'data/zoomer/image6a.jpg', 'data/zoomer/image7a.jpg', 'data/zoomer/image8a.jpg',
+  'data/zoomer/image9a.jpg', 'data/zoomer/shun-compo.jpg',
 ];
 
 export class Demo {
@@ -98,6 +109,16 @@ export class Demo {
       ? 'data:audio/mpeg;base64,' + embAudio.b64
       : 'data/test.mp3');
     this.audio.preload = 'auto';
+
+    // Rough-cut fillers keep the show continuous where the real parts are
+    // not reverse-engineered yet. Windows observed from the release AVI.
+    this.roughCut = [
+      { name: '≈ intro burst', effect: new IntroBurst(this.mgl), window: [0, 12] },
+      { name: '≈ credits backdrops', effect: new CreditsRough(this.mgl, this.tex), window: [12, 41.5] },
+      { name: '≈ contour logo', effect: new ContLogoRough(this.mgl, this.tex), window: [41.5, 52] },
+      { name: '≈ zoomer (lite)', effect: new ZoomerLite(this.mgl, this.tex), window: [108.5, 174] },
+      { name: '≈ end card', effect: new EndCard(this.mgl, this.tex), window: [174, 192.5] },
+    ];
 
     this.status('ready');
   }
@@ -205,6 +226,17 @@ export class Demo {
     mgl.clear();
 
     const active = [];
+
+    // rough-cut fillers render first, underneath any real effects
+    for (const rc of this.roughCut) {
+      if (time >= rc.window[0] && time <= rc.window[1]) {
+        active.push({ id: '~', name: rc.name + ' (rough cut)', implemented: true, rendering: true });
+        try {
+          rc.effect.do(time, rc.window[0]);
+        } catch (e) { /* keep the loop alive */ }
+      }
+    }
+
     for (const [id, inst] of this.instances) {
       const inWindow = !inst.window || (time >= inst.window[0] && time <= inst.window[1]);
       active.push({
