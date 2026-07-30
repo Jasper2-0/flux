@@ -19,6 +19,7 @@ const MODULES = [
   'js/effects/bloem.js',
   'js/effects/rogplay.js',
   'js/effects/timscene.js',
+  'js/effects/zoomer.js',
   'js/effects/quickparts.js',
   'js/demo.js',
 ];

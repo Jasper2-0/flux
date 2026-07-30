@@ -1,13 +1,28 @@
 #!/usr/bin/env python3
-"""Reconstruct Contour's full timeline table from contour.exe.
+"""Reconstruct Contour's timeline from contour.exe — corrected layout.
 
-Five 40-byte records are static in .data at VA 0x438948; the remaining 84 are
-written at runtime by an init routine at VA 0x401560 as a long run of
-`mov dword ptr [abs], imm32/reg` stores into 0x438a10..0x439758. This script
-replays those stores symbolically (tracking register constants, since MSVC
-hoisted the repeated class-name pointers into registers) and emits the whole
-table as JSON, with class/instance pointers resolved to strings and each
-record's parameter block hex-dumped for later decoding.
+The runtime dispatcher (tick at VA 0x403ce0, player ctor at 0x403840)
+defines the truth: records are 0x28 bytes, based at VA 0x438930, and the
+table ends at the first record whose kind is 2 (terminator).
+
+    +0x00  uint32   kind: 0 create · 1 kill · 2 END · 3 message
+                          4 music-object call · 5 clock jump
+    +0x04  uint32   instance id
+    +0x08  double   cue time in seconds (compared against the MP3 clock)
+    +0x10  uint32   create: constructor/handler · message: code
+                    clock jump: seconds (int) · music call: argument
+    +0x14  uint32   parameter block pointer (create) / message param
+    +0x18  uint32   extra message param (usually 0)
+    +0x1c  char*    class (the coder's namespace)
+    +0x20  char*    instance name
+
+Earlier extractions used base 0x438948, which shifted class/instance one
+record against everything else — the corrected base fixes the mislabeled
+message rows.
+
+Most of the table is written at runtime by the init routine at 0x401560;
+this script replays its stores (tracking register-held string pointers),
+overlays the static .data contents, and decodes the table.
 
 Usage: extract-timeline.py contour.exe timeline.json
 """
@@ -20,8 +35,6 @@ import capstone
 EXE, OUT = sys.argv[1], sys.argv[2]
 data = open(EXE, 'rb').read()
 
-IMAGE_BASE = 0x400000
-# section: (va, raw, rawsize) — from the PE section table of this exe
 SECTIONS = [
     (0x401000, 0x1000, 0x31000),
     (0x432000, 0x32000, 0x6000),
@@ -45,16 +58,15 @@ def cstr(va):
         return None
     return s.decode('latin1')
 
-TABLE_START = 0x438948
-TABLE_END = 0x439758 + 0x28
+TABLE_BASE = 0x438930
+TABLE_LIMIT = 0x439800
 RECORD = 0x28
 
 # ---- replay the init routine's stores ----
 md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
-md.detail = True
 
-mem = {}      # target VA -> dword value (None = written from a runtime value)
-regs = {}     # register name -> last known imm32
+mem = {}
+regs = {}
 store_count = 0
 unknown_count = 0
 GPRS = ('eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'ebp')
@@ -72,7 +84,7 @@ while True:
         dst, src = [p.strip() for p in insn.op_str.split(',', 1)]
         if dst.startswith('dword ptr [0x'):
             target = int(dst[len('dword ptr ['):-1], 16)
-            if TABLE_START <= target < TABLE_END:
+            if TABLE_BASE <= target < TABLE_LIMIT:
                 if src.startswith('0x') or src.isdigit():
                     mem[target] = int(src, 0)
                     store_count += 1
@@ -80,19 +92,18 @@ while True:
                     mem[target] = regs[src]
                     store_count += 1
                 else:
-                    mem[target] = None  # runtime-resolved (e.g. loaded from .data)
+                    mem[target] = None
                     unknown_count += 1
         elif dst in GPRS:
             if src.startswith('0x') or src.isdigit():
                 regs[dst] = int(src, 0)
             else:
-                regs.pop(dst, None)  # value no longer known
+                regs.pop(dst, None)
     elif insn.mnemonic == 'xor':
         ops = [p.strip() for p in insn.op_str.split(',')]
         if len(ops) == 2 and ops[0] == ops[1] and ops[0] in GPRS:
             regs[ops[0]] = 0
     else:
-        # any other instruction that names a register first may clobber it
         first = insn.op_str.split(',')[0].strip()
         if first in GPRS:
             regs.pop(first, None)
@@ -101,80 +112,94 @@ while True:
 
 print(f'replayed init routine: {store_count} known stores, {unknown_count} runtime-valued', file=sys.stderr)
 
-# overlay the five static records straight from .data
-for rec_va in range(TABLE_START, 0x4389e8 + RECORD, RECORD):
-    roff = va2off(rec_va)
-    for i in range(0, RECORD, 4):
-        mem.setdefault(rec_va + i, struct.unpack_from('<I', data, roff + i)[0])
+# overlay static .data for anything the init routine didn't write
+for addr in range(TABLE_BASE, TABLE_LIMIT, 4):
+    if addr not in mem:
+        o = va2off(addr)
+        mem[addr] = struct.unpack_from('<I', data, o)[0] if o else 0
 
-# ---- decode records ----
-def get(va, default=0):
-    v = mem.get(va, default)
-    return default if v is None else v
+def get(addr):
+    v = mem.get(addr, 0)
+    return 0 if v is None else v
+
+KINDS = {0: 'create', 1: 'kill', 2: 'end', 3: 'message', 4: 'musicctl', 5: 'clockjump'}
 
 records = []
-for rec_va in range(TABLE_START, TABLE_END, RECORD):
-    cls_ptr = get(rec_va + 0x04)
-    inst_ptr = get(rec_va + 0x08)
-    kind = get(rec_va + 0x10)
-    inst_id = get(rec_va + 0x14)
-    lo, hi = get(rec_va + 0x18), get(rec_va + 0x1c)
+rec_va = TABLE_BASE
+index = 0
+while rec_va < TABLE_LIMIT:
+    kind = get(rec_va + 0x00)
+    inst_id = get(rec_va + 0x04)
+    lo, hi = get(rec_va + 0x08), get(rec_va + 0x0c)
     time = struct.unpack('<d', struct.pack('<II', lo, hi))[0]
-    handler = get(rec_va + 0x20)
-    params = get(rec_va + 0x24)
-
-    cls = cstr(cls_ptr) if cls_ptr else None
-    inst = cstr(inst_ptr) if inst_ptr else None
-    if not cls and not inst and not handler:
-        continue  # empty slot
+    a = get(rec_va + 0x10)
+    b = get(rec_va + 0x14)
+    c = get(rec_va + 0x18)
+    cls = cstr(get(rec_va + 0x1c)) if get(rec_va + 0x1c) else None
+    inst = cstr(get(rec_va + 0x20)) if get(rec_va + 0x20) else None
 
     rec = {
+        'index': index,
         'va': f'0x{rec_va:x}',
-        'class': cls,
-        'instance': inst,
-        'kind': kind,
+        'kind': KINDS.get(kind, kind),
         'id': inst_id,
         'time': round(time, 4),
-        'handler': f'0x{handler:x}' if handler else None,
+        'class': cls,
+        'instance': inst,
     }
-    if params:
-        rec['params'] = f'0x{params:x}'
-        poff = va2off(params)
-        if poff is not None:
-            blob = data[poff:poff + 64]
-            rec['params_hex'] = blob.hex()
-            s = cstr(params)
-            if s and len(s) > 3:
-                rec['params_str'] = s
-            # resolve any dwords inside the block that point at strings —
-            # this is how records name their scene files and textures
-            refs = []
-            for i in range(0, 64, 4):
-                ptr = struct.unpack_from('<I', blob, i)[0] if i + 4 <= len(blob) else 0
-                if 0x432000 <= ptr < 0x43a000:
-                    rs = cstr(ptr)
-                    if rs and len(rs) > 3:
-                        refs.append({'offset': i, 'str': rs})
-            if refs:
-                rec['params_refs'] = refs
+    if kind == 0:
+        rec['ctor'] = f'0x{a:x}'
+        if b:
+            rec['params'] = f'0x{b:x}'
+    elif kind == 3:
+        rec['code'] = f'0x{a:x}'
+        if b:
+            rec['param'] = f'0x{b:x}'
+        if c:
+            rec['extra'] = f'0x{c:x}'
+    elif kind in (4, 5):
+        rec['arg'] = a
+
+    # annotate pointer-ish fields with resolved strings / hexdumps
+    for key, ptr in (('params', b if kind == 0 else 0), ('param', b if kind == 3 else 0)):
+        if not ptr:
+            continue
+        poff = va2off(ptr)
+        if poff is None:
+            continue
+        blob = data[poff:poff + 64]
+        rec[key + '_hex'] = blob.hex()
+        s = cstr(ptr)
+        if s and len(s) > 3:
+            rec[key + '_str'] = s
+        refs = []
+        for i in range(0, 64, 4):
+            p2 = struct.unpack_from('<I', blob, i)[0] if i + 4 <= len(blob) else 0
+            if 0x432000 <= p2 < 0x43a000:
+                rs = cstr(p2)
+                if rs and len(rs) > 3:
+                    refs.append({'offset': i, 'str': rs})
+        if refs:
+            rec[key + '_refs'] = refs
+
     records.append(rec)
+    index += 1
+    rec_va += RECORD
+    if kind == 2:
+        break
 
-records.sort(key=lambda r: (r['time'], r['va']))
-
-KINDS = {0: 'create', 1: 'kill', 2: 'msg2', 3: 'msg3', 4: 'msg4'}
 summary = {}
 for r in records:
-    summary.setdefault(r['class'] or '?', 0)
-    summary[r['class'] or '?'] += 1
+    summary.setdefault(r['kind'], 0)
+    summary[r['kind']] += 1
 
 out = {
-    'source': 'contour.exe (TBL, 1999) — static records at 0x438948 + init routine 0x401560',
+    'source': 'contour.exe (TBL, 1999) — table at 0x438930, layout per dispatcher 0x403ce0',
     'record_count': len(records),
-    'by_class': summary,
-    'kinds': KINDS,
+    'by_kind': summary,
     'records': records,
 }
 with open(OUT, 'w') as f:
     json.dump(out, f, indent=1)
 print(f'{len(records)} records -> {OUT}', file=sys.stderr)
-print('by class:', summary, file=sys.stderr)
+print('by kind:', summary, file=sys.stderr)

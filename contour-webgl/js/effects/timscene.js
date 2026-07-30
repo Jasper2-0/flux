@@ -14,6 +14,8 @@ export class TimScene {
     this.scene = scene;
     this.tex = tex.loadTexture(textureName);
 
+    this.duration = scene.frames / scene.fps;
+
     this.world = [];
     this.colors = [];
     for (const obj of scene.objects) {

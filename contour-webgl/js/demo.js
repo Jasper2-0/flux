@@ -7,7 +7,8 @@ import { parseARSE } from './arse.js';
 import { Bloem } from './effects/bloem.js';
 import { Rogplay } from './effects/rogplay.js';
 import { TimScene } from './effects/timscene.js';
-import { IntroBurst, CreditsRough, ContLogoRough, ZoomerLite, EndCard } from './effects/quickparts.js';
+import { Zoomer } from './effects/zoomer.js';
+import { IntroBurst, CreditsRough, ContLogoRough, EndCard } from './effects/quickparts.js';
 
 const DEMO_LENGTH = 194; // shipped soundtrack runs 3:14
 
@@ -112,50 +113,44 @@ export class Demo {
 
     // Rough-cut fillers keep the show continuous where the real parts are
     // not reverse-engineered yet. Windows observed from the release AVI.
+    // (The zoomer is a real effect now — id 60, shown by its 0x20 at 108 s.)
     this.roughCut = [
       { name: '≈ intro burst', effect: new IntroBurst(this.mgl), window: [0, 12] },
       { name: '≈ credits backdrops', effect: new CreditsRough(this.mgl, this.tex), window: [12, 41.5] },
-      { name: '≈ contour logo', effect: new ContLogoRough(this.mgl, this.tex), window: [41.5, 52] },
-      { name: '≈ zoomer (lite)', effect: new ZoomerLite(this.mgl, this.tex), window: [108.5, 174] },
+      { name: '≈ contour logo overlay', effect: new ContLogoRough(this.mgl, this.tex), window: [41.5, 52] },
       { name: '≈ end card', effect: new EndCard(this.mgl, this.tex), window: [174, 192.5] },
     ];
 
     this.status('ready');
   }
 
-  // Effect factory: instance-name keyed. Everything unimplemented returns
-  // null and shows up in the placeholder readout instead.
-  //
-  // Timing caveat: most creates fire at t=0 as preloads; visibility is
-  // driven by kind-2/3 messages that are not decoded yet. Until they are,
-  // implemented effects carry an AVI-calibrated visible window
-  // [start, end] observed from the release capture.
+  // Effect factory for create records. The dispatcher semantics (decoded
+  // from the exe): create = preload, message code 0x20 = show, kill =
+  // destroy. Instances are keyed by id; implemented ids get an effect,
+  // everything else shows as a placeholder.
   _makeEffect(record) {
-    switch (record.instance) {
-      case 'bloem':
-        return { effect: new Bloem(this.mgl, this.tex), window: [88, 108.5] };
-      case 'rogplay':
-        return { effect: new Rogplay(this.mgl, this.tex), window: [64, 82] };
-      default:
-        break;
-    }
-    // scene files ride in parameter blocks: dildo.bin on the static
-    // credit5 record, neuron.bin on the linefx id=455 preload
     const refs = (record.params_refs || []).map((r) => r.str).join(' ') +
       ' ' + (record.params_str || '');
-    if (refs.includes('neuron.bin')) {
-      // texture guess: the capture shows coppery surfaces — fx8/dildo.jpg
-      return {
-        effect: new TimScene(this.mgl, this.tex, this.neuronScene, 'data/saftext/fx8.jpg'),
-        window: [52, 65.5],
-      };
-    }
+
+    // id 13 nixfx/contlogo runs Tim's replayer on dildo.bin (shown 40 s)
     if (refs.includes('dildo.bin')) {
-      // not yet located in the capture; parked until the messages are
-      // decoded (the scene is 17 s long — plausibly the intro)
-      return null;
+      return { effect: new TimScene(this.mgl, this.tex, this.dildoScene, 'data/saftext/fx8.jpg') };
     }
-    return null;
+    // id 455 carries neuron.bin in its parameter block (shown 94 s)
+    if (refs.includes('neuron.bin')) {
+      return { effect: new TimScene(this.mgl, this.tex, this.neuronScene, 'data/saftext/fx8.jpg') };
+    }
+
+    switch (record.instance) {
+      case 'bloem':
+        return { effect: new Bloem(this.mgl, this.tex) };
+      case 'rogplay':
+        return { effect: new Rogplay(this.mgl, this.tex) };
+      case 'zoomer':
+        return { effect: new Zoomer(this.mgl, this.tex, { ending: this.opts.zoomerEnding || 'original' }) };
+      default:
+        return null;
+    }
   }
 
   start() {
@@ -202,21 +197,36 @@ export class Demo {
       const stamp = r.va;
       if (this.processed.has(stamp)) continue;
       this.processed.add(stamp);
-      if (r.kind === 0) {
+      if (r.kind === 'create') {
         let made = null;
         try {
           made = this._makeEffect(r);
         } catch (e) { /* placeholder instead */ }
+        // creates that are never messaged 0x20 (e.g. the timed credit3
+        // rows) act on their cue directly, so they start shown
+        const preload = r.time === 0;
         this.instances.set(r.id, {
           record: r,
           effect: made && made.effect,
-          window: made && made.window,
-          born: r.time,
+          shown: !preload,
+          shownAt: preload ? null : r.time,
         });
-      } else if (r.kind === 1) {
+      } else if (r.kind === 'kill') {
         this.instances.delete(r.id);
+      } else if (r.kind === 'message') {
+        const inst = this.instances.get(r.id);
+        if (inst) {
+          if (r.code === '0x20' && !inst.shown) {
+            inst.shown = true;
+            inst.shownAt = r.time;
+          }
+          // other codes (0x9004/0x9005/0x9010/0xa001…) are per-effect
+          // mode switches — recorded but not yet interpreted
+          inst.lastCode = r.code;
+        }
       }
-      // kinds 2-4 are messages; parameters not decoded yet
+      // musicctl / clockjump records don't affect the port's clock: it
+      // follows the soundtrack element directly
     }
   }
 
@@ -238,18 +248,22 @@ export class Demo {
     }
 
     for (const [id, inst] of this.instances) {
-      const inWindow = !inst.window || (time >= inst.window[0] && time <= inst.window[1]);
       active.push({
         id,
         name: inst.record.class + '/' + inst.record.instance,
         implemented: !!inst.effect,
-        rendering: !!inst.effect && inWindow,
+        rendering: !!inst.effect && inst.shown,
       });
-      if (inst.effect && inWindow) {
-        try {
-          // effect-local time runs from its window start (AVI-calibrated)
-          inst.effect.do(time, inst.window ? inst.window[0] : inst.born);
-        } catch (e) { /* keep the loop alive */ }
+      if (inst.effect && inst.shown) {
+        // baked scenes stop when their frames run out (no explicit kill
+        // record exists for them; the engine presumably self-hides)
+        const dur = inst.effect.duration;
+        if (!dur || time - (inst.shownAt || 0) <= dur) {
+          try {
+            // effect-local time runs from the moment it was shown
+            inst.effect.do(time, inst.shownAt || 0);
+          } catch (e) { /* keep the loop alive */ }
+        }
       }
     }
     this.onActiveChange(time, active);

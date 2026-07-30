@@ -8,6 +8,32 @@ released — this port is built from binary reverse engineering of
 "Viewer" engine) and from the asset extraction and format analysis done
 in the companion research repository.
 
+## The dispatcher, decoded
+
+The timeline's runtime semantics were recovered from the binary
+(tick at VA `0x403ce0`, player ctor `0x403840`, WinMain `0x402ca1`):
+
+- The record table lives at `0x438930`, stride 0x28, terminated by a
+  kind-2 record. Earlier extractions used base `0x438948`, which shifted
+  every class/instance label one record against its own time and id —
+  the corrected base resolves the previously mislabeled message rows.
+- Record layout: kind +0x00 · id +0x04 · time (double) +0x08 ·
+  code/ctor +0x10 · params +0x14 · extra +0x18 · class +0x1c ·
+  instance +0x20.
+- Kinds: 0 create (preload; allocates a registry node with strdup'd
+  names in a 64-slot table) · 1 kill (also notifies the engine with
+  code 0x10) · 2 end-of-table · 3 message (code + two params delivered
+  to the instance by id) · 4 call on the global music object ·
+  5 clock jump (payload seconds × 4×44100 added to the MP3-byte clock —
+  the demo's clock **is** the soundtrack position, like this port's).
+- Message code `0x20` is the universal "show/start": every visible part
+  begins with it. Codes `0x9004/0x9005/0x9010/0xa001` are per-effect
+  mode switches, not yet interpreted.
+
+This yields real activation windows: contlogo (running Tim's replayer on
+`dildo.bin` — the copper ripple under the logo) shows at 40 s, rogplay
+52–65.5 s, bloem 80–94 s, grid1fx 94.5–107 s, the zoomer at 108 s.
+
 ## What works
 
 - **The full timeline, extracted from the executable.**
@@ -43,9 +69,10 @@ capture. Handedness in the TimScene replayer is a best guess until then.
 
 `flarefx`, `grid1fx` (formula recovered, not yet implemented), `linefx`,
 `picflash`, `flash`, the `bally` credits, Scid's `Letters` (the poem
-renderer), `contlogo` (DirectDraw blitting), the neuron scene sequencing,
-and the zoomer — a polished standalone recreation of the zoomer already
-exists and should be integrated rather than rewritten.
+renderer), and the contour logo overlay treatment. The zoomer is
+integrated (`js/effects/zoomer.js`), ported from the standalone
+recreation with its measured nesting, feathered largest-first stack and
+both endings — shipped (default) and the intended aligned landing.
 
 Next steps, roughly in order of value: decode the parameter blocks the
 timeline hands each record (dumped in `timeline.json` as `params_hex`),

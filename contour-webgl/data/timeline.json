@@ -1,50 +1,45 @@
 {
- "source": "contour.exe (TBL, 1999) \u2014 static records at 0x438948 + init routine 0x401560",
- "record_count": 90,
- "by_class": {
-  "bally": 17,
-  "nixfx": 5,
-  "jace": 55,
-  "?": 1,
-  "scid": 12
- },
- "kinds": {
-  "0": "create",
-  "1": "kill",
-  "2": "msg2",
-  "3": "msg3",
-  "4": "msg4"
+ "source": "contour.exe (TBL, 1999) \u2014 table at 0x438930, layout per dispatcher 0x403ce0",
+ "record_count": 91,
+ "by_kind": {
+  "create": 47,
+  "musicctl": 1,
+  "message": 31,
+  "kill": 11,
+  "end": 1
  },
  "records": [
   {
-   "va": "0x438948",
+   "index": 0,
+   "va": "0x438930",
+   "kind": "create",
+   "id": 1,
+   "time": 0.0,
    "class": "bally",
    "instance": "credit4",
-   "kind": 0,
+   "ctor": "0x41a9d0",
+   "params": "0x438588",
+   "params_hex": "0000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c98430001000000",
+   "params_refs": [
+    {
+     "offset": 8,
+     "str": "THE BLACK LOTUS"
+    },
+    {
+     "offset": 56,
+     "str": "YOUR VOICE"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "va": "0x438958",
+   "kind": "create",
    "id": 2,
    "time": 0.0,
-   "handler": "0x41a0f0",
-   "params": "0x438584",
-   "params_hex": "0000e0400000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c984300",
-   "params_refs": [
-    {
-     "offset": 12,
-     "str": "THE BLACK LOTUS"
-    },
-    {
-     "offset": 60,
-     "str": "YOUR VOICE"
-    }
-   ]
-  },
-  {
-   "va": "0x438970",
    "class": "bally",
    "instance": "credit1",
-   "kind": 0,
-   "id": 7,
-   "time": 0.0,
-   "handler": "0x41a000",
+   "ctor": "0x41a0f0",
    "params": "0x438584",
    "params_hex": "0000e0400000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c984300",
    "params_refs": [
@@ -59,96 +54,127 @@
    ]
   },
   {
-   "va": "0x438998",
+   "index": 2,
+   "va": "0x438980",
+   "kind": "create",
+   "id": 7,
+   "time": 0.0,
    "class": "bally",
    "instance": "credit5",
-   "kind": 0,
+   "ctor": "0x41a000",
+   "params": "0x438584",
+   "params_hex": "0000e0400000a04000000000a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c984300",
+   "params_refs": [
+    {
+     "offset": 12,
+     "str": "THE BLACK LOTUS"
+    },
+    {
+     "offset": 60,
+     "str": "YOUR VOICE"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "va": "0x4389a8",
+   "kind": "create",
    "id": 13,
    "time": 0.0,
-   "handler": "0x419330",
+   "class": "nixfx",
+   "instance": "contlogo",
+   "ctor": "0x419330",
    "params": "0x439784",
    "params_hex": "633a5c746f64656d6f5c646174615c7363656e65735c64696c646f2e62696e0063726564697435006372656469743100637265646974340062616c6c79000000",
    "params_str": "c:\\todemo\\data\\scenes\\dildo.bin"
   },
   {
-   "va": "0x4389c0",
-   "class": "nixfx",
-   "instance": "contlogo",
-   "kind": 0,
+   "index": 4,
+   "va": "0x4389d0",
+   "kind": "create",
    "id": 60,
    "time": 0.0,
-   "handler": "0x418d90"
-  },
-  {
-   "va": "0x4389e8",
    "class": "nixfx",
    "instance": "zoomer",
-   "kind": 0,
-   "id": 451,
-   "time": 0.0,
-   "handler": "0x41d8d0"
+   "ctor": "0x418d90"
   },
   {
-   "va": "0x438a10",
+   "index": 5,
+   "va": "0x4389f8",
+   "kind": "create",
+   "id": 451,
+   "time": 0.0,
    "class": "jace",
    "instance": "rogplay",
-   "kind": 0,
+   "ctor": "0x41d8d0"
+  },
+  {
+   "index": 6,
+   "va": "0x438a20",
+   "kind": "create",
    "id": 452,
    "time": 0.0,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x438520",
    "params_hex": "000000009a99993ecdcccc3e3333333f00000000cdcccc3e00000000ffffff009a99993e9a99193fcdcc4c3f0000c04000000000cdcccc3effffff0000000000"
   },
   {
-   "va": "0x438a38",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 0,
+   "index": 7,
+   "va": "0x438a48",
+   "kind": "create",
    "id": 454,
    "time": 0.0,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x438540",
    "params_hex": "9a99993e9a99193fcdcc4c3f0000c04000000000cdcccc3effffff0000000000cdcc4c3ecdcccc3e9a99993e9a99193f000000006666e63effffff0000000000"
   },
   {
-   "va": "0x438a60",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 0,
+   "index": 8,
+   "va": "0x438a70",
+   "kind": "create",
    "id": 453,
    "time": 0.0,
-   "handler": "0x41e980"
-  },
-  {
-   "va": "0x438a88",
    "class": "jace",
    "instance": "bloem",
-   "kind": 0,
+   "ctor": "0x41e980"
+  },
+  {
+   "index": 9,
+   "va": "0x438a98",
+   "kind": "create",
    "id": 458,
    "time": 0.0,
-   "handler": "0x41fd30",
+   "class": "jace",
+   "instance": "picflash",
+   "ctor": "0x41fd30",
    "params": "0x4383c0",
    "params_hex": "0000a042000048420000000000000000cdcccc3e3333f33f3333333f000000000000a042000048420000000000000000cdcccc3ecdcc4c3fcdcc4c3f00000000"
   },
   {
-   "va": "0x438ab0",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 0,
+   "index": 10,
+   "va": "0x438ac0",
+   "kind": "create",
    "id": 457,
    "time": 0.0,
-   "handler": "0x41f470",
+   "class": "jace",
+   "instance": "linefx",
+   "ctor": "0x41f470",
    "params": "0x438310",
    "params_hex": "0000003f00000000000000000000003f00000000000000000000a0400000000000000000ffffff000000803f0000000000000000000000000000000000000000"
   },
   {
-   "va": "0x438ad8",
-   "class": "jace",
-   "instance": "linefx",
-   "kind": 0,
+   "index": 11,
+   "va": "0x438ae8",
+   "kind": "create",
    "id": 455,
    "time": 0.0,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x438560",
    "params_hex": "cdcc4c3ecdcccc3e9a99993e9a99193f000000006666e63effffff0000000000b89843000000e0400000a04000000000a8984300020000000200000000000000",
    "params_refs": [
@@ -163,146 +189,160 @@
    ]
   },
   {
-   "va": "0x438b00",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 0,
+   "index": 12,
+   "va": "0x438b10",
+   "kind": "create",
    "id": 456,
    "time": 0.0,
-   "handler": "0x41e1d0"
-  },
-  {
-   "va": "0x438b28",
    "class": "jace",
    "instance": "grid1fx",
-   "kind": 0,
+   "ctor": "0x41e1d0"
+  },
+  {
+   "index": 13,
+   "va": "0x438b38",
+   "kind": "create",
    "id": 32,
    "time": 0.0,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x4388f0",
    "params_hex": "cdcc4c3e0000803fcdcccc3d0000803f00000000cdcccc3effffff0000000000cdcccc3d0000803f9a99993e0000803f00000000cdcccc3effffff0000000000"
   },
   {
-   "va": "0x438b50",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 0,
+   "index": 14,
+   "va": "0x438b60",
+   "kind": "create",
    "id": 500,
    "time": 0.0,
-   "handler": "0x41f470",
+   "class": "jace",
+   "instance": "linefx",
+   "ctor": "0x41f470",
    "params": "0x438210",
    "params_hex": "85eb513f00000000000000009a99593f0000000000000000000010410000000000000000ffffff000000803f0000000000000000000000000000000000000000"
   },
   {
-   "va": "0x438b78",
-   "class": "jace",
-   "instance": "linefx",
-   "kind": 0,
+   "index": 15,
+   "va": "0x438b88",
+   "kind": "create",
    "id": 501,
    "time": 0.0,
-   "handler": "0x41f470",
+   "class": "jace",
+   "instance": "linefx",
+   "ctor": "0x41f470",
    "params": "0x438290",
    "params_hex": "5c8fc23e00000000000000003333b33e0000000000000000000010410000000000000000ffffff000000803f00000000000000000000003ecdcccc3d8fc2f53c"
   },
   {
-   "va": "0x438ba0",
-   "class": "jace",
-   "instance": "linefx",
-   "kind": 0,
+   "index": 16,
+   "va": "0x438bb0",
+   "kind": "create",
    "id": 552,
    "time": 0.0,
-   "handler": "0x41fd30",
+   "class": "jace",
+   "instance": "picflash",
+   "ctor": "0x41fd30",
    "params": "0x4384c0",
    "params_hex": "00409c470050434700000000000000400000fa430000d841cdcc4c3f000000000000a042000048420000000000000000cdcccc3e000040400000403f00000000"
   },
   {
-   "va": "0x438bc8",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 0,
+   "index": 17,
+   "va": "0x438bd8",
+   "kind": "create",
    "id": 553,
    "time": 0.0,
-   "handler": "0x41fd30",
+   "class": "jace",
+   "instance": "picflash",
+   "ctor": "0x41fd30",
    "params": "0x4383e0",
    "params_hex": "0000a042000048420000000000000000cdcccc3ecdcc4c3fcdcc4c3f000000000000a042000048420000000000000000cdcccc3ecdcc4c3fcdcc4c3f00000000"
   },
   {
-   "va": "0x438bf0",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 0,
+   "index": 18,
+   "va": "0x438c00",
+   "kind": "create",
    "id": 554,
    "time": 0.0,
-   "handler": "0x41db50"
-  },
-  {
-   "va": "0x438c18",
    "class": "jace",
    "instance": "flarefx",
-   "kind": 0,
+   "ctor": "0x41db50"
+  },
+  {
+   "index": 19,
+   "va": "0x438c28",
+   "kind": "create",
    "id": 556,
    "time": 0.0,
-   "handler": "0x41fd30",
+   "class": "jace",
+   "instance": "picflash",
+   "ctor": "0x41fd30",
    "params": "0x4384e0",
    "params_hex": "0000a042000048420000000000000000cdcccc3e000040400000403f00000000000080400000e040000000000000a04000000000cdcccc3e0000ff00ff00ff00"
   },
   {
-   "va": "0x438c40",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 0,
+   "index": 20,
+   "va": "0x438c50",
+   "kind": "create",
    "id": 469,
    "time": 0.0,
-   "handler": "0x41fd30",
+   "class": "jace",
+   "instance": "picflash",
+   "ctor": "0x41fd30",
    "params": "0x438480",
    "params_hex": "00409c470050434700000000000000400000fa430000d841cdcc4c3f000000000000a042000048420000000000000000cdcccc3e000040403333733f00000000"
   },
   {
-   "va": "0x438c68",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 0,
+   "index": 21,
+   "va": "0x438c78",
+   "kind": "create",
    "id": 468,
    "time": 0.0,
-   "handler": "0x41fd30",
+   "class": "jace",
+   "instance": "picflash",
+   "ctor": "0x41fd30",
    "params": "0x438460",
    "params_hex": "0000a0420000484200000000000000c00000003f0000803fcdcc4c3f0000000000409c470050434700000000000000400000fa430000d841cdcc4c3f00000000"
   },
   {
-   "va": "0x438c90",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 4,
+   "index": 22,
+   "va": "0x438ca0",
+   "kind": "musicctl",
    "id": 0,
    "time": 0.0,
-   "handler": "0x439a18"
-  },
-  {
-   "va": "0x438cb8",
    "class": null,
    "instance": null,
-   "kind": 3,
+   "arg": 4430360
+  },
+  {
+   "index": 23,
+   "va": "0x438cc8",
+   "kind": "message",
    "id": 1,
    "time": 0.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x438ce0",
    "class": "bally",
    "instance": "credit4",
-   "kind": 3,
-   "id": 2,
-   "time": 0.0,
-   "handler": "0x20"
+   "code": "0x20"
   },
   {
-   "va": "0x438d08",
+   "index": 24,
+   "va": "0x438cf0",
+   "kind": "message",
+   "id": 2,
+   "time": 0.0,
    "class": "bally",
    "instance": "credit1",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 25,
+   "va": "0x438d18",
+   "kind": "create",
    "id": 12,
    "time": 0.0,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x438590",
    "params_hex": "a8984300020000000200000000000000000000000000803f00000000000000000000803f9a9999406666c6400000803f9c9843000100000000000000cdccccbe",
    "params_refs": [
@@ -317,155 +357,157 @@
    ]
   },
   {
-   "va": "0x439730",
-   "class": "nixfx",
-   "instance": "zoomer",
-   "kind": 2,
-   "id": 0,
-   "time": 0.0,
-   "handler": null
-  },
-  {
-   "va": "0x438d30",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 0,
+   "index": 26,
+   "va": "0x438d40",
+   "kind": "create",
    "id": 3,
    "time": 12.0,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x4387d0",
    "params_hex": "000000000000a0400000a0c10000a041000000000000000000000000010000000000a0400000a040000000000000c8410000a0c100000000020000000000a040"
   },
   {
-   "va": "0x438d58",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 0,
+   "index": 27,
+   "va": "0x438d68",
+   "kind": "create",
    "id": 4,
    "time": 15.5,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x4387ec",
    "params_hex": "010000000000a0400000a040000000000000c8410000a0c100000000020000000000a0400000a0c10000a0c0000020410000c8c100000000030000000000a040"
   },
   {
-   "va": "0x438d80",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 0,
+   "index": 28,
+   "va": "0x438d90",
+   "kind": "create",
    "id": 5,
    "time": 19.0,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x438808",
    "params_hex": "020000000000a0400000a0c10000a0c0000020410000c8c100000000030000000000a040000000000000c841000090410000004100000000040000000000a040"
   },
   {
-   "va": "0x438da8",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 0,
+   "index": 29,
+   "va": "0x438db8",
+   "kind": "create",
    "id": 6,
    "time": 22.5,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x438840",
    "params_hex": "040000000000a040000020c10000c0410000c8410000a04000000000050000000000a040000070c1000080400000a0410000c8c100000000060000000000a040"
   },
   {
-   "va": "0x438dd0",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 3,
+   "index": 30,
+   "va": "0x438de0",
+   "kind": "message",
    "id": 7,
    "time": 23.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x438df8",
    "class": "bally",
    "instance": "credit5",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 31,
+   "va": "0x438e08",
+   "kind": "create",
    "id": 8,
    "time": 26.0,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x43885c",
    "params_hex": "050000000000a040000070c1000080400000a0410000c8c100000000060000000000a0400000b0c10000a0410000c040000080c000000000070000000000a040"
   },
   {
-   "va": "0x438e20",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 0,
+   "index": 32,
+   "va": "0x438e30",
+   "kind": "create",
    "id": 9,
    "time": 29.5,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x438824",
    "params_hex": "030000000000a040000000000000c841000090410000004100000000040000000000a040000020c10000c0410000c8410000a04000000000050000000000a040"
   },
   {
-   "va": "0x438e48",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 0,
+   "index": 33,
+   "va": "0x438e58",
+   "kind": "create",
    "id": 10,
    "time": 33.0,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x438878",
    "params_hex": "060000000000a0400000b0c10000a0410000c040000080c000000000070000000000a04000008040000000000000a041000080c101000000cdcc4c3e0000803f"
   },
   {
-   "va": "0x438e70",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 0,
+   "index": 34,
+   "va": "0x438e80",
+   "kind": "create",
    "id": 11,
    "time": 36.5,
-   "handler": "0x41aff0",
+   "class": "bally",
+   "instance": "credit3",
+   "ctor": "0x41aff0",
    "params": "0x438894",
    "params_hex": "070000000000a04000008040000000000000a041000080c101000000cdcc4c3e0000803f000000000000803f00000000cdcccc3e00000000ffffff00cdcc4c3e"
   },
   {
-   "va": "0x438e98",
-   "class": "bally",
-   "instance": "credit3",
-   "kind": 3,
+   "index": 35,
+   "va": "0x438ea8",
+   "kind": "message",
    "id": 13,
    "time": 40.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x438ec0",
    "class": "nixfx",
    "instance": "contlogo",
-   "kind": 1,
+   "code": "0x20"
+  },
+  {
+   "index": 36,
+   "va": "0x438ed0",
+   "kind": "kill",
    "id": 1,
    "time": 45.0,
-   "handler": null
+   "class": "bally",
+   "instance": "credit4"
   },
   {
-   "va": "0x438ee8",
-   "class": "bally",
-   "instance": "credit4",
-   "kind": 1,
+   "index": 37,
+   "va": "0x438ef8",
+   "kind": "kill",
    "id": 2,
    "time": 45.0,
-   "handler": null
+   "class": "bally",
+   "instance": "credit1"
   },
   {
-   "va": "0x438f10",
-   "class": "bally",
-   "instance": "credit1",
-   "kind": 1,
+   "index": 38,
+   "va": "0x438f20",
+   "kind": "kill",
    "id": 7,
    "time": 45.0,
-   "handler": null
+   "class": "bally",
+   "instance": "credit5"
   },
   {
-   "va": "0x438f38",
-   "class": "bally",
-   "instance": "credit5",
-   "kind": 0,
+   "index": 39,
+   "va": "0x438f48",
+   "kind": "create",
    "id": 20,
    "time": 45.0,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x4385c0",
    "params_hex": "9c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f00004040909843000100000000000000cdcccc3e",
    "params_refs": [
@@ -480,13 +522,14 @@
    ]
   },
   {
-   "va": "0x438f60",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 0,
+   "index": 40,
+   "va": "0x438f70",
+   "kind": "create",
    "id": 21,
    "time": 47.5,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x4385f0",
    "params_hex": "909843000100000000000000cdcccc3ecdcccc3e0000003f9a99993e9a99993e0000803f000000000000803f00004040849843000100000000000000cdccccbe",
    "params_refs": [
@@ -501,80 +544,88 @@
    ]
   },
   {
-   "va": "0x438f88",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 3,
+   "index": 41,
+   "va": "0x438f98",
+   "kind": "message",
    "id": 13,
    "time": 48.5,
-   "handler": "0xa001"
-  },
-  {
-   "va": "0x438fb0",
    "class": "nixfx",
    "instance": "contlogo",
-   "kind": 0,
+   "code": "0xa001"
+  },
+  {
+   "index": 42,
+   "va": "0x438fc0",
+   "kind": "create",
    "id": 22,
    "time": 51.5,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x4388b0",
    "params_hex": "cdcc4c3e0000803f000000000000803f00000000cdcccc3e00000000ffffff00cdcc4c3e0000803f000000000000803f00000000cdcccc3effffff0000000000"
   },
   {
-   "va": "0x438fd8",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 3,
+   "index": 43,
+   "va": "0x438fe8",
+   "kind": "message",
    "id": 22,
    "time": 51.6,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439000",
    "class": "jace",
    "instance": "flash",
-   "kind": 3,
-   "id": 451,
-   "time": 52.0,
-   "handler": "0x20"
+   "code": "0x20"
   },
   {
-   "va": "0x439028",
+   "index": 44,
+   "va": "0x439010",
+   "kind": "message",
+   "id": 451,
+   "time": 52.0,
    "class": "jace",
    "instance": "rogplay",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 45,
+   "va": "0x439038",
+   "kind": "create",
    "id": 24,
    "time": 52.0,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x4388d0",
    "params_hex": "cdcc4c3e0000803f000000000000803f00000000cdcccc3effffff0000000000cdcc4c3e0000803fcdcccc3d0000803f00000000cdcccc3effffff0000000000"
   },
   {
-   "va": "0x439050",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 3,
+   "index": 46,
+   "va": "0x439060",
+   "kind": "message",
    "id": 24,
    "time": 52.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439078",
    "class": "jace",
    "instance": "flash",
-   "kind": 3,
+   "code": "0x20"
+  },
+  {
+   "index": 47,
+   "va": "0x439088",
+   "kind": "message",
    "id": 32,
    "time": 57.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4390a0",
    "class": "jace",
    "instance": "flash",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 48,
+   "va": "0x4390b0",
+   "kind": "create",
    "id": 30,
    "time": 57.0,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x438620",
    "params_hex": "849843000100000000000000cdccccbecdccccbe0000003f9a9999be9a9999be0000803f000000000000803f00004040789843000100000000000000cdcccc3e",
    "params_refs": [
@@ -589,13 +640,14 @@
    ]
   },
   {
-   "va": "0x4390c8",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 0,
+   "index": 49,
+   "va": "0x4390d8",
+   "kind": "create",
    "id": 31,
    "time": 58.0,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x438650",
    "params_hex": "789843000100000000000000cdcccc3ecdccccbe0000003f9a99993e9a9999be0000803f000000000000803f000040406c9843000100000000000000cdccccbe",
    "params_refs": [
@@ -610,22 +662,24 @@
    ]
   },
   {
-   "va": "0x4390f0",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 3,
+   "index": 50,
+   "va": "0x439100",
+   "kind": "message",
    "id": 553,
    "time": 60.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439118",
    "class": "jace",
    "instance": "picflash",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 51,
+   "va": "0x439128",
+   "kind": "create",
    "id": 705,
    "time": 62.2,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x438680",
    "params_hex": "6c9843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e0000803f000000000000803f000040405c9843000100000000000000cdccccbe",
    "params_refs": [
@@ -640,13 +694,14 @@
    ]
   },
   {
-   "va": "0x439140",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 0,
+   "index": 52,
+   "va": "0x439150",
+   "kind": "create",
    "id": 706,
    "time": 62.2,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x4386b0",
    "params_hex": "5c9843000100000000000000cdccccbe000000000000003f9a9999becdccccbd0000803f000000000000803f00004040389843000100000000000000cdccccbe",
    "params_refs": [
@@ -661,89 +716,97 @@
    ]
   },
   {
-   "va": "0x439168",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 3,
+   "index": 53,
+   "va": "0x439178",
+   "kind": "message",
    "id": 451,
    "time": 64.8,
-   "handler": "0x9004"
-  },
-  {
-   "va": "0x439190",
    "class": "jace",
    "instance": "rogplay",
-   "kind": 0,
+   "code": "0x9004"
+  },
+  {
+   "index": 54,
+   "va": "0x4391a0",
+   "kind": "create",
    "id": 575,
    "time": 65.3,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x4388d0",
    "params_hex": "cdcc4c3e0000803f000000000000803f00000000cdcccc3effffff0000000000cdcc4c3e0000803fcdcccc3d0000803f00000000cdcccc3effffff0000000000"
   },
   {
-   "va": "0x4391b8",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 3,
+   "index": 55,
+   "va": "0x4391c8",
+   "kind": "message",
    "id": 575,
    "time": 65.31,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4391e0",
    "class": "jace",
    "instance": "flash",
-   "kind": 3,
+   "code": "0x20"
+  },
+  {
+   "index": 56,
+   "va": "0x4391f0",
+   "kind": "message",
    "id": 552,
    "time": 65.32,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439208",
    "class": "jace",
    "instance": "picflash",
-   "kind": 3,
-   "id": 554,
-   "time": 65.33,
-   "handler": "0x20"
+   "code": "0x20"
   },
   {
-   "va": "0x439230",
+   "index": 57,
+   "va": "0x439218",
+   "kind": "message",
+   "id": 554,
+   "time": 65.33,
    "class": "jace",
    "instance": "flarefx",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 58,
+   "va": "0x439240",
+   "kind": "create",
    "id": 576,
    "time": 65.34,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x4388d0",
    "params_hex": "cdcc4c3e0000803f000000000000803f00000000cdcccc3effffff0000000000cdcc4c3e0000803fcdcccc3d0000803f00000000cdcccc3effffff0000000000"
   },
   {
-   "va": "0x439258",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 3,
+   "index": 59,
+   "va": "0x439268",
+   "kind": "message",
    "id": 576,
    "time": 65.35,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439280",
    "class": "jace",
    "instance": "flash",
-   "kind": 1,
-   "id": 451,
-   "time": 65.5,
-   "handler": null
+   "code": "0x20"
   },
   {
-   "va": "0x4392a8",
+   "index": 60,
+   "va": "0x439290",
+   "kind": "kill",
+   "id": 451,
+   "time": 65.5,
    "class": "jace",
-   "instance": "rogplay",
-   "kind": 0,
+   "instance": "rogplay"
+  },
+  {
+   "index": 61,
+   "va": "0x4392b8",
+   "kind": "create",
    "id": 707,
    "time": 68.2,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x4386e0",
    "params_hex": "389843000100000000000000cdccccbecdcccc3e0000003f9a9999be9a99993e66660640000000000000803f00004040189843000100000000000000cdcc4cbe",
    "params_refs": [
@@ -758,22 +821,24 @@
    ]
   },
   {
-   "va": "0x4392d0",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 3,
+   "index": 62,
+   "va": "0x4392e0",
+   "kind": "message",
    "id": 556,
    "time": 74.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4392f8",
    "class": "jace",
    "instance": "picflash",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 63,
+   "va": "0x439308",
+   "kind": "create",
    "id": 710,
    "time": 76.1,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x438710",
    "params_hex": "189843000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be00000040000000000000803f00004040009843000100000000000000cdccccbe",
    "params_refs": [
@@ -788,58 +853,62 @@
    ]
   },
   {
-   "va": "0x439320",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 1,
+   "index": 64,
+   "va": "0x439330",
+   "kind": "kill",
    "id": 552,
    "time": 76.3,
-   "handler": null
+   "class": "jace",
+   "instance": "picflash"
   },
   {
-   "va": "0x439348",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 3,
+   "index": 65,
+   "va": "0x439358",
+   "kind": "message",
    "id": 454,
    "time": 80.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439370",
    "class": "jace",
    "instance": "flash",
-   "kind": 1,
+   "code": "0x20"
+  },
+  {
+   "index": 66,
+   "va": "0x439380",
+   "kind": "kill",
    "id": 554,
    "time": 80.0,
-   "handler": null
+   "class": "jace",
+   "instance": "flarefx"
   },
   {
-   "va": "0x439398",
-   "class": "jace",
-   "instance": "flarefx",
-   "kind": 3,
+   "index": 67,
+   "va": "0x4393a8",
+   "kind": "message",
    "id": 453,
    "time": 80.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4393c0",
    "class": "jace",
    "instance": "bloem",
-   "kind": 3,
-   "id": 458,
-   "time": 84.0,
-   "handler": "0x20"
+   "code": "0x20"
   },
   {
-   "va": "0x4393e8",
+   "index": 68,
+   "va": "0x4393d0",
+   "kind": "message",
+   "id": 458,
+   "time": 84.0,
    "class": "jace",
    "instance": "picflash",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 69,
+   "va": "0x4393f8",
+   "kind": "create",
    "id": 711,
    "time": 84.0,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x438740",
    "params_hex": "009843000100000000000000cdccccbecdcc4c3d0000003fcdccccbe0000000033331340000000000000803f00004040e49743000100000000000000cdcc4cbe",
    "params_refs": [
@@ -854,40 +923,44 @@
    ]
   },
   {
-   "va": "0x439410",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 3,
+   "index": 70,
+   "va": "0x439420",
+   "kind": "message",
    "id": 457,
    "time": 85.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439438",
    "class": "jace",
    "instance": "linefx",
-   "kind": 3,
+   "code": "0x20"
+  },
+  {
+   "index": 71,
+   "va": "0x439448",
+   "kind": "message",
    "id": 469,
    "time": 90.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439460",
    "class": "jace",
    "instance": "picflash",
-   "kind": 3,
+   "code": "0x20"
+  },
+  {
+   "index": 72,
+   "va": "0x439470",
+   "kind": "message",
    "id": 468,
    "time": 90.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439488",
    "class": "jace",
    "instance": "picflash",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 73,
+   "va": "0x439498",
+   "kind": "create",
    "id": 712,
    "time": 90.3,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x438770",
    "params_hex": "e49743000100000000000000cdcc4cbecdccccbe0000003f9a9999be9a9999be33331340000000000000803f00004040c49743000100000000000000cdccccbd",
    "params_refs": [
@@ -902,40 +975,43 @@
    ]
   },
   {
-   "va": "0x4394b0",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 3,
+   "index": 74,
+   "va": "0x4394c0",
+   "kind": "message",
    "id": 455,
    "time": 94.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4394d8",
    "class": "jace",
    "instance": "flash",
-   "kind": 1,
+   "code": "0x20"
+  },
+  {
+   "index": 75,
+   "va": "0x4394e8",
+   "kind": "kill",
    "id": 453,
    "time": 94.0,
-   "handler": null
+   "class": "jace",
+   "instance": "bloem"
   },
   {
-   "va": "0x439500",
-   "class": "jace",
-   "instance": "bloem",
-   "kind": 3,
+   "index": 76,
+   "va": "0x439510",
+   "kind": "message",
    "id": 456,
    "time": 94.5,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x439528",
    "class": "jace",
    "instance": "grid1fx",
-   "kind": 0,
+   "code": "0x20"
+  },
+  {
+   "index": 77,
+   "va": "0x439538",
+   "kind": "create",
    "id": 713,
    "time": 96.3,
-   "handler": "0x41d3b0",
+   "class": "scid",
+   "instance": "Letters",
+   "ctor": "0x41d3b0",
    "params": "0x4387a0",
    "params_hex": "c49743000100000000000000cdccccbdcdcccc3d0000003fcdcc4cbe000000009a991940000000000000803f00004040000000000000a0400000a0c10000a041",
    "params_refs": [
@@ -946,114 +1022,131 @@
    ]
   },
   {
-   "va": "0x439550",
-   "class": "scid",
-   "instance": "Letters",
-   "kind": 0,
+   "index": 78,
+   "va": "0x439560",
+   "kind": "create",
    "id": 502,
    "time": 101.0,
-   "handler": "0x41ffc0",
+   "class": "jace",
+   "instance": "flash",
+   "ctor": "0x41ffc0",
    "params": "0x4388d0",
    "params_hex": "cdcc4c3e0000803f000000000000803f00000000cdcccc3effffff0000000000cdcc4c3e0000803fcdcccc3d0000803f00000000cdcccc3effffff0000000000"
   },
   {
-   "va": "0x439578",
-   "class": "jace",
-   "instance": "flash",
-   "kind": 3,
+   "index": 79,
+   "va": "0x439588",
+   "kind": "message",
    "id": 502,
    "time": 101.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4395a0",
    "class": "jace",
    "instance": "flash",
-   "kind": 1,
+   "code": "0x20"
+  },
+  {
+   "index": 80,
+   "va": "0x4395b0",
+   "kind": "kill",
    "id": 469,
    "time": 101.0,
-   "handler": null
+   "class": "jace",
+   "instance": "picflash"
   },
   {
-   "va": "0x4395c8",
-   "class": "jace",
-   "instance": "picflash",
-   "kind": 3,
+   "index": 81,
+   "va": "0x4395d8",
+   "kind": "message",
    "id": 500,
    "time": 101.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4395f0",
    "class": "jace",
    "instance": "linefx",
-   "kind": 3,
+   "code": "0x20"
+  },
+  {
+   "index": 82,
+   "va": "0x439600",
+   "kind": "message",
    "id": 500,
    "time": 101.0,
-   "handler": "0x9010"
-  },
-  {
-   "va": "0x439618",
    "class": "jace",
    "instance": "linefx",
-   "kind": 3,
+   "code": "0x9010"
+  },
+  {
+   "index": 83,
+   "va": "0x439628",
+   "kind": "message",
    "id": 456,
    "time": 101.0,
-   "handler": "0x9005"
-  },
-  {
-   "va": "0x439640",
    "class": "jace",
    "instance": "grid1fx",
-   "kind": 3,
-   "id": 501,
-   "time": 101.0,
-   "handler": "0x20"
+   "code": "0x9005"
   },
   {
-   "va": "0x439668",
-   "class": "jace",
-   "instance": "linefx",
-   "kind": 3,
+   "index": 84,
+   "va": "0x439650",
+   "kind": "message",
    "id": 501,
    "time": 101.0,
-   "handler": "0x9010"
-  },
-  {
-   "va": "0x439690",
    "class": "jace",
    "instance": "linefx",
-   "kind": 1,
+   "code": "0x20"
+  },
+  {
+   "index": 85,
+   "va": "0x439678",
+   "kind": "message",
+   "id": 501,
+   "time": 101.0,
+   "class": "jace",
+   "instance": "linefx",
+   "code": "0x9010"
+  },
+  {
+   "index": 86,
+   "va": "0x4396a0",
+   "kind": "kill",
    "id": 501,
    "time": 107.0,
-   "handler": null
+   "class": "jace",
+   "instance": "linefx"
   },
   {
-   "va": "0x4396b8",
-   "class": "jace",
-   "instance": "linefx",
-   "kind": 1,
+   "index": 87,
+   "va": "0x4396c8",
+   "kind": "kill",
    "id": 456,
    "time": 107.0,
-   "handler": null
+   "class": "jace",
+   "instance": "grid1fx"
   },
   {
-   "va": "0x439708",
-   "class": "jace",
-   "instance": "linefx",
-   "kind": 3,
-   "id": 60,
-   "time": 108.0,
-   "handler": "0x20"
-  },
-  {
-   "va": "0x4396e0",
-   "class": "jace",
-   "instance": "grid1fx",
-   "kind": 1,
+   "index": 88,
+   "va": "0x4396f0",
+   "kind": "kill",
    "id": 500,
    "time": 108.5,
-   "handler": null
+   "class": "jace",
+   "instance": "linefx"
+  },
+  {
+   "index": 89,
+   "va": "0x439718",
+   "kind": "message",
+   "id": 60,
+   "time": 108.0,
+   "class": "nixfx",
+   "instance": "zoomer",
+   "code": "0x20"
+  },
+  {
+   "index": 90,
+   "va": "0x439740",
+   "kind": "end",
+   "id": 0,
+   "time": 0.0,
+   "class": null,
+   "instance": null
   }
  ]
 }
