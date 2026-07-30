@@ -11,16 +11,19 @@ import { TimScene } from './effects/timscene.js';
 const DEMO_LENGTH = 194; // shipped soundtrack runs 3:14
 
 // Async texture manager over loose files (Contour's assets are extracted
-// to data/, unlike Tesla's pak).
+// to data/, unlike Tesla's pak). An `embed` map (path -> {b64, mime})
+// substitutes data URIs for fetches in single-file builds.
 class TexManager {
-  constructor(mgl) {
+  constructor(mgl, embed = null) {
     this.mgl = mgl;
+    this.embed = embed;
     this.cache = new Map();
   }
   async preload(path) {
     if (this.cache.has(path)) return this.cache.get(path);
     const img = new Image();
-    img.src = path;
+    const e = this.embed && this.embed[path];
+    img.src = e ? 'data:' + e.mime + ';base64,' + e.b64 : path;
     await img.decode();
     const cv = document.createElement('canvas');
     cv.width = img.naturalWidth;
@@ -60,26 +63,38 @@ export class Demo {
     this.onActiveChange = opts.onActiveChange || (() => {});
   }
 
+  async _bytes(path) {
+    const e = this.opts.embed && this.opts.embed[path];
+    if (e) {
+      const bin = atob(e.b64);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+    return new Uint8Array(await (await fetch(path)).arrayBuffer());
+  }
+
   async load() {
     this.status('initializing WebGL…');
     this.mgl = new MiniGL(this.canvas);
-    this.tex = new TexManager(this.mgl);
+    this.tex = new TexManager(this.mgl, this.opts.embed || null);
 
     this.status('loading timeline…');
-    const tl = await (await fetch('data/timeline.json')).json();
+    const tl = JSON.parse(new TextDecoder().decode(await this._bytes('data/timeline.json')));
     this.timeline = tl.records.filter((r) => r.class);
 
     this.status('loading textures…');
     for (const t of TEXTURES) await this.tex.preload(t);
 
     this.status('loading scenes…');
-    const dildoBytes = new Uint8Array(await (await fetch('data/scenes/dildo.bin')).arrayBuffer());
-    this.dildoScene = parseARSE(dildoBytes);
-    const neuronBytes = new Uint8Array(await (await fetch('data/scenes/neuron.bin')).arrayBuffer());
-    this.neuronScene = parseARSE(neuronBytes);
+    this.dildoScene = parseARSE(await this._bytes('data/scenes/dildo.bin'));
+    this.neuronScene = parseARSE(await this._bytes('data/scenes/neuron.bin'));
 
     this.status('loading soundtrack…');
-    this.audio = new Audio('data/test.mp3');
+    const embAudio = this.opts.embed && this.opts.embed['data/test.mp3'];
+    this.audio = new Audio(embAudio
+      ? 'data:audio/mpeg;base64,' + embAudio.b64
+      : 'data/test.mp3');
     this.audio.preload = 'auto';
 
     this.status('ready');
