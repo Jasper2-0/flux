@@ -12,6 +12,9 @@ import { Letters } from './effects/letters.js';
 import { Credit, resetCreditOrder } from './effects/credits.js';
 import { Grid1fx } from './effects/grid1fx.js';
 import { Flarefx } from './effects/flarefx.js';
+import { Flash } from './effects/flash.js';
+import { Picflash } from './effects/picflash.js';
+import { Linefx } from './effects/linefx.js';
 import { IntroBurst, CreditsRough, ContLogoRough, EndCard } from './effects/quickparts.js';
 
 const DEMO_LENGTH = 194; // shipped soundtrack runs 3:14
@@ -144,16 +147,13 @@ export class Demo {
     if (refs.includes('dildo.bin')) {
       return { effect: new TimScene(this.mgl, this.tex, this.dildoScene, 'data/saftext/fx8.jpg') };
     }
-    // neuron.bin is named inside id 455's parameter struct (a jace/flash,
-    // not the ARSE replayer itself), so this attribution is inferred from
-    // the path rather than from the constructor. The capture shows a dark
-    // mass over this section, so it is presented dim and additive.
-    if (refs.includes('neuron.bin')) {
-      return {
-        effect: new TimScene(this.mgl, this.tex, this.neuronScene,
-                             'data/saftext/fx8.jpg', { additive: true, gain: 0.22 }),
-      };
-    }
+    // `scenes\neuron.bin` was once dispatched here too, because the string
+    // turned up in instance 455's parameter dump. Now that the flash block
+    // is decoded as 32 bytes we know that pointer sits one dword *past*
+    // the end of 455's block: it belongs to whatever comes next, not to a
+    // flash. No timeline record references the neuron scene inside its own
+    // block, so the port no longer renders it. The shipped scene stays in
+    // data/ and the parser still validates against it.
 
     // Scid's poem: the parameter block carries text, drift and timing
     if (record.letters) {
@@ -169,6 +169,18 @@ export class Demo {
         return { effect: new Grid1fx(this.mgl, this.tex) };
       case 'flarefx':
         return { effect: new Flarefx(this.mgl, this.tex) };
+      case 'flash':
+        return record.flash
+          ? { effect: new Flash(this.mgl, this.tex, record.flash) }
+          : null;
+      case 'picflash':
+        return record.picflash
+          ? { effect: new Picflash(this.mgl, this.tex, record.picflash) }
+          : null;
+      case 'linefx':
+        return record.linefx
+          ? { effect: new Linefx(this.mgl, this.tex, record.linefx) }
+          : null;
       case 'zoomer':
         return { effect: new Zoomer(this.mgl, this.tex, { ending: this.opts.zoomerEnding || 'original' }) };
       case 'credit3':

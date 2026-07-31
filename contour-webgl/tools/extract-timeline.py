@@ -183,6 +183,80 @@ while rec_va < TABLE_LIMIT:
                     'fade0': round(f[8], 4), 'fade1': round(f[9], 4),
                 }
 
+    # Jace's parameter blocks, read off the constructors, the geometry
+    # builders and the update methods.
+    #
+    # flash (ctor 0x41ff80, block 32 bytes at this+0x94). The builder at
+    # 0x4200e0 lays a fan of N−1 rim vertices of radius p[0x14] with the
+    # centre vertex last, and gives every vertex z = p[0x14] too — so the
+    # radius cancels against the depth and the fan is always a full-frame
+    # wash. The update 0x420160 writes only colours, from two clamped
+    # 0→1 ramps; the object dies when both pass 0.999.
+    #   +0x00,+0x04  rim ramp start/end        +0x08,+0x0c  centre ramp
+    #   +0x14 radius (== depth)  +0x18,+0x1c   0xRRGGBB from/to
+    #
+    # picflash (ctor 0x41fce0, block 32 bytes at this+0x94; four vertices
+    # allocated at 0x41fdc0, rebuilt each frame by 0x41fe30 as a square of
+    # half-diagonal `size` rotated by `ang`, the baked π/4 making angle 0
+    # axis-aligned):
+    #   t = T / p[0x14];  size = lerp(p0,p1,t)×0.01;  ang = lerp(p2,p3,t)+π/4
+    #   z = p[0x10] + 0.002t;  alpha = clamp01((1−t)×p[0x18])
+    #   +0x1c is a texture name for the init (0x41fda0) — null everywhere.
+    #
+    # linefx (ctor 0x41f4e0, block 128 bytes at this+0xb4): a ring
+    # emitter. Eight (base, rate, drift) triples — spawn writes
+    # base + drift×T (0x41f920), update evaluates + rate×age (0x41f5c0) —
+    # plus a colour, an attack/sustain/release envelope whose sum is the
+    # particle life, and four emitter fields. The init (0x41f530) forces
+    # the segment count to 70 if it falls outside [1, 70].
+    if kind == 0 and b and inst in ('flash', 'picflash', 'linefx'):
+        poff = va2off(b)
+        if poff is not None:
+            n = 32 if inst == 'linefx' else 8
+            w = struct.unpack_from('<%dI' % n, data, poff)
+            f = struct.unpack_from('<%df' % n, data, poff)
+            r4 = lambda x: round(x, 4)
+            if inst == 'flash':
+                rec['flash'] = {
+                    'rampRim': [r4(f[0]), r4(f[1])],
+                    'rampCentre': [r4(f[2]), r4(f[3])],
+                    'radius': r4(f[5]),
+                    'colors': [w[6], w[7]],
+                }
+            elif inst == 'picflash':
+                rec['picflash'] = {
+                    'size': [r4(f[0]), r4(f[1])],
+                    'angle': [r4(f[2]), r4(f[3])],
+                    'depth': r4(f[4]),
+                    'duration': r4(f[5]),
+                    'falloff': r4(f[6]),
+                    'texture': w[7],
+                }
+            else:
+                # triples at 0x00/0x0c/0x18, then the colour, then
+                # 0x28/0x34/0x40/0x4c/0x58 — indices 0,3,6,(9),10,13,16,19,22
+                tri = lambda i: [r4(f[i]), r4(f[i + 1]), r4(f[i + 2])]
+                segs = w[31]
+                rec['linefx'] = {
+                    'cx': tri(0), 'cy': tri(3), 'width': tri(6),
+                    'color': w[9],
+                    'bright': tri(10),
+                    'angle0': tri(13), 'angle1': tri(16),
+                    'radius0': tri(19), 'radius1': tri(22),
+                    'attack': r4(f[25]), 'sustain': r4(f[26]), 'release': r4(f[27]),
+                    'interval': r4(f[28]), 'emitUntil': r4(f[29]),
+                    'maxAlive': w[30],
+                    'segments': segs if 1 <= segs <= 70 else 70,
+                }
+
+    # Known block sizes, so the string scan below cannot walk past the end
+    # of a block and attribute the *next* record's data to this one. (That
+    # is exactly how `scenes\neuron.bin` — which lives one dword past
+    # instance 455's 32-byte flash block — was once read as a scene name
+    # belonging to 455.)
+    BLOCK_SIZE = {'flash': 32, 'picflash': 32, 'linefx': 128, 'Letters': 48}
+    span = BLOCK_SIZE.get(inst, 64)
+
     # annotate pointer-ish fields with resolved strings / hexdumps
     for key, ptr in (('params', b if kind == 0 else 0), ('param', b if kind == 3 else 0)):
         if not ptr:
@@ -190,13 +264,14 @@ while rec_va < TABLE_LIMIT:
         poff = va2off(ptr)
         if poff is None:
             continue
-        blob = data[poff:poff + 64]
+        blob = data[poff:poff + span]
         rec[key + '_hex'] = blob.hex()
+        rec[key + '_span'] = span
         s = cstr(ptr)
         if s and len(s) > 3:
             rec[key + '_str'] = s
         refs = []
-        for i in range(0, 64, 4):
+        for i in range(0, span, 4):
             p2 = struct.unpack_from('<I', blob, i)[0] if i + 4 <= len(blob) else 0
             if 0x432000 <= p2 < 0x43a000:
                 rs = cstr(p2)

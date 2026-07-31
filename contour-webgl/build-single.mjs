@@ -24,6 +24,9 @@ const MODULES = [
   'js/effects/credits.js',
   'js/effects/grid1fx.js',
   'js/effects/flarefx.js',
+  'js/effects/flash.js',
+  'js/effects/picflash.js',
+  'js/effects/linefx.js',
   'js/effects/quickparts.js',
   'js/demo.js',
 ];

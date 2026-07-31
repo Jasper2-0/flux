@@ -50,9 +50,11 @@ This yields real activation windows: contlogo (running Tim's replayer on
   (validated against both shipped scenes), and a first **TimScene
   replayer** rendering meshes with their baked 30 fps object transforms
   and camera track.
-- **Two of Jace's effects from recovered closed-form math**:
+- **Jace's effects from recovered closed-form math and decoded
+  parameter blocks**:
   - `bloem` — the phase-modulated five-petal flower
   - `rogplay` — the Pickover attractor orbit, all three parameter sets
+  - `flash`, `picflash`, `linefx` — see the decode below
 - **The engine layer** is Tesla's `minigl.js` with one addition the
   D3D-era vertex layout needs: per-vertex color in the array-draw path
   (`XYZ|DIFFUSE|TEX1`).
@@ -88,28 +90,115 @@ artwork and data rather than approximated:
 out of the binary — the standing-wave radius field and the Pickover
 attractor parameter sets respectively.
 
-### A caveat worth stating
+## Jace's three parameter blocks, decoded
 
-`scenes/neuron.bin` is named *inside* the parameter struct of instance
-455, which is a `jace/flash` (constructor `0x41ffc0`), not the ARSE
-replayer (`0x419330`). Only the dildo scene is definitely a `TimScene`.
-The port renders the neuron scene over 455's window as dim additive
-geometry because the capture shows a dark mass there, but that
-attribution is inferred from the path, not proven from the constructor.
+These were read straight off the constructors, the geometry builders and
+the update methods, and they are now what drives the port. All three are
+in `tools/extract-timeline.py`, so `timeline.json` carries named fields
+rather than hex.
+
+### `flash` — 32 bytes at `this+0x94` (ctor `0x41ff80`)
+
+| offset | meaning |
+| --- | --- |
+| `+0x00,+0x04` | rim ramp, start and end time |
+| `+0x08,+0x0c` | centre ramp, start and end time |
+| `+0x14` | radius — *and* the fan's z |
+| `+0x18,+0x1c` | colour from, colour to (`0xRRGGBB`) |
+
+The builder (`0x4200e0`) lays N−1 vertices on a circle and puts the
+centre last, giving every vertex `z = p[0x14]` as well. Radius and depth
+being the same number means the fan subtends a fixed angle whatever the
+parameter says: it is always a full-frame wash, and the radius has no
+visual effect at all.
+
+The update (`0x420160`) writes **nothing but vertex colours**. Two
+clamped ramps, `v = (T−p0)/(p1−p0)` for the rim and `s = (T−p2)/(p3−p2)`
+for the centre, each drive a `lerp(from, to)`; once both pass 0.999 the
+object raises its own dead flag. The blend is additive, and the timeline
+proves it: instance 22 runs black→white at 51.5 s and instance 24 runs
+white→black at 52.0 s — a cut through white. Under alpha blending the
+first of those would paint the screen *black* before it went white.
+
+### `picflash` — 32 bytes at `this+0x94` (ctor `0x41fce0`)
+
+| offset | meaning |
+| --- | --- |
+| `+0x00,+0x04` | half-diagonal, start and end (× 0.01) |
+| `+0x08,+0x0c` | rotation, start and end (radians) |
+| `+0x10` | base depth |
+| `+0x14` | duration |
+| `+0x18` | alpha falloff |
+| `+0x1c` | texture name — null in all six instances |
+
+Four vertices and two triangles (`0x41fdc0`), rebuilt every frame by
+`0x41fe30` as a square whose corner vector is `(cos, sin) × size`, the
+other three corners being that vector turned by 90°, 180° and 270°. The
+π/4 baked into the angle is what makes rotation 0 axis-aligned — that
+constant is what gives the layout away. Depth creeps by `0.002 t` over
+the effect's life and the alpha is `clamp01((1−t) × falloff)`.
+
+### `linefx` — 128 bytes at `this+0xb4` (ctor `0x41f4e0`)
+
+A ring emitter. Eight `(base, rate, drift)` triples: the spawn routine
+(`0x41f920`) writes `base + drift × T` into a new particle — `T` being
+the effect's own clock, so successive rings differ — and the update
+(`0x41f5c0`) evaluates `spawned + rate × age` each frame.
+
+| offset | triple |
+| --- | --- |
+| `+0x00`, `+0x0c` | centre x, centre y |
+| `+0x18` | ribbon half-width (× 0.001) |
+| `+0x24` | colour (`0xRRGGBB`, not a triple) |
+| `+0x28` | brightness |
+| `+0x34`, `+0x40` | start angle, end angle (in turns) |
+| `+0x4c`, `+0x58` | inner radius, outer radius |
+| `+0x64`,`+0x68`,`+0x6c` | attack, sustain, release — their sum is the particle's life |
+| `+0x70`,`+0x74`,`+0x78`,`+0x7c` | spawn interval, emit until, max alive, segments |
+
+Per segment the update writes three vertices — inner *black*, middle
+*colour*, outer *black* — so each particle is a ribbon lit down its own
+centreline. The init (`0x41f530`) forces the segment count to 70 if it
+falls outside `[1, 70]`.
+
+The coordinates are normalised screen space with **y downward**, times a
+constant 1.25 on y for the 4:3 frame. The release capture is what fixes
+that sign, and it also confirms the whole reading: at 86 s instance 457
+puts sixty-segment rings dead centre, and at 102 s instance 501's
+five-segment ring sits upper-left at (0.38, 0.35) with 500's
+fifty-segment one lower-right at (0.82, 0.85) — which is exactly what
+the AVI shows.
+
+### What the decode corrected
+
+`scenes/neuron.bin` used to be dispatched as a scene belonging to
+instance 455, because the string turned up in that record's parameter
+dump. With the flash block pinned at 32 bytes it is now clear the
+pointer sits one dword *past* the end of 455's block — it was the next
+record's data, read through too wide a window. The extractor now clips
+its string scan to each block's known size, no timeline record
+references the neuron scene from inside its own block, and the port no
+longer renders it. The scene stays in `data/` and the parser still
+validates against it.
 
 ## Not yet ported
 
-`linefx`, `picflash`, `flash`, the credit backdrop layers (`credit1`,
-`credit4`, `credit5` — currently a crossfade of the shipped paintings),
-the intro burst and the contour logo overlay treatment. The zoomer is
-integrated (`js/effects/zoomer.js`), ported from the standalone
-recreation with its measured nesting, feathered largest-first stack and
-both endings — shipped (default) and the intended aligned landing.
+The credit backdrop layers (`credit1`, `credit4`, `credit5` — currently
+a crossfade of the shipped paintings), the intro burst, the contour logo
+overlay treatment, and the shard explosion visible in the capture around
+86–90 s. Message codes `0x9004/0x9005/0x9010/0xa001` are recorded but
+still uninterpreted. The zoomer is integrated
+(`js/effects/zoomer.js`), ported from the standalone recreation with its
+measured nesting, feathered largest-first stack and both endings —
+shipped (default) and the intended aligned landing.
 
-Next steps, roughly in order of value: decode the parameter blocks the
-timeline hands each record (dumped in `timeline.json` as `params_hex`),
-enumerate per-effect blend state from the engine wrapper, integrate the
-existing zoomer recreation, and frame-match against the AVI.
+One judgment call worth flagging in the three effects above: `picflash`
+has a null texture in every instance, so the data says "white square".
+A flat white square at alpha 0.8 additive would blow the frame out for
+the full 27 seconds of instances 552 and 469, and the capture instead
+shows a bloom decaying from the centre — so this port fans the quad from
+a bright centre to transparent corners. Its size, spin, depth and alpha
+are the decoded ones untouched.
 
 ## Running
 
