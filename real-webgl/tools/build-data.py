@@ -27,6 +27,7 @@ separate greyscale JPEG for opacity, which `loadImage <img> mask <msk>`
 binds together. This merges those into single RGBA PNGs.
 """
 import json
+import math
 import os
 import re
 import shutil
@@ -203,16 +204,174 @@ def build_images(release, out, preload):
     return manifest
 
 
+def build_scene(scene, wanted):
+    """Flatten one .i3d into draw-ready arrays.
+
+    Triangles become independent corners so that the two texture-coordinate
+    conventions in these files can be resolved per mesh: bolletje and cubes
+    store one UV per triangle corner, the credits TVs one per vertex, and
+    several meshes carry a few more UVs than vertices because the exporter
+    dropped 3ds Max's separate map-face table at the seam. Indexing by
+    vertex covers that last case as the engine does.
+    """
+    mats = []
+    for m in scene['materials']:
+        slots = {t['slot']: t.get('file') for t in m['textures'] if t.get('file')}
+        base = slots.get(3) or slots.get(0) or slots.get(1)
+        env = slots.get(11) or slots.get(8)
+        for f in (base, env):
+            if f:
+                wanted.add(f.lower())
+        mats.append({
+            'name': m['name'],
+            'base': base and os.path.splitext(f_lower(base))[0] + '.png',
+            'env': env and os.path.splitext(f_lower(env))[0] + '.png',
+            'opacity': round(m['opacity'], 4),
+            'twoSided': bool(m.get('twoSided')),
+        })
+
+    meshes = []
+    for m in scene['meshes']:
+        nv, nf, nuv = len(m['verts']), len(m['faces']), len(m['uvs'])
+        pos, uv = [], []
+        per_corner = nuv == 3 * nf
+        for fi, f in enumerate(m['faces']):
+            for ci, vi in enumerate(f):
+                v = m['verts'][vi] if vi < nv else [0, 0, 0]
+                pos.extend(round(x, 3) for x in v)
+                if per_corner:
+                    t = m['uvs'][fi * 3 + ci]
+                elif nuv:
+                    t = m['uvs'][vi] if vi < nuv else [0, 0]
+                else:
+                    t = None
+                if t:
+                    uv.extend((round(t[0], 4), round(t[1], 4)))
+        tr = m['transform'] or {}
+        meshes.append({
+            'name': m['name'], 'material': m['material'],
+            'pos': [round(x, 4) for x in tr.get('pos', [0, 0, 0])],
+            'rot': [round(x, 6) for x in tr.get('rot', [0, 0, 0, 1])],
+            'scale': [round(x, 5) for x in tr.get('scale', [1, 1, 1])],
+            'positions': pos,
+            'uvs': uv or None,
+            'normals': smooth_normals(m['verts'], m['faces']),
+            'anim': pack_anim(m['anim']),
+        })
+
+    cams = []
+    for c in scene['cameras']:
+        cams.append({
+            'name': c['name'], 'fov': round(c['fov'], 4),
+            'pos': [round(x, 4) for x in c.get('pos', [0, 0, 0])],
+            'target': [round(x, 4) for x in c.get('target', [0, 0, 0])],
+            'anim': pack_anim([a for a in c['anim'] if not is_target(a['node'])]),
+            'targetAnim': pack_anim([a for a in c['anim'] if is_target(a['node'])]),
+        })
+
+    return {'frameEnd': scene['frameEnd'], 'fps': scene.get('fps', 30),
+            'materials': mats, 'meshes': meshes, 'cameras': cams}
+
+
+def smooth_normals(verts, faces):
+    """One normal per triangle corner, averaged over the faces meeting at a
+    vertex. The file only carries face normals — Energy3D computes vertex
+    normals itself in c3dObject::CalcNormals — and the reflection maps that
+    most of these materials use need smooth ones."""
+    acc = [[0.0, 0.0, 0.0] for _ in verts]
+    for f in faces:
+        try:
+            a, b, c = (verts[i] for i in f)
+        except IndexError:
+            continue
+        u = [b[i] - a[i] for i in range(3)]
+        v = [c[i] - a[i] for i in range(3)]
+        n = [u[1] * v[2] - u[2] * v[1],
+             u[2] * v[0] - u[0] * v[2],
+             u[0] * v[1] - u[1] * v[0]]
+        for i in f:
+            for j in range(3):
+                acc[i][j] += n[j]
+    out = []
+    for f in faces:
+        for i in f:
+            n = acc[i] if i < len(acc) else [0.0, 0.0, 1.0]
+            l = math.sqrt(n[0] ** 2 + n[1] ** 2 + n[2] ** 2) or 1.0
+            out.extend(round(x / l, 3) for x in n)
+    return out
+
+
+def f_lower(name):
+    return name.lower()
+
+
+def is_target(node):
+    return node.lower().endswith('.target')
+
+
+def pack_anim(anims):
+    """One node's animation.
+
+    Position and scale are sparse spline keys and keep their frame numbers
+    and TCB terms. Rotation is already baked to one quaternion per frame by
+    the exporter, so it goes out as a first frame and a flat run.
+    """
+    out = {}
+    for a in anims:
+        for prop in ('pos', 'scale'):
+            if a[prop]:
+                out[prop] = [{
+                    'f': k['f'],
+                    'v': [round(x, 4) for x in k['v']],
+                    'tcb': [round(x, 4) for x in k['tcb']],
+                } for k in a[prop]]
+        if a['rot']:
+            flat = []
+            for k in a['rot']:
+                flat.extend(round(x, 5) for x in k['q'])
+            out['rot'] = {'first': a['rot'][0]['f'], 'q': flat}
+    return out or None
+
+
+def build_scenes(release, out):
+    """Convert the nine .i3d scenes and copy the textures they name."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import i3d
+
+    src = os.path.join(release, 'scenes')
+    dst = os.path.join(out, 'scenes')
+    os.makedirs(dst, exist_ok=True)
+    wanted, built = set(), {}
+    for f in sorted(os.listdir(src)):
+        if not f.lower().endswith('.i3d'):
+            continue
+        s = build_scene(i3d.load(os.path.join(src, f)), wanted)
+        built[f.lower()] = s
+        with open(os.path.join(dst, os.path.splitext(f)[0] + '.json'), 'w') as fh:
+            json.dump(s, fh, separators=(',', ':'))
+
+    tdst = os.path.join(out, 'textures')
+    os.makedirs(tdst, exist_ok=True)
+    idir = os.path.join(release, 'images')
+    have = {n.lower(): n for n in os.listdir(idir)}
+    missing = []
+    for name in sorted(wanted):
+        real = have.get(name)
+        if not real:
+            missing.append(name)
+            continue
+        Image.open(os.path.join(idir, real)).convert('RGB').save(
+            os.path.join(tdst, os.path.splitext(name)[0] + '.png'))
+    return built, sorted(wanted), missing
+
+
 def main(release, out):
     os.makedirs(out, exist_ok=True)
     preload, cues = compile_script(os.path.join(release, 'real.scp'))
     instances = build_instances(cues)
     images = build_images(release, out, preload)
+    scenes, textures, missing_tex = build_scenes(release, out)
 
-    os.makedirs(os.path.join(out, 'scenes'), exist_ok=True)
-    for f in sorted(os.listdir(os.path.join(release, 'scenes'))):
-        shutil.copyfile(os.path.join(release, 'scenes', f),
-                        os.path.join(out, 'scenes', f))
     shutil.copyfile(os.path.join(release, 'real.mp3'), os.path.join(out, 'real.mp3'))
 
     cfg = open(os.path.join(release, 'energy3d.cfg')).read().split()
@@ -233,6 +392,10 @@ def main(release, out):
     print('  %d images (%d with a separate opacity map)' %
           (len(images), sum(1 for v in images.values() if v['mask'])))
     print('  ' + ', '.join('%s:%d' % kv for kv in sorted(kinds.items())))
+    print('  %d scenes, %d meshes, %d scene textures%s' % (
+        len(scenes), sum(len(s['meshes']) for s in scenes.values()),
+        len(textures) - len(missing_tex),
+        (' (missing %s)' % ', '.join(missing_tex)) if missing_tex else ''))
 
 
 if __name__ == '__main__':

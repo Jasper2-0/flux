@@ -23,6 +23,8 @@
 // was through BASS.
 
 import { MiniGL } from './minigl.js';
+import { Scene, lookAt } from './scene.js';
+import { Mat4 } from './mathlib.js';
 
 const SCREEN_W = 640, SCREEN_H = 480;
 
@@ -135,6 +137,31 @@ export class Demo {
         // ptr_und_ul.jpg and ptr_up_ul.jpg are named by the script but
         // were never shipped in the release
       }
+    }
+
+    this.status('loading the scenes…');
+    this.scenes = new Map();
+    this.sceneTex = new Map();
+    const names = new Set();
+    for (const inst of this.script.instances) {
+      if (inst.command === 'drawscene' && inst.args[0]) names.add(String(inst.args[0]).toLowerCase());
+    }
+    for (const n of names) {
+      try {
+        const file = n.replace(/\.i3d$/, '') + '.json';
+        const json = await (await fetch(this.base + 'scenes/' + file)).json();
+        const scene = new Scene(json);
+        for (const mat of scene.materials) {
+          for (const key of ['base', 'env']) {
+            const f = mat[key];
+            if (f && !this.sceneTex.has(f)) {
+              this.sceneTex.set(f, await this.assets.texture({ file: 'textures/' + f })
+                .catch(() => null));
+            }
+          }
+        }
+        this.scenes.set(n, scene);
+      } catch (e) { /* a scene the release does not ship */ }
     }
 
     this.status('loading the soundtrack…');
@@ -276,6 +303,99 @@ export class Demo {
     mgl.end();
   }
 
+  // GL_SPHERE_MAP, computed here because minigl has no fixed-function
+  // texgen. Energy3D imports glTexGeni and every scene material but the
+  // credits screens leans on a reflection map, so this is the look of most
+  // of the demo's 3D.
+  _sphereMap(mesh, mv) {
+    const n = mesh.positions.length / 3;
+    if (!mesh.envUV || mesh.envUV.length !== n * 2) mesh.envUV = new Float32Array(n * 2);
+    const p = mesh.positions, nm = mesh.normals, out = mesh.envUV, m = mv.m;
+    for (let i = 0; i < n; i++) {
+      const x = p[i * 3], y = p[i * 3 + 1], z = p[i * 3 + 2];
+      // eye-space position and normal (the transform is rigid, so the
+      // normal takes the same rotation)
+      let ex = m[0] * x + m[4] * y + m[8] * z + m[12];
+      let ey = m[1] * x + m[5] * y + m[9] * z + m[13];
+      let ez = m[2] * x + m[6] * y + m[10] * z + m[14];
+      const el = Math.hypot(ex, ey, ez) || 1;
+      ex /= el; ey /= el; ez /= el;
+      const ax = nm[i * 3], ay = nm[i * 3 + 1], az = nm[i * 3 + 2];
+      let nx = m[0] * ax + m[4] * ay + m[8] * az;
+      let ny = m[1] * ax + m[5] * ay + m[9] * az;
+      let nz = m[2] * ax + m[6] * ay + m[10] * az;
+      const nl = Math.hypot(nx, ny, nz) || 1;
+      nx /= nl; ny /= nl; nz /= nl;
+      const d = 2 * (nx * ex + ny * ey + nz * ez);
+      const rx = ex - d * nx, ry = ey - d * ny, rz = ez - d * nz;
+      const q = 2 * Math.sqrt(rx * rx + ry * ry + (rz + 1) * (rz + 1)) || 1;
+      out[i * 2] = rx / q + 0.5;
+      out[i * 2 + 1] = ry / q + 0.5;
+    }
+    return out;
+  }
+
+  _drawScene(inst, p, time) {
+    const scene = this.scenes.get(String(inst.args[0] || '').toLowerCase());
+    if (!scene) return;
+    const mgl = this.mgl, gl = mgl.gl;
+    const offset = parseFloat(inst.args[3]) || 0;
+    const frame = scene.frameAt((time - inst.start) * 1000, offset);
+    scene.update(frame);
+    const cam = scene.cameraAt(inst.args[1], frame);
+    if (!cam) return;
+
+    mgl.matrixMode(mgl.PROJECTION);
+    mgl.loadMatrix(scene.projection(cam.fov));
+    const view = lookAt(cam.eye, cam.at, [0, 1, 0]);
+
+    mgl.matrixMode(mgl.MODELVIEW);
+    // the write mask has to be back on before the clear, or the previous
+    // layer's depth survives and occludes this scene
+    mgl.depthMask(true);
+    gl.clear(gl.DEPTH_BUFFER_BIT);
+    mgl.enableDepthTest(true);
+    mgl.enableCullFace(false);
+
+    const a = p.alpha[0] / 255;
+    const [r, g, b] = p.color;
+    if (a < 0.999) {
+      mgl.enableBlend(true);
+      mgl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      this._blendState = [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA];
+      mgl.depthMask(false);
+    } else {
+      mgl.enableBlend(false);
+      this._blendState = null;
+    }
+    mgl.color4(r / 255, g / 255, b / 255, a);
+
+    for (const mesh of scene.meshes) {
+      const mv = new Mat4();
+      mv.copy(view);
+      mv.mult(mesh.world);
+      mgl.loadMatrix(mv);
+
+      const mat = scene.materials[mesh.src.material] || null;
+      let uvs = null, tex = null;
+      if (mat && mat.base && mesh.uvs) {
+        tex = this.sceneTex.get(mat.base); uvs = mesh.uvs;
+      } else if (mat && mat.env) {
+        tex = this.sceneTex.get(mat.env);
+        if (tex) uvs = this._sphereMap(mesh, mv);
+      } else if (mat && mat.base) {
+        tex = this.sceneTex.get(mat.base); uvs = mesh.uvs || mesh.zeroUV;
+      }
+      mgl.enableTexture(!!tex);
+      if (tex) mgl.bindTexture(tex);
+      if (!uvs) uvs = mesh.zeroUV;
+      mgl.drawElements(mesh.positions, uvs, mesh.indices);
+    }
+
+    mgl.enableDepthTest(false);
+    mgl.depthMask(false);
+  }
+
   renderFrame(time) {
     const mgl = this.mgl;
     mgl.clear();
@@ -285,13 +405,15 @@ export class Demo {
     live.sort((a, b) => (a.layer - b.layer) || (a.start - b.start));
 
     for (const inst of live) {
-      const done = inst.command === 'drawimage' || inst.command === 'colorfade';
+      const done = inst.command === 'drawimage' || inst.command === 'colorfade' ||
+        (inst.command === 'drawscene' && this.scenes.has(String(inst.args[0] || '').toLowerCase()));
       active.push({ layer: inst.layer, command: inst.command,
                     what: inst.args[0] || '', done });
       if (!done) continue;
       const p = this._props(inst, time);
       try {
         if (inst.command === 'drawimage') this._drawImage(inst, p);
+        else if (inst.command === 'drawscene') this._drawScene(inst, p, time);
         else this._colorFade(inst, p);
       } catch (e) { /* keep the loop alive */ }
     }
