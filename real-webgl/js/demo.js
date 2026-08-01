@@ -25,6 +25,7 @@
 import { MiniGL } from './minigl.js';
 import { Scene, lookAt } from './scene.js';
 import { Mat4 } from './mathlib.js';
+import { EFFECTS } from './effects.js';
 
 const SCREEN_W = 640, SCREEN_H = 480;
 
@@ -396,6 +397,20 @@ export class Demo {
     mgl.depthMask(false);
   }
 
+  // One of xotrack's show* tasks. They keep per-instance state, so each
+  // script instance gets its own object, built the first time it is seen.
+  _drawEffect(inst, p, time) {
+    if (!this._fx) this._fx = new Map();
+    let fx = this._fx.get(inst);
+    if (!fx) {
+      fx = new (EFFECTS[inst.command])(inst);
+      this._fx.set(inst, fx);
+    }
+    this._setup2d();
+    fx.draw(this.mgl, (time - inst.start) * 1000, p);
+    this._blendState = null;
+  }
+
   renderFrame(time) {
     const mgl = this.mgl;
     mgl.clear();
@@ -406,7 +421,8 @@ export class Demo {
 
     for (const inst of live) {
       const done = inst.command === 'drawimage' || inst.command === 'colorfade' ||
-        (inst.command === 'drawscene' && this.scenes.has(String(inst.args[0] || '').toLowerCase()));
+        (inst.command === 'drawscene' && this.scenes.has(String(inst.args[0] || '').toLowerCase())) ||
+        !!EFFECTS[inst.command];
       active.push({ layer: inst.layer, command: inst.command,
                     what: inst.args[0] || '', done });
       if (!done) continue;
@@ -414,7 +430,8 @@ export class Demo {
       try {
         if (inst.command === 'drawimage') this._drawImage(inst, p);
         else if (inst.command === 'drawscene') this._drawScene(inst, p, time);
-        else this._colorFade(inst, p);
+        else if (inst.command === 'colorfade') this._colorFade(inst, p);
+        else this._drawEffect(inst, p, time);
       } catch (e) { /* keep the loop alive */ }
     }
     this.onActiveChange(time, active);
