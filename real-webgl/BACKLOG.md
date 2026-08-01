@@ -61,16 +61,56 @@ after the last `drawScene`, so they inherit `gears.i3d`'s camera.
 
 Notes gathered so far:
 
-- **`show2d` is the big one** and the only one that is not straightforward.
-  It keeps a `0x65e78`-byte buffer — big enough for a 640×480 working
-  image — and picks between three textures held at `+0x65e6c`, `+0x65e70`
-  and `+0x65e74` on the third script parameter. It then compares the
-  first parameter against the three joke strings in `.data`
-  (`ranzigebotteparamomeeneffecttekiezen` at `0x40e05c`,
-  `ditisparameternummertje2endieisookheelergbottoevallig` at `0x40e084`,
-  `xotrackiseenbotteaapenhijverzintbotteparameternamen` at `0x40e0bc`) to
-  pick a variant. So it is a software effect that uploads a texture each
-  frame — the largest single reading job left.
+### `show2d` — the last one, and not what the buffer size suggested
+
+It is **not** a software rasteriser. The `0x65e78`-byte block is eight
+grids of 161 x 81 floats laid end to end at `+0x34`, `+0xcbf8`, `+0x197bc`,
+`+0x26380`, `+0x32f44`, `+0x3fb08`, `+0x4c6cc`, `+0x59290`, with the state
+flags in the 0x24 bytes left at the end. The draw is a screen-space grid
+of **160 x 80 quads, 4 x 6 pixels each** — exactly 640 x 480 — every one
+carrying its own animated texture coordinates. A UV warp, not a pixel
+loop. It registers as kind 1, which fits: its vertices are screen pixels.
+
+The grids pair up as (u, v): `+0x197bc` and `+0x26380` hold the rest
+coordinates, written once in init as `inner/160` and `outer/80`;
+`+0x32f44` and `+0x3fb08` are deltas; `+0x4c6cc` and `+0x59290` are the
+live coordinates the draw reads. `+0x34` and `+0xcbf8` are read but never
+written by either init or run — they are the fresh allocation, so zero in
+practice, and the arithmetic collapses accordingly.
+
+**Which variant runs is decided by two different parameter slots**, not
+one as previously noted here:
+
+  * `+0x94` (the *third* script parameter) picks the texture only:
+    `0` -> `solar_groot.jpg`, `2` -> `bruut.tga`, anything else ->
+    `eeeeeeeenv.tga`.
+  * `+0x8c` (the *first*) is compared against
+    `xotrackiseenbotteaapenhijverzintbotteparameternamen` (`0x40e0bc`) and
+    `ditisparameternummertje2endieisookheelergbottoevallig` (`0x40e084`).
+  * `+0x90` (the *second*) against
+    `ranzigebotteparamomeeneffecttekiezen` (`0x40e05c`).
+
+That gives four paths, and the five script instances use all of them:
+
+  | instance | params | path |
+  |---|---|---|
+  | 02:28.947 | `- ranzige… -` | plasma A (`0x401581`) |
+  | 03:07.551 | `- - 2` | plasma B (`0x401811`) |
+  | 03:18.582 | `- - 0` | plasma B (`0x401811`) |
+  | 03:29.103 | `xotrack… - 0` | zoomer (`0x40145d`) |
+  | 03:40.000 | `ditis… - 0` | zoomer, plus the closing move |
+
+**Done:** the zoomer path is fully traced. The live coordinates come out
+as `S * 0.02 * rest`, with `S = 50 - (cos(e) + 1) * 25` and
+`e = (t - t0) * 0.000436564364` clamped at pi — so `S` runs 0 to 50 over
+7.2 seconds and the texture opens out from a single texel to its full
+extent. The `ditis` instance adds a vertical-only `glScalef` about
+(320, 240) and a fade over ten seconds on top, which is the demo's last
+ten seconds.
+
+**Left:** the two plasma paths, each about sixty instructions of nested
+sines per grid vertex, with their own constant sets. Nothing conceptually
+hard, but it has to be traced exactly rather than approximated.
 
 - The assets, from the string table's cross-references — one per init,
   and none of them ever passing through `loadImage`, so the script never
