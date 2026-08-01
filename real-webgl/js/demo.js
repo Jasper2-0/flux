@@ -421,14 +421,13 @@ export class Demo {
 
     const mat = scene.materials[mesh.src.material] || null;
     let uvs = null, tex = null;
-    if (mat && mat.base && mesh.uvs) {
-      tex = this.sceneTex.get(mat.base); uvs = mesh.uvs;
-    } else if (mat && mat.env) {
-      tex = this.sceneTex.get(mat.env);
-      if (tex) uvs = this._sphereMap(mesh, mv);
-    } else if (mat && mat.base) {
-      tex = this.sceneTex.get(mat.base); uvs = mesh.uvs || mesh.zeroUV;
+    if (mat && mat.base) {
+      tex = this.sceneTex.get(mat.base);
+      uvs = mesh.uvs || mesh.zeroUV;
     }
+    // The reflection map is *not* an alternative to the base map. It goes
+    // on as a second, additive contribution — see the env pass below.
+    const envTex = mat && mat.env ? this.sceneTex.get(mat.env) : null;
 
     // Additive materials swap the blend func in place, per material
     // (0x1000548e). Source alpha then has no effect at all, which is why
@@ -454,6 +453,44 @@ export class Demo {
     const prim = mat && mat.wire ? gl.LINES : null;
     mgl.drawElements(mesh.positions, uvs || mesh.zeroUV, mesh.indices,
                      null, mesh.normals, prim);
+
+    if (!envTex) return;
+
+    // The reflection pass, at 0x100055ff. Energy3D has two routes to it
+    // and both *add* the map on top of what the base pass already drew:
+    //
+    //   with GL_ARB_multitexture and GL_EXT_texture_env_add (+0x278 and
+    //   +0x27c, probed at 0x100014c2 and 0x10005142), one pass — the map
+    //   goes on texture unit 1 with
+    //   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, 260.0), and 260 is
+    //   GL_ADD.
+    //
+    //   without them, two passes — the base, then glDepthFunc(GL_EQUAL),
+    //   glBlendFunc(GL_ONE, GL_ONE) and the map again over the same
+    //   triangles.
+    //
+    // So a reflective surface is its own colour *plus* its reflection, not
+    // its reflection alone. sphere.i3d's blob is mid grey under chrome,
+    // not chrome on black. The port took the second route because it is
+    // the one that fits a single texture unit, but it follows the first in
+    // leaving the added map unmodulated: the fallback would tint it by
+    // whatever colour the base pass left current, which on a GeForce-era
+    // card — where both extensions were present — never happened.
+    //
+    // GL_NV_texgen_reflection (+0x27b) would swap GL_SPHERE_MAP for
+    // GL_REFLECTION_MAP, a different and cruder mapping. Not reproduced;
+    // the sphere-map route is the portable one and the one that reads
+    // correctly against the artwork.
+    const env = this._sphereMap(mesh, mv);
+    mgl.depthFunc(gl.EQUAL);
+    mgl.blendFunc(gl.ONE, gl.ONE);
+    mgl.enableBlend(true);
+    mgl.bindTexture(envTex);
+    mgl.enableTexture(true);
+    mgl.color4(alpha, alpha, alpha, 1);
+    mgl.drawElements(mesh.positions, env, mesh.indices, null, mesh.normals, prim);
+    mgl.depthFunc(gl.LEQUAL);
+    if (!inBlendedPass) mgl.enableBlend(false);
   }
 
   // Lights, transformed into eye space the way glLightfv would have them

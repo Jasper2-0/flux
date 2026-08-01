@@ -222,6 +222,37 @@ Only `effect.i3d` uses it, and it is the difference between that section
 reading as a solid white blob and as the radiating wireframe mandala it
 is supposed to be.
 
+### The reflection map is added, not substituted — **done**
+`ogl_trimesh` has two routes to a material's reflection map and both add
+it on top of the base pass rather than replacing it:
+
+  * with `GL_ARB_multitexture` and `GL_EXT_texture_env_add` (the flags at
+    `+0x278` and `+0x27c`, probed at `0x100014c2` and `0x10001542`), one
+    pass — the map goes on texture unit 1 under
+    `glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, 260.0)`, and 260 is
+    `GL_ADD`.
+  * without them, two passes — the base, then `glDepthFunc(GL_EQUAL)`,
+    `glBlendFunc(GL_ONE, GL_ONE)` and the map again over the same
+    triangles.
+
+The port had been substituting the map for the base, so every reflective
+surface rendered as its reflection alone on black. Five materials are
+affected: `bolletje`, `credits`, `cross`, `dings` and `sphere`.
+
+Two of them have a black diffuse colour (`cross`, and `credits` whose
+base map is the missing `zwart.jpg` — "zwart" is Dutch for black), so
+those look the same either way. The other three are mid grey, and they
+get visibly brighter: `sphere.i3d`'s blob is chrome over 50% grey, not
+chrome over nothing.
+
+**Open:** the two routes do not agree on how bright. Multitexture adds the
+map raw, so `0.5 + env`. The fallback leaves whatever colour the base
+pass set current, and unit 0 defaults to `GL_MODULATE`, so it lands on
+`0.5 + 0.5 * env`. The port follows the multitexture reading, on the
+grounds that both extensions were near-universal on the hardware this was
+shown on. If the release looked less blown out than that, the fallback
+arithmetic is the other candidate and is a one-line change.
+
 ### Texture-coordinate seams
 The exporter drops 3ds Max's separate map-face table, so a handful of
 meshes carry slightly more UVs than vertices (`Torus09`: 169 against 144).
