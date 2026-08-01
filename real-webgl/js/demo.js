@@ -346,6 +346,46 @@ export class Demo {
     return out;
   }
 
+  // One mesh with its material applied, as ogl_material does it.
+  _drawMesh(scene, mesh, view, alpha, inBlendedPass) {
+    const mgl = this.mgl, gl = mgl.gl;
+    const mv = new Mat4();
+    mv.copy(view);
+    mv.mult(mesh.world);
+    mgl.loadMatrix(mv);
+
+    const mat = scene.materials[mesh.src.material] || null;
+    let uvs = null, tex = null;
+    if (mat && mat.base && mesh.uvs) {
+      tex = this.sceneTex.get(mat.base); uvs = mesh.uvs;
+    } else if (mat && mat.env) {
+      tex = this.sceneTex.get(mat.env);
+      if (tex) uvs = this._sphereMap(mesh, mv);
+    } else if (mat && mat.base) {
+      tex = this.sceneTex.get(mat.base); uvs = mesh.uvs || mesh.zeroUV;
+    }
+
+    // Additive materials swap the blend func in place, per material
+    // (0x1000548e). Source alpha then has no effect at all, which is why
+    // the cubes' 40% opacity does not dim them.
+    if (inBlendedPass) {
+      if (mat && mat.additive) mgl.blendFunc(gl.ONE, gl.ONE);
+      else mgl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    }
+
+    // A textured mesh draws white and lets the texture carry the colour,
+    // its alpha scaled by the material's opacity; an untextured one draws
+    // in the material's own colour. With lighting off — which it is for
+    // every scene that carries no lights — that glColor4f is the only
+    // colour these meshes get.
+    const op = mat ? (mat.opacity === undefined ? 1 : mat.opacity) : 1;
+    if (tex || !mat || !mat.color) mgl.color4(1, 1, 1, alpha * op);
+    else mgl.color4(mat.color[0], mat.color[1], mat.color[2], alpha * op);
+    mgl.enableTexture(!!tex);
+    if (tex) mgl.bindTexture(tex);
+    mgl.drawElements(mesh.positions, uvs || mesh.zeroUV, mesh.indices);
+  }
+
   _drawScene(inst, p, time) {
     const scene = this.scenes.get(String(inst.args[0] || '').toLowerCase());
     if (!scene) return;
@@ -366,50 +406,40 @@ export class Demo {
     mgl.depthMask(true);
     gl.clear(gl.DEPTH_BUFFER_BIT);
     mgl.enableDepthTest(true);
-    mgl.enableCullFace(false);
 
     // drawScene::run never touches the colour — it only passes alpha
     // through set_alpha — so the tint comes from the material, not the
     // script.
     const a = p.alpha[0] / 255;
-    if (a < 0.999) {
-      mgl.enableBlend(true);
-      mgl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      mgl.depthMask(false);
-    } else {
-      mgl.enableBlend(false);
-    }
 
+    // ogl::draw_display draws in two passes. An object is transparent if
+    // any of its materials has opacity below 1 or is marked additive
+    // (0x10005467); everything else goes in the opaque pass first, with
+    // culling on and depth writes on. Then, at 0x10001ab6, blending goes
+    // on, depth writes go off, culling goes off, and the transparent
+    // objects follow — which is why the additive cubes read as six-sided:
+    // nothing is culled and nothing occludes.
+    const transparent = (mat) => !!mat && (mat.additive || mat.opacity < 1);
+    const opaque = [], blended = [];
     for (const mesh of scene.meshes) {
-      const mv = new Mat4();
-      mv.copy(view);
-      mv.mult(mesh.world);
-      mgl.loadMatrix(mv);
-
-      const mat = scene.materials[mesh.src.material] || null;
-      let uvs = null, tex = null;
-      if (mat && mat.base && mesh.uvs) {
-        tex = this.sceneTex.get(mat.base); uvs = mesh.uvs;
-      } else if (mat && mat.env) {
-        tex = this.sceneTex.get(mat.env);
-        if (tex) uvs = this._sphereMap(mesh, mv);
-      } else if (mat && mat.base) {
-        tex = this.sceneTex.get(mat.base); uvs = mesh.uvs || mesh.zeroUV;
-      }
-      // ogl_material, 0x100054ac and 0x100054e7: a textured mesh draws
-      // white and lets the texture carry the colour, its alpha scaled by
-      // the material's opacity; an untextured one draws in the material's
-      // own colour. With lighting off — which it is for every scene but
-      // bolletje — that glColor4f is the only colour these meshes get.
-      const op = mat ? (mat.opacity === undefined ? 1 : mat.opacity) : 1;
-      if (tex || !mat || !mat.color) mgl.color4(1, 1, 1, a * op);
-      else mgl.color4(mat.color[0], mat.color[1], mat.color[2], a * op);
-      mgl.enableTexture(!!tex);
-      if (tex) mgl.bindTexture(tex);
-      if (!uvs) uvs = mesh.zeroUV;
-      mgl.drawElements(mesh.positions, uvs, mesh.indices);
+      (transparent(scene.materials[mesh.src.material]) ? blended : opaque).push(mesh);
     }
 
+    mgl.enableCullFace(true);
+    mgl.cullFace(gl.BACK);
+    mgl.depthMask(true);
+    mgl.enableBlend(false);
+    for (const mesh of opaque) this._drawMesh(scene, mesh, view, a, false);
+
+    if (blended.length) {
+      mgl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      mgl.enableBlend(true);
+      mgl.depthMask(false);
+      mgl.enableCullFace(false);
+      for (const mesh of blended) this._drawMesh(scene, mesh, view, a, true);
+    }
+
+    mgl.enableCullFace(false);
     mgl.enableDepthTest(false);
     mgl.depthMask(false);
   }

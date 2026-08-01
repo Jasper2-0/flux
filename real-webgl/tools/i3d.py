@@ -134,7 +134,10 @@ def read_material(r):
         r.u8(); r.f32(); r.f32()
         flags = r.u8()
         mat['twoSided'] = bool(flags & 2)
-        r.u8()
+        # 3ds Max's transparency Type: filter / subtractive / additive.
+        # The loader turns a 2 into mat[0x30] = 1 (0x1000a913), and the
+        # renderer reads exactly that to pick glBlendFunc(GL_ONE, GL_ONE).
+        mat['additive'] = r.u8() == 2
     mat['textures'] = [read_texture(r) for _ in range(r.u16())]
     mat['sub'] = [read_material(r) for _ in range(r.u16())]
     return mat

@@ -233,6 +233,7 @@ def build_scene(scene, wanted):
             'env': env and os.path.splitext(f_lower(env))[0] + '.png',
             'color': [round(x, 4) for x in m['color']],
             'opacity': round(m['opacity'], 4),
+            'additive': bool(m.get('additive')),
             'twoSided': bool(m.get('twoSided')),
         })
 
@@ -244,6 +245,8 @@ def build_scene(scene, wanted):
         # samples them: a reflection-mapped surface generates its own
         needs_uv = bool(mat and mat['base']) and nuv > 0
         per_corner = needs_uv and nuv == 3 * nf
+        if per_corner and uvs_are_degenerate(m['uvs'], m['faces']):
+            m['uvs'] = quad_unwrap(m['faces'])
         normals = smooth_normals(m['verts'], m['faces'])
 
         if per_corner:
@@ -296,6 +299,38 @@ def build_scene(scene, wanted):
 
     return {'frameEnd': scene['frameEnd'], 'fps': scene.get('fps', 30),
             'materials': mats, 'meshes': meshes, 'cameras': cams}
+
+
+def uvs_are_degenerate(uvs, faces):
+    """True when most triangles enclose no area in UV space.
+
+    cubes.i3d is like this: the chunk parses to the byte, but ten of every
+    twelve triangles collapse to a line, so no indexing of the stored data
+    can map a texture onto a face. The exporter dropped 3ds Max's map-face
+    table and what is left cannot be reassembled.
+    """
+    bad = 0
+    for fi in range(len(faces)):
+        a, b, c = uvs[fi * 3:fi * 3 + 3]
+        area = abs((b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1]))
+        if area < 1e-6:
+            bad += 1
+    return bad * 2 > len(faces)
+
+
+def quad_unwrap(faces):
+    """Map each pair of triangles across the whole 0..1 square.
+
+    A reconstruction, not a transcription — but these meshes are boxes
+    built from quad pairs and their texture is drawn as a face panel, so
+    this is the mapping the artwork was made for.
+    """
+    out = []
+    for i in range(0, len(faces), 2):
+        out.extend([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0)])
+        if i + 1 < len(faces):
+            out.extend([(1.0, 1.0), (0.0, 1.0), (0.0, 0.0)])
+    return out
 
 
 def smooth_normals(verts, faces):
