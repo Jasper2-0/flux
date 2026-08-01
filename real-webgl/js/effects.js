@@ -694,6 +694,7 @@ const S2D = {
   fade: 1.0,
   zoom: 0,
   built: false,
+  pos: null, uv: null, idx: null,
 };
 
 function s2dInit() {
@@ -821,22 +822,39 @@ export class ShowTwoD {
     const c = ditis ? S2D.fade : 1.0;
     mgl.color4(c, c, c, 1);
     const U = S2D.live[0], V = S2D.live[1];
-    mgl.begin(mgl.TRIANGLES);
-    for (let j = 0; j < G_COLS - 1; j++) {
-      const x = j * 4;
-      for (let i = 0; i < G_ROWS - 1; i++) {
-        const y = i * 6;
-        const a = j * G_ROWS + i, b = a + 1;
-        const d = (j + 1) * G_ROWS + i, e2 = d + 1;
-        const q = [[x, y, a], [x, y + 6, b], [x + 4, y + 6, e2], [x + 4, y, d]];
-        for (const n of [0, 1, 2, 0, 2, 3]) {
-          mgl.color4(c, c, c, 1);
-          mgl.texCoord2(U[q[n][2]], V[q[n][2]]);
-          mgl.vertex3(q[n][0], q[n][1], 0);
+
+    // 160 x 80 cells is 76,800 triangle vertices a frame, which overruns
+    // the immediate-mode batch and is far too much traffic for one call
+    // per vertex besides. Built straight into typed arrays instead — the
+    // screen positions never change, so only the coordinates are rewritten.
+    if (!S2D.pos) {
+      S2D.pos = new Float32Array((G_COLS - 1) * (G_ROWS - 1) * 6 * 3);
+      S2D.uv = new Float32Array((G_COLS - 1) * (G_ROWS - 1) * 6 * 2);
+      S2D.idx = new Int32Array((G_COLS - 1) * (G_ROWS - 1) * 6);
+      let o = 0;
+      for (let j = 0; j < G_COLS - 1; j++) {
+        const x = j * 4;
+        for (let i = 0; i < G_ROWS - 1; i++) {
+          const y = i * 6;
+          const a = j * G_ROWS + i, b = a + 1;
+          const d2 = (j + 1) * G_ROWS + i, e2 = d2 + 1;
+          const q = [[x, y, a], [x, y + 6, b], [x + 4, y + 6, e2], [x + 4, y, d2]];
+          for (const n of [0, 1, 2, 0, 2, 3]) {
+            S2D.pos[o * 3] = q[n][0];
+            S2D.pos[o * 3 + 1] = q[n][1];
+            S2D.pos[o * 3 + 2] = 0;
+            S2D.idx[o] = q[n][2];
+            o++;
+          }
         }
       }
     }
-    mgl.end();
+    const idx = S2D.idx, uv = S2D.uv;
+    for (let n = 0; n < idx.length; n++) {
+      uv[n * 2] = U[idx[n]];
+      uv[n * 2 + 1] = V[idx[n]];
+    }
+    mgl.drawArraysTri(S2D.pos, uv);
     if (pushed) mgl.popMatrix();
     mgl.enableTexture(false);
   }
