@@ -116,8 +116,9 @@ export class ShowLines {
 //
 // It is a kind-2 task, so it draws in whatever 3D frame is standing. In
 // its section — part 8, alongside showTunnel — that is the projection
-// gears.i3d's camera left behind two sections earlier, because nothing
-// between them restores one. It never sets a projection of its own.
+// showBol left behind in part 7: showBol calls draw_scene, which reaches
+// the camera's calculate, which never restores it. showDraai itself never
+// sets a projection.
 //
 // The odd part is the feedback: the rotation angle is written to the same
 // stack slot the elapsed time came in on, and the depth and half-size for
@@ -125,9 +126,9 @@ export class ShowLines {
 export class ShowDraai {
   static kind = 2;
 
-  draw(mgl, ms, p, fxTex) {
+  draw(mgl, ms, p, demo) {
     const gl = mgl.gl;
-    const tex = fxTex && fxTex.get('envmap.png');
+    const tex = demo.fxTex && demo.fxTex.get('envmap.png');
     mgl.enableTexture(!!tex);
     if (tex) mgl.bindTexture(tex);
     mgl.enableLighting(false);
@@ -243,9 +244,9 @@ export class ShowTunnel {
     this.outUV = new Float32Array(idx.length * 2);
   }
 
-  draw(mgl, ms, p, fxTex) {
+  draw(mgl, ms, p, demo) {
     const gl = mgl.gl;
-    const tex = fxTex && fxTex.get('eenv2.png');
+    const tex = demo.fxTex && demo.fxTex.get('eenv2.png');
 
     // D is where the camera sits along the tube, W how far it has rolled.
     const D = 50 * Math.sin(ms * 5.265399886411615e-05) - 64;
@@ -319,6 +320,86 @@ export class ShowTunnel {
   }
 }
 
+// showBol — 0x401d70 (init) and 0x4021b0 (run).
+//
+// The one effect that hands its geometry back to the engine. Its init
+// loads sphere.i3d, keeps a pristine `memcpy` of the vertex array, and
+// then each frame it writes a deformed copy into the scene's live array,
+// recomputes the normals (0x401e80), moves the camera and calls
+// `energy3d_scene::draw_scene` (0x402342) — the same path any `drawScene`
+// layer takes. So this renders as a scene, not as immediate-mode geometry.
+//
+// That also means it is the one effect that *sets* the standing 3D frame
+// rather than borrowing it: draw_scene reaches the camera's `calculate`
+// through the vtable at 0x10011885, and calculate never restores the
+// projection. Part 8's showDraai inherits this camera, not gears'.
+//
+// The deformation reads x, y and z from the pristine copy and perturbs
+// each axis by a product of two sines of the *other two* axes summed —
+// so the sphere kneads itself rather than simply breathing.
+export class ShowBol {
+  static kind = 2;
+  static scene = 'sphere.i3d';
+
+  draw(mgl, ms, p, demo) {
+    const scene = demo.scenes.get('sphere.i3d');
+    if (!scene) return;
+    const mesh = scene.meshes[0];
+    if (!mesh) return;
+    const base = mesh.base, out = mesh.positions;
+
+    // The four phase terms the loop keeps on the FPU stack for its whole
+    // run — 0x40c390, 0x40c398, 0x40c3a0, 0x40c3a8 in stack order.
+    const T0 = ms * 0.003293609752;
+    const T1 = ms * 0.0002854109754;
+    const T2 = ms * 0.004097526959;
+    const T3 = ms * 0.002854109754;
+
+    for (let i = 0; i < base.length; i += 3) {
+      const x = base[i], y = base[i + 1], z = base[i + 2];
+      const s = z + y, u = z + x, v = y + x;
+      out[i] = x + 25 * Math.sin(s * 0.044353453 + T3) * Math.sin(s * 0.019353453 + T1);
+      out[i + 1] = y + 20 * Math.sin(u * 0.029052457 + T1) * Math.sin(u * 0.033245335 + T2);
+      out[i + 2] = z + 21 * Math.sin(v * 0.035754676 + T0) * Math.sin(v * 0.025563549 + T1);
+    }
+    // 0x401e80 rebuilds the vertex normals from the deformed faces, by
+    // accumulating each face's cross product onto its three corners. The
+    // scene has no lights, so nothing lights them — but the material
+    // carries a reflection map (eeeeeeeenv.tga), and GL_SPHERE_MAP is
+    // computed from the normal, so a stale normal freezes the chrome onto
+    // the rest pose instead of letting it slide over the deformation.
+    const nrm = mesh.normals, idx = mesh.indices;
+    nrm.fill(0);
+    for (let f = 0; f < idx.length; f += 3) {
+      const a = idx[f] * 3, b = idx[f + 1] * 3, c = idx[f + 2] * 3;
+      const ux = out[b] - out[a], uy = out[b + 1] - out[a + 1], uz = out[b + 2] - out[a + 2];
+      const vx = out[c] - out[a], vy = out[c + 1] - out[a + 1], vz = out[c + 2] - out[a + 2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      nrm[a] += nx; nrm[a + 1] += ny; nrm[a + 2] += nz;
+      nrm[b] += nx; nrm[b + 1] += ny; nrm[b + 2] += nz;
+      nrm[c] += nx; nrm[c + 1] += ny; nrm[c + 2] += nz;
+    }
+    for (let i = 0; i < nrm.length; i += 3) {
+      const l = Math.hypot(nrm[i], nrm[i + 1], nrm[i + 2]) || 1;
+      nrm[i] /= l; nrm[i + 1] /= l; nrm[i + 2] /= l;
+    }
+
+    // energy3d_camera::set_position, the only virtual three-float setter
+    // on the class, reached through vtable slot 2 at 0x402335. The target
+    // is left at sphere.i3d's own, which is the origin.
+    const cam = {
+      eye: [
+        50 * Math.sin(ms * 0.001357465396) + 100,
+        50 * Math.sin(ms * 0.002357465396) + 100,
+        100 * Math.sin(ms * 0.0007249999907799065 * 6.283185307 + 1.57079632675) + 160,
+      ],
+      at: scene.cameras[0].target,
+      fov: scene.cameras[0].fov,
+    };
+    demo.renderScene(scene, cam, 0, 1);
+  }
+}
+
 // Named in Real.exe's string table and loaded by the effects themselves,
 // so they never pass through the script's `loadImage`.
 export const EFFECT_TEXTURES = ['envmap.png', 'eenv2.png'];
@@ -327,4 +408,5 @@ export const EFFECTS = {
   showlines: ShowLines,
   showdraai: ShowDraai,
   showtunnel: ShowTunnel,
+  showbol: ShowBol,
 };

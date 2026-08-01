@@ -163,6 +163,10 @@ export class Demo {
     const names = new Set();
     for (const inst of this.script.instances) {
       if (inst.command === 'drawscene' && inst.args[0]) names.add(String(inst.args[0]).toLowerCase());
+      // showBol and showPartiekels load sphere.i3d for themselves; the
+      // script never names it.
+      const fx = EFFECTS[inst.command];
+      if (fx && fx.scene) names.add(fx.scene);
     }
     let sn = 0;
     for (const n of names) {
@@ -481,12 +485,20 @@ export class Demo {
   _drawScene(inst, p, time) {
     const scene = this.scenes.get(String(inst.args[0] || '').toLowerCase());
     if (!scene) return;
-    const mgl = this.mgl, gl = mgl.gl;
     const offset = parseFloat(inst.args[3]) || 0;
     const frame = scene.frameAt((time - inst.start) * 1000, offset);
     scene.update(frame);
     const cam = scene.cameraAt(inst.args[1], frame);
     if (!cam) return;
+    this.renderScene(scene, cam, frame, p.alpha[0] / 255);
+  }
+
+  // The body of drawScene, without the script instance around it, so
+  // showBol can reach it — that effect deforms sphere.i3d's vertices and
+  // then calls `energy3d_scene::draw_scene` (0x402342), which is the same
+  // path any scene takes.
+  renderScene(scene, cam, frame, a) {
+    const mgl = this.mgl, gl = mgl.gl;
 
     mgl.matrixMode(mgl.PROJECTION);
     // ogl_camera::calculate does not push this, so it stays current for
@@ -505,8 +517,6 @@ export class Demo {
     // drawScene::run never touches the colour — it only passes alpha
     // through set_alpha — so the tint comes from the material, not the
     // script.
-    const a = p.alpha[0] / 255;
-
     // ogl::draw_display draws in two passes. An object is transparent if
     // any of its materials has opacity below 1 or is marked additive
     // (0x10005467); everything else goes in the opaque pass first, with
@@ -560,7 +570,7 @@ export class Demo {
     }
     if (fx.constructor.kind === 2) this._setup3d();
     else this._setup2d();
-    fx.draw(this.mgl, (time - inst.start) * 1000, p, this.fxTex);
+    fx.draw(this.mgl, (time - inst.start) * 1000, p, this);
   }
 
   renderFrame(time) {

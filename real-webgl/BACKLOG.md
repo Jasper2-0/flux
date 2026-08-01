@@ -23,7 +23,7 @@ slot 4 returns the required parameter count.
 | `showPartiekels` | `0x40c56c` | `0x403150` | `0x403220` | `0x48` | 2 | 21 s |
 | `showCylinder` | `0x40c558` | `0x402350` | `0x4026a0` | `0x98` | 2 | 11 s |
 | `showPlanes` | `0x40c530` | `0x403590` | `0x4036d0` | `0x1e0` | 2 | 11 s |
-| `showBol` | `0x40c5a8` | `0x401d70` | `0x4021b0` | `0x64` | 2 | 11 s |
+| `showBol` | `0x40c5a8` | `0x401d70` | `0x4021b0` | `0x64` | 2 | 11 s — **done** |
 | `showDraai` | `0x40c544` | `0x4029f0` | `0x402a30` | `0x38` | 2 | 11 s — **done** |
 | `showTunnel` | `0x40c5bc` | `0x4039e0` | `0x403e60` | `0x98` | 2 | 11 s — **done** |
 
@@ -89,14 +89,26 @@ Notes gathered so far:
   All eleven ship in the release. `build-data.py` copies them alongside
   the scene textures.
 
-- **`sphere.i3d` is mesh data, not a scene.** `showBol` and
-  `showPartiekels` both `load_scene` it, `init_scene`, `activate_camera`,
-  then `memcpy` the vertex array into a buffer of their own and draw it
-  themselves. `draw_scene` and `draw_display` are imported by `Real.exe`
-  and neither has a single call site. `activate_camera` (`0x10011790`)
-  turns out to be a two-line setter that never calls
-  `ogl_camera::calculate`, so it sets no projection either — those two
-  effects inherit the standing frame like the rest.
+- **`sphere.i3d` is loaded by two effects, and they use it differently.**
+  Both `load_scene` it, `init_scene`, `activate_camera`, and `memcpy` the
+  vertex array into a pristine buffer of their own.
+
+  `showBol` then writes a deformed copy back into the scene's *live*
+  array, rebuilds the vertex normals (`0x401e80`), moves the camera and
+  calls `energy3d_scene::draw_scene` at `0x402342` — so the engine draws
+  it, on the same path any `drawScene` layer takes.
+
+  `showPartiekels` never calls it; it draws the vertices itself.
+
+  `draw_display` genuinely has no call site. `draw_scene` has exactly one,
+  and it matters: `draw_scene` (`0x10011860`) reaches the camera's
+  `calculate` through the vtable at `0x10011885`, and calculate never
+  restores the projection. So `showBol` is the one effect that *sets* the
+  standing 3D frame rather than borrowing it, and part 8's `showDraai`
+  inherits `sphere.i3d`'s camera — fov 45 — not `gears.i3d`'s 39.6.
+
+  `activate_camera` (`0x10011790`) is only a two-line setter and sets no
+  projection by itself; the projection comes from `draw_scene`.
 
   The mesh is `GeoSphere01`: 1002 vertices, 2000 faces, radius exactly
   50, no UVs, and a valence histogram of twelve 5s and 990 6s — the
