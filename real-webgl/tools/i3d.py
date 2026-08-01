@@ -119,8 +119,12 @@ def read_material(r):
     r.u8()
     mat = {'index': r.u16(), 'name': r.s(), 'kind': r.s()}
     full = r.u8() == 1
-    mat['diffuse'] = r.f32n(3)
-    mat['ambient'] = r.f32n(3)
+    # Named for what the engine does with them (ogl_material, 0x100054ed):
+    # the +0xa8 triple goes to glMaterialfv(GL_AMBIENT) and the +0x94 one
+    # to glColor4f — so +0x94 is the colour you actually see on any mesh
+    # that has no texture, which is most of gears.i3d and the Solar logo.
+    mat['glAmbient'] = r.f32n(3)
+    mat['color'] = r.f32n(3)
     mat['specular'] = r.f32n(3)
     mat['shininess'] = r.f32()
     r.f32()

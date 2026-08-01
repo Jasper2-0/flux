@@ -368,8 +368,10 @@ export class Demo {
     mgl.enableDepthTest(true);
     mgl.enableCullFace(false);
 
+    // drawScene::run never touches the colour — it only passes alpha
+    // through set_alpha — so the tint comes from the material, not the
+    // script.
     const a = p.alpha[0] / 255;
-    const [r, g, b] = p.color;
     if (a < 0.999) {
       mgl.enableBlend(true);
       mgl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -377,7 +379,6 @@ export class Demo {
     } else {
       mgl.enableBlend(false);
     }
-    mgl.color4(r / 255, g / 255, b / 255, a);
 
     for (const mesh of scene.meshes) {
       const mv = new Mat4();
@@ -395,6 +396,14 @@ export class Demo {
       } else if (mat && mat.base) {
         tex = this.sceneTex.get(mat.base); uvs = mesh.uvs || mesh.zeroUV;
       }
+      // ogl_material, 0x100054ac and 0x100054e7: a textured mesh draws
+      // white and lets the texture carry the colour, its alpha scaled by
+      // the material's opacity; an untextured one draws in the material's
+      // own colour. With lighting off — which it is for every scene but
+      // bolletje — that glColor4f is the only colour these meshes get.
+      const op = mat ? (mat.opacity === undefined ? 1 : mat.opacity) : 1;
+      if (tex || !mat || !mat.color) mgl.color4(1, 1, 1, a * op);
+      else mgl.color4(mat.color[0], mat.color[1], mat.color[2], a * op);
       mgl.enableTexture(!!tex);
       if (tex) mgl.bindTexture(tex);
       if (!uvs) uvs = mesh.zeroUV;

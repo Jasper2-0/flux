@@ -231,6 +231,7 @@ def build_scene(scene, wanted):
             'name': m['name'],
             'base': base and os.path.splitext(f_lower(base))[0] + '.png',
             'env': env and os.path.splitext(f_lower(env))[0] + '.png',
+            'color': [round(x, 4) for x in m['color']],
             'opacity': round(m['opacity'], 4),
             'twoSided': bool(m.get('twoSided')),
         })
