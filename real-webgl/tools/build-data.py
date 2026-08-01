@@ -310,7 +310,7 @@ def build_images(release, out, preload):
     return manifest
 
 
-def build_scene(scene, wanted):
+def build_scene(scene, wanted, have=()):
     """Flatten one .i3d into draw-ready arrays.
 
     Geometry stays indexed, which matters: expanded to independent corners
@@ -333,6 +333,15 @@ def build_scene(scene, wanted):
         for f in (base, env):
             if f:
                 wanted.add(f.lower())
+        # Three materials name a bitmap the release never shipped:
+        # bolletje's refmap.png, solar's lakerem2.png and credits' zwart.png
+        # are baked into the .i3d from whoever's machine exported it.
+        # `energy3d_texture::load` fails them and leaves the stage unbound,
+        # so drop them here rather than have the browser 404 nine times.
+        if base and f_lower(base) not in have:
+            base = None
+        if env and f_lower(env) not in have:
+            env = None
         mats.append({
             'name': m['name'],
             'base': base and os.path.splitext(f_lower(base))[0] + '.png',
@@ -540,11 +549,13 @@ def build_scenes(release, out):
     src = os.path.join(release, 'scenes')
     dst = os.path.join(out, 'scenes')
     os.makedirs(dst, exist_ok=True)
+    idir = os.path.join(release, 'images')
+    have = {n.lower(): n for n in os.listdir(idir)}
     wanted, built = set(), {}
     for f in sorted(os.listdir(src)):
         if not f.lower().endswith('.i3d'):
             continue
-        s = build_scene(i3d.load(os.path.join(src, f)), wanted)
+        s = build_scene(i3d.load(os.path.join(src, f)), wanted, have)
         built[f.lower()] = s
         with open(os.path.join(dst, os.path.splitext(f)[0] + '.json'), 'w') as fh:
             json.dump(s, fh, separators=(',', ':'))
@@ -556,8 +567,6 @@ def build_scenes(release, out):
 
     tdst = os.path.join(out, 'textures')
     os.makedirs(tdst, exist_ok=True)
-    idir = os.path.join(release, 'images')
-    have = {n.lower(): n for n in os.listdir(idir)}
     missing = []
     for name in sorted(wanted):
         real = have.get(name)

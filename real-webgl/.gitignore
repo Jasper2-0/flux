@@ -1,3 +1,5 @@
 *-single.html
 *-artifact.html
 __pycache__/
+.DS_Store
+node_modules/
