@@ -456,6 +456,34 @@ export class MiniGL {
   // colors (optional): Float32Array of rgba per vertex — the D3D-era
   // XYZ|DIFFUSE|TEX1 vertex layout; omitted, the current color applies.
 
+  // An unindexed triangle list, for effects that expand their own indices
+  // — xotrack's do, because they emit through glBegin/glVertex3f and
+  // recompute each vertex as they go.
+  drawArraysTri(positions, uvs) {
+    const gl = this.gl;
+    this._applyCommonUniforms();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.posVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STREAM_DRAW);
+    gl.enableVertexAttribArray(this.aPos);
+    gl.vertexAttribPointer(this.aPos, 3, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.uvVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STREAM_DRAW);
+    gl.enableVertexAttribArray(this.aUV);
+    gl.vertexAttribPointer(this.aUV, 2, gl.FLOAT, false, 0, 0);
+
+    gl.disableVertexAttribArray(this.aColor);
+    gl.uniform1i(this.uUseVertexColor, 0);
+    gl.uniform4fv(this.uColor, this.curColor);
+    if (this.aNormal >= 0) {
+      gl.disableVertexAttribArray(this.aNormal);
+      gl.vertexAttrib3f(this.aNormal, 0, 0, 1);
+    }
+
+    gl.drawArrays(gl.TRIANGLES, 0, positions.length / 3);
+  }
+
   drawElements(positions, uvs, indices, colors = null, normals = null, mode = null) {
     const gl = this.gl;
     this._applyCommonUniforms();

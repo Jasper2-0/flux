@@ -25,7 +25,7 @@ slot 4 returns the required parameter count.
 | `showPlanes` | `0x40c530` | `0x403590` | `0x4036d0` | `0x1e0` | 2 | 11 s |
 | `showBol` | `0x40c5a8` | `0x401d70` | `0x4021b0` | `0x64` | 2 | 11 s |
 | `showDraai` | `0x40c544` | `0x4029f0` | `0x402a30` | `0x38` | 2 | 11 s — **done** |
-| `showTunnel` | `0x40c5bc` | `0x4039e0` | `0x403e60` | `0x98` | 2 | 11 s |
+| `showTunnel` | `0x40c5bc` | `0x4039e0` | `0x403e60` | `0x98` | 2 | 11 s — **done** |
 
 ### The two drawing frames
 
@@ -72,15 +72,43 @@ Notes gathered so far:
   pick a variant. So it is a software effect that uploads a texture each
   frame — the largest single reading job left.
 
-- `Real.exe` also names `bruut.tga`, `eeeeeeeenv.tga`, `solar_groot.jpg`,
-  `sphere.i3d`, `envmap.jpg`, `particle.jpg` and `plane_01`–`plane_04.jpg`.
-  Those are the assets the effects use, and they map onto the effect names
-  neatly: `particle.jpg` for `showPartiekels`, the four planes for
-  `showPlanes`, `sphere.i3d` for `showBol`. All are present in the release.
+- The assets, from the string table's cross-references — one per init,
+  and none of them ever passing through `loadImage`, so the script never
+  names them:
 
-- The effects draw in the same screen-pixel ortho frame as the 2D layers
-  and take their clock from the message's task-local elapsed milliseconds,
-  the same `[msg+0x48]` that drives `drawScene`.
+  | effect | assets |
+  |---|---|
+  | `show2d` | `solar_groot.jpg`, `eeeeeeeenv.tga`, `bruut.tga` |
+  | `showBol` | `sphere.i3d` |
+  | `showPartiekels` | `sphere.i3d`, `particle.jpg` |
+  | `showCylinder` | `eeeeeeeenv.tga` |
+  | `showTunnel` | `eenv2.tga` |
+  | `showPlanes` | `plane_01`–`plane_04.jpg` |
+  | `showDraai` | `envmap.jpg` |
+
+  All eleven ship in the release. `build-data.py` copies them alongside
+  the scene textures.
+
+- **`sphere.i3d` is mesh data, not a scene.** `showBol` and
+  `showPartiekels` both `load_scene` it, `init_scene`, `activate_camera`,
+  then `memcpy` the vertex array into a buffer of their own and draw it
+  themselves. `draw_scene` and `draw_display` are imported by `Real.exe`
+  and neither has a single call site. `activate_camera` (`0x10011790`)
+  turns out to be a two-line setter that never calls
+  `ogl_camera::calculate`, so it sets no projection either — those two
+  effects inherit the standing frame like the rest.
+
+  The mesh is `GeoSphere01`: 1002 vertices, 2000 faces, radius exactly
+  50, no UVs, and a valence histogram of twelve 5s and 990 6s — the
+  signature of a geodesic sphere, with no poles and no seam. Coat
+  exported it from 3ds Max rather than have xotrack write a geosphere
+  generator, and inopia is who pointed the group at pole-free spheres for
+  effects like these. It matters for the port as well as for the original:
+  vertex density is near-uniform, so walking the array in index order is
+  spatially even and nothing needs weighting.
+
+- They all take their clock from the message's task-local elapsed
+  milliseconds, the same `[msg+0x48]` that drives `drawScene`.
 
 ---
 

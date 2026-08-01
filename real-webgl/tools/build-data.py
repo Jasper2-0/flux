@@ -49,6 +49,18 @@ PROP_DEFAULT = {'alpha': (255.0,), 'color': (255.0, 255.0, 255.0),
                 'translation': (0.0, 0.0, 0.0), 'rotation': (0.0, 0.0, 0.0),
                 'scale': (1.0, 1.0, 1.0)}
 
+# Named in Real.exe's string table, one per effect init:
+#   show2d 0x40100a/0x401039/0x401068, showDraai 0x4029f7,
+#   showPartiekels 0x4031ed, showPlanes 0x403613..0x40369d,
+#   showCylinder 0x402661, showTunnel 0x403e23.
+# showBol and showPartiekels also load sphere.i3d, which is converted with
+# the other scenes — the script never mentions it either.
+EFFECT_ASSETS = {
+    'solar_groot.jpg', 'eeeeeeeenv.tga', 'bruut.tga', 'envmap.jpg',
+    'particle.jpg', 'eenv2.tga',
+    'plane_01.jpg', 'plane_02.jpg', 'plane_03.jpg', 'plane_04.jpg',
+}
+
 DRAW = {'drawimage', 'drawscene', 'colorfade', 'show2d', 'showlines',
         'showcylinder', 'showbol', 'showdraai', 'showtunnel', 'showplanes',
         'showpartiekels'}
@@ -469,6 +481,11 @@ def build_scenes(release, out):
         built[f.lower()] = s
         with open(os.path.join(dst, os.path.splitext(f)[0] + '.json'), 'w') as fh:
             json.dump(s, fh, separators=(',', ':'))
+
+    # The artwork xotrack's effects load for themselves. These never pass
+    # through `loadImage`, so the script never names them — they are string
+    # constants in Real.exe, each referenced from one effect's init.
+    wanted |= EFFECT_ASSETS
 
     tdst = os.path.join(out, 'textures')
     os.makedirs(tdst, exist_ok=True)
