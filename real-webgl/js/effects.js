@@ -30,6 +30,8 @@ function rnd(k) {
 //        of every 172 ms — the second parameter picks vertical (x from
 //        a 320-pixel wrap) or horizontal (y through fmod 240).
 export class ShowLines {
+  static kind = 1;   // registered at 0x4046f1 — the 2D pixel frame
+
   constructor(inst) {
     this.mode = String(inst.args[0] || '0');
     this.sub = String(inst.args[1] || '-');
@@ -103,4 +105,69 @@ export class ShowLines {
   }
 }
 
-export const EFFECTS = { showlines: ShowLines };
+// showDraai — 0x4029f0 (init) and 0x402a30 (run). "Draai" is Dutch for
+// spin, and that is the whole effect: ten screen-filling additive quads
+// of envmap.jpg, stacked at slightly different depths and rotated about
+// the view axis by an angle beaten out of three sines.
+//
+// It is a kind-2 task, so it draws in whatever 3D frame is standing. In
+// its section — part 8, alongside showTunnel — that is the projection
+// gears.i3d's camera left behind two sections earlier, because nothing
+// between them restores one. It never sets a projection of its own.
+//
+// The odd part is the feedback: the rotation angle is written to the same
+// stack slot the elapsed time came in on, and the depth and half-size for
+// the quad are then derived from *the angle*, not from the clock.
+export class ShowDraai {
+  static kind = 2;
+
+  draw(mgl, ms, p, fxTex) {
+    const gl = mgl.gl;
+    const tex = fxTex && fxTex.get('envmap.png');
+    mgl.enableTexture(!!tex);
+    if (tex) mgl.bindTexture(tex);
+    mgl.enableLighting(false);
+    mgl.enableDepthTest(false);
+    mgl.depthMask(false);
+    mgl.enableCullFace(false);
+    mgl.blendFunc(gl.ONE, gl.ONE);
+    mgl.enableBlend(true);
+
+    mgl.matrixMode(mgl.MODELVIEW);
+    mgl.pushMatrix();
+    mgl.loadIdentity();
+    mgl.translate(0, 0, -5);
+
+    const a = ms * 0.00029754957395;
+    const b = ms * 0.0004054359374;
+    const c = ms * 0.0006432759545;
+    for (let i = 0; i < 10; i++) {
+      const q = i * 0.1;
+      const angle = Math.sin(a + q) * Math.sin(b + q) * Math.sin(c + q) * 70;
+      // no push/pop inside the loop, so the rotations accumulate
+      mgl.rotate(angle, 0, 0, 1);
+      const z = Math.sin(angle * 0.000633543 + i) * 0.5 - 1.0;
+      const h = Math.sin(angle * 0.00123479375);
+      const lo = h - 7, hi = h + 7;
+      const quad = [[lo, lo, 0, 0], [hi, lo, 1, 0], [hi, hi, 1, 1], [lo, hi, 0, 1]];
+      mgl.color4(0.16, 0.16, 0.16, 1);
+      mgl.begin(mgl.TRIANGLES);
+      for (const k of [0, 1, 2, 0, 2, 3]) {
+        const [x, y, u, v] = quad[k];
+        mgl.color4(0.16, 0.16, 0.16, 1);
+        mgl.texCoord2(u, v);
+        mgl.vertex3(x, y, z);
+      }
+      mgl.end();
+    }
+    mgl.popMatrix();
+    mgl.enableTexture(false);
+    mgl.enableBlend(false);
+  }
+}
+
+// Named in Real.exe's string table and loaded by the effects themselves,
+// so they never pass through the script's `loadImage`.
+export const EFFECT_TEXTURES = ['envmap.png'];
+
+export const EFFECTS = { showlines: ShowLines, showdraai: ShowDraai };

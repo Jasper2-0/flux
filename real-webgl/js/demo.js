@@ -25,7 +25,7 @@
 import { MiniGL } from './minigl.js';
 import { Scene, lookAt } from './scene.js';
 import { Mat4 } from './mathlib.js';
-import { EFFECTS } from './effects.js';
+import { EFFECTS, EFFECT_TEXTURES } from './effects.js';
 
 const SCREEN_W = 640, SCREEN_H = 480;
 
@@ -125,6 +125,7 @@ export class Demo {
   }
 
   async load() {
+    this.proj3d = this._proj3dDefault();
     this.status('initialising WebGL…');
     await breathe();
     this.mgl = new MiniGL(this.canvas);
@@ -172,6 +173,18 @@ export class Demo {
         }
         this.scenes.set(n, scene);
       } catch (e) { /* a scene the release does not ship */ }
+    }
+
+    // The textures xotrack's effects name in Real.exe's string table.
+    // They live alongside the scene textures rather than in the script's
+    // image list, because `loadImage` never sees them — each effect loads
+    // its own in its init.
+    this.fxTex = new Map();
+    for (const f of EFFECT_TEXTURES) {
+      this.status('loading effect artwork… ' + f);
+      await breathe();
+      this.fxTex.set(f, await this.assets.texture({ file: 'textures/' + f })
+        .catch(() => null));
     }
 
     this.status('loading the soundtrack…');
@@ -222,9 +235,46 @@ export class Demo {
     return p;
   }
 
-  // red_base::demo_loop sets this once and never changes it: no culling,
-  // no depth test, and an ortho frame in screen pixels with the origin
-  // top-left.
+  // Red keeps two drawing frames and switches between them by task *kind*,
+  // which every task declares when it registers (`red_base::add_task`
+  // takes the kind as its second argument). `red_base::run_tasks`
+  // (0x10003d10) watches for a change of kind between consecutive layers:
+  //
+  //   kind 2 -> kind 1   glDisable(CULL_FACE / DEPTH_TEST / LIGHTING)
+  //                      PROJECTION: push, identity, glOrtho(0, w-1, h-1, 0, 0, 100)
+  //                      MODELVIEW:  push, identity
+  //
+  //   kind 1 -> kind 2   MODELVIEW: pop.  PROJECTION: pop.
+  //                      glEnable(CULL_FACE / DEPTH_TEST / LIGHTING)
+  //
+  // So kind 1 is the 2D pixel frame — `drawImage`, `colorFade`, and of
+  // xotrack's effects only `showLines` and `show2d` — and kind 2 draws in
+  // whatever 3D frame is standing. Nothing restores that frame: the two
+  // effects that set a projection of their own (`showTunnel`,
+  // `showPartiekels`) push and pop it, and `ogl_bitmap::render` pushes and
+  // pops too, so the standing projection is always the one the last
+  // `drawScene` left behind — `ogl_camera::calculate` (0x10002dc0) never
+  // restores it — or, before any scene has drawn, the one
+  // `energy3d_ogl::create_display` set at 0x100011ba.
+  _proj3dDefault() {
+    // create_display: gluPerspective(45, 4/3, 2, 5000)
+    const m = new Mat4();
+    const half = Math.tan(45 * Math.PI / 360) * 2;
+    m.frustum(-half * (4 / 3), half * (4 / 3), -half, half, 2, 5000);
+    return m;
+  }
+
+  // The entry side of a kind-2 task. Red re-enables culling, the depth
+  // test and lighting here, but every one of xotrack's effects opens by
+  // setting the state it wants, so only the matrices have to be right.
+  _setup3d() {
+    const mgl = this.mgl;
+    mgl.matrixMode(mgl.PROJECTION);
+    mgl.loadMatrix(this.proj3d);
+    mgl.matrixMode(mgl.MODELVIEW);
+    mgl.loadIdentity();
+  }
+
   _setup2d() {
     const mgl = this.mgl;
     mgl.matrixMode(mgl.PROJECTION);
@@ -429,7 +479,10 @@ export class Demo {
     if (!cam) return;
 
     mgl.matrixMode(mgl.PROJECTION);
-    mgl.loadMatrix(scene.projection(cam.fov));
+    // ogl_camera::calculate does not push this, so it stays current for
+    // every kind-2 task that follows — including into the next section.
+    this.proj3d = scene.projection(cam.fov);
+    mgl.loadMatrix(this.proj3d);
     const view = lookAt(cam.eye, cam.at, [0, 1, 0]);
 
     mgl.matrixMode(mgl.MODELVIEW);
@@ -495,8 +548,9 @@ export class Demo {
       fx = new (EFFECTS[inst.command])(inst);
       this._fx.set(inst, fx);
     }
-    this._setup2d();
-    fx.draw(this.mgl, (time - inst.start) * 1000, p);
+    if (fx.constructor.kind === 2) this._setup3d();
+    else this._setup2d();
+    fx.draw(this.mgl, (time - inst.start) * 1000, p, this.fxTex);
   }
 
   renderFrame(time) {
