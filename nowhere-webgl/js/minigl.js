@@ -216,20 +216,25 @@ export class MiniGL {
     return tex;
   }
 
-  createTextureFromData(data, width, height, mipmap = false) {
+  createTextureFromData(data, width, height, mipmap = false, clamp = false) {
     const gl = this.gl;
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
-    this._setTexParams(mipmap);
+    this._setTexParams(mipmap, clamp);
     this.boundTex = tex;
     return tex;
   }
 
-  _setTexParams(mipmap) {
+  // `clamp` may be false, true (both axes) or 't' (V only — D3D lets the
+  // two addressing modes differ, and Nowhere's credits need exactly that:
+  // U carries a scrolling offset that has to wrap, V is a single band)
+  _setTexParams(mipmap, clamp = false) {
     const gl = this.gl;
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    const wrapS = clamp === true ? gl.CLAMP_TO_EDGE : gl.REPEAT;
+    const wrapT = clamp ? gl.CLAMP_TO_EDGE : gl.REPEAT;
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     if (mipmap) {
       gl.generateMipmap(gl.TEXTURE_2D);

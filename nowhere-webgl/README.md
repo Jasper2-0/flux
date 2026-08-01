@@ -169,8 +169,26 @@ overwritten by the fisheye passes before anything is drawn, so they are
 dead code in the shipped build and are not reproduced.
 
 The credits render *additively over the `sbs` plasma*, which runs
-underneath them for the whole first 45 seconds. Until `sbs` exists they
-float on black, which is faithful but looks far darker than the release.
+underneath them for the whole first 45 seconds — and the release capture
+shows that plasma is itself very dark, a dim olive and yellow smoke on
+near-black. So the near-black credits here are close to right; they are
+not missing a bright backdrop.
+
+Two things still do not match the capture, and neither is explained yet:
+
+- **The lettering repeats vertically.** `v` spans about 1.7 texture
+  heights across the front of the dome, so the word stacks two or three
+  times; the capture shows one row. Clamping V is not the answer — the
+  strip is lettering on black right to its top and bottom edges, so
+  clamping erases the dome instead. (U must wrap regardless: it carries
+  the scroll, which is around −1.4 by mid-section.)
+- **It is too dim.** `grey = clamp(Y − 1.2·r, 0.1, 1)` averages 0.16 over
+  the dome and only 46 of its 751 vertices exceed 0.5, so the letters
+  come out mid-grey where the capture has them near-white.
+
+The composition does line up: the same italic word from `*bol.jpg`
+lensing across a dome left of frame centre with the small plate over it,
+which is what the camera's off-centre look-at point predicts.
 
 ## The flower's ball, decoded
 

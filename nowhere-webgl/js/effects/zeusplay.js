@@ -67,14 +67,15 @@ export function sceneView(cam) {
 }
 
 // Apply one material's render state. Returns the primary texture.
-export async function bindMaterial(ctx, name, cache) {
+export async function bindMaterial(ctx, name, cache, opts = {}) {
   const mat = ctx.materials[String(name || '').toLowerCase()];
   if (!mat) return null;
   if (cache && cache.has(name)) return cache.get(name);
   const texName = mat.textures[0];
   const tex = ctx.textures[texName];
   const out = { mat, tex: null, env: null };
-  if (tex) out.tex = await ctx.assets.texture(tex.file, { mipmap: !tex.flags.includes('nomipmap') });
+  if (tex) out.tex = await ctx.assets.texture(tex.file,
+    { mipmap: !tex.flags.includes('nomipmap'), clamp: !!opts.clamp });
   if (mat.textures[1] && ctx.textures[mat.textures[1]]) {
     out.env = await ctx.assets.texture(ctx.textures[mat.textures[1]].file, {});
   }

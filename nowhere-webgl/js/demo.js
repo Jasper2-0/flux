@@ -59,8 +59,8 @@ class Assets {
 
   // Textures are uploaded through a canvas: iOS Safari is unreliable
   // about ImageBitmap uploads, and this port has to run there.
-  async texture(path, { alpha = null, mipmap = true } = {}) {
-    const key = path + '|' + (alpha || '');
+  async texture(path, { alpha = null, mipmap = true, clamp = false } = {}) {
+    const key = path + '|' + (alpha || '') + (clamp ? '|c' + clamp : '');
     if (this.tex.has(key)) return this.tex.get(key);
     const p = (async () => {
       const img = await this.image(path);
@@ -79,7 +79,7 @@ class Assets {
         for (let i = 0; i < id.data.length; i += 4) id.data[i + 3] = ad[i];
       }
       return this.mgl.createTextureFromData(
-        new Uint8Array(id.data.buffer), cv.width, cv.height, mipmap);
+        new Uint8Array(id.data.buffer), cv.width, cv.height, mipmap, clamp);
     })();
     this.tex.set(key, p);
     return p;
