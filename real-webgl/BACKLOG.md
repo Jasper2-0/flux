@@ -100,6 +100,26 @@ twelve triangles enclose no UV area — so those 96 boxes get a synthesised
 quad unwrap. If a capture ever turns up, that is the first thing to check
 against it.
 
+### The additive cubes letterbox — intent vs. release
+Coat, who designed the demo, remembers the black bars top and bottom
+sitting *above* the cube scene, letterboxing it. The script puts them
+below: `balk.jpg` is at layers 6 and 7, the scene at layer 8, and
+`red_base::run_tasks` (0x10003d10) walks its 64-slot layer array
+ascending, with no inversion at either end — the parse at 0x100033fd
+stores `atoi(token)` verbatim and the draw loop indexes by that same
+number. There is no viewport or scissor anywhere in Energy3D either; the
+only two `glViewport` calls are `(0, 0, w, h)` at display setup. So as
+released, the cubes spilled over the bars, and the port reproduces that.
+
+Recorded because it is the one place where the author's memory and the
+shipped script disagree, and a capture would settle it. Moving the two
+`balk.jpg` cues above layer 8 is the whole change if it ever turns out
+the release did letterbox them.
+
+Worth knowing regardless: the engine clears `GL_DEPTH_BUFFER_BIT` before
+*every* layer, so a 3D scene can never occlude anything drawn after it.
+Sitting 3D between 2D layers is a supported arrangement, not a trick.
+
 ### Map amount
 Each texture record carries a Max map amount, which the parser skips. It
 is 1.000 for every texture in all nine scenes, so nothing is being lost
