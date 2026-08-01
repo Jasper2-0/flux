@@ -32,7 +32,7 @@
 // recovered.
 
 import { Mat4, DEG2RAD } from '../mathlib.js';
-import { lookAt, bindMaterial, applyMaterial } from './zeusplay.js';
+import { sceneView, bindMaterial, applyMaterial } from './zeusplay.js';
 
 const ASPECT = 4 / 3;
 const K = 0.2;
@@ -118,7 +118,7 @@ export class Sphere {
     const half = Math.tan(cam.fov * DEG2RAD / 2);
     mgl.frustum(-half, half, -half / ASPECT, half / ASPECT, 1, 100000);
     const mv = new Mat4();
-    mv.copy(lookAt(cam.eye, cam.at, cam.roll));
+    mv.copy(sceneView(cam));
     mv.mult(this.min.world);
     mgl.matrixMode(mgl.MODELVIEW);
     mgl.loadMatrix(mv);

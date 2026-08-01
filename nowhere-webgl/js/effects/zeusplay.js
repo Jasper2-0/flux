@@ -9,10 +9,17 @@
 // `calcenv` (spherical environment mapping generated per vertex, as
 // Zeus's c3dObject::CalcEnv does), `envmodulate`, `cull none`.
 //
-// 3ds Max is Z-up right-handed and the exporter does not convert, so
-// this port stays in Max space and puts the axis convention in the view
-// matrix: the camera's up vector is +Z. GL is right-handed too, so
-// triangle winding carries over unchanged.
+// The exporter targets Direct3D, so it has already converted Max's Z-up
+// right-handed world into D3D's **Y-up left-handed** one by swapping Y
+// and Z. Two things follow, and both are read out of the data rather
+// than assumed: every camera in all eleven scenes looks near-horizontally
+// through the XZ plane, so +Y is up; and on every closed mesh — the
+// geospheres, the boxes — the right-hand-rule normal of each triangle
+// points *inward*, so the winding is left-handed.
+//
+// GL is right-handed, so the world is mirrored through Z on the way in.
+// That fixes the orientation and flips the winding back to CCW-outward,
+// which is what GL's default front face expects.
 //
 // Reconstructed: the scene frame rate.
 
@@ -27,8 +34,7 @@ const unit = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] 
 
 export function lookAt(eye, at, roll) {
   const z = unit(sub(eye, at));
-  // Max is Z-up; fall back to Y when the camera looks straight down it
-  const up = Math.abs(z[2]) > 0.999 ? [0, 1, 0] : [0, 0, 1];
+  const up = Math.abs(z[1]) > 0.999 ? [0, 0, 1] : [0, 1, 0];
   const x = unit(cross(up, z));
   const y = cross(z, x);
   const m = new Mat4();
@@ -44,6 +50,20 @@ export function lookAt(eye, at, roll) {
     m.copy(r);
   }
   return m;
+}
+
+// Mirror through Z: left-handed scene space -> right-handed GL.
+const MIRROR_Z = new Mat4();
+MIRROR_Z.m[10] = -1;
+
+// The view matrix an effect should start its model-view from: look-at
+// built from the mirrored camera, with the world mirror folded in, so
+// `view.mult(mesh.world)` is the complete model-view.
+export function sceneView(cam) {
+  const flip = (p) => [p[0], p[1], -p[2]];
+  const v = lookAt(flip(cam.eye), flip(cam.at), cam.roll);
+  v.mult(MIRROR_Z);
+  return v;
 }
 
 // Apply one material's render state. Returns the primary texture.
@@ -75,7 +95,15 @@ export function applyMaterial(mgl, m) {
     mgl.enableBlend(false);
     mgl.depthMask(true);
   }
-  mgl.enableCullFace(m.mat.cull !== 'none');
+  // Culling stays off. The release capture settles it: the greetings
+  // ribbon shows its own back face with the lettering reversed (that
+  // material does say `cull none`), and the boarder section is built
+  // from flat one-sided cut-outs of the snowboarder that vanish under
+  // either front-face convention. The closed meshes wind consistently —
+  // right-hand normals point inward on every geosphere and box in all
+  // eleven scenes — but nothing in the capture shows culling doing any
+  // visible work, and turning it on loses content.
+  mgl.enableCullFace(false);
 }
 
 export class ZeusPlay {
@@ -117,7 +145,7 @@ export class ZeusPlay {
     const near = 1, far = 100000;
     mgl.frustum(-half * near, half * near, -half * near / ASPECT, half * near / ASPECT, near, far);
 
-    const view = lookAt(cam.eye, cam.at, cam.roll);
+    const view = sceneView(cam);
 
     mgl.matrixMode(mgl.MODELVIEW);
     mgl.enableDepthTest(true);

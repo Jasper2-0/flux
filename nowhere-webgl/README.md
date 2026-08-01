@@ -65,6 +65,32 @@ right camera, right timing — but without the procedural deformation the
 plugin applies on top. The corner readout labels those honestly while
 they are in that state.
 
+## Handedness and the up axis
+
+The exporter targets Direct3D, so it has already turned Max's Z-up
+right-handed world into D3D's **Y-up left-handed** one by swapping Y and
+Z. Both halves of that are read out of the data rather than assumed:
+
+- **+Y is up.** Every camera in all eleven scenes looks near-horizontally
+  through the XZ plane — the largest vertical component of any view
+  direction is 0.37, most are under 0.15.
+- **The winding is left-handed.** On every closed mesh in every scene —
+  geospheres, boxes, the boarder's limbs — the right-hand-rule normal of
+  each triangle points *inward*. 0 outward against 8000-odd inward.
+
+GL is right-handed, so `sceneView()` mirrors the world through Z on the
+way in and folds that into the view matrix. The release capture confirms
+the result reads the right way round: the gate in the boarder section
+carries "snowboarding can kill you", and in this port the `d` shows as a
+rotated `p`, not a mirrored `b`.
+
+**Culling is off**, and the capture is why. The greetings ribbon shows
+its own back face with the lettering reversed — that material does say
+`cull none` — and the boarder section turns out to be flat, one-sided
+cut-outs of the snowboarder that disappear under either front-face
+convention. Nothing in the capture shows culling doing visible work, and
+enabling it loses content.
+
 ## The `.zeu` scene format
 
 `tools/unzeu.py` parses it; the layout was read off Zeus.dll's chunk

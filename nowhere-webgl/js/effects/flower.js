@@ -35,7 +35,7 @@
 // Reconstructed: the unit of the effect's clock (seconds, as elsewhere).
 
 import { Mat4, DEG2RAD } from '../mathlib.js';
-import { lookAt, bindMaterial, applyMaterial } from './zeusplay.js';
+import { sceneView, bindMaterial, applyMaterial } from './zeusplay.js';
 
 const ASPECT = 4 / 3;
 const UV_SCALE = 1 / 70;         // 0.0142857 in the binary
@@ -114,7 +114,7 @@ export class Flower {
     mgl.loadIdentity();
     const half = Math.tan(cam.fov * DEG2RAD / 2);
     mgl.frustum(-half, half, -half / ASPECT, half / ASPECT, 1, 100000);
-    const view = lookAt(cam.eye, cam.at, cam.roll);
+    const view = sceneView(cam);
 
     mgl.matrixMode(mgl.MODELVIEW);
     mgl.enableDepthTest(true);
