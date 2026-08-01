@@ -28,7 +28,14 @@ function rnd(k) {
 //
 //   "0"  sixteen full-width bands, each riding a slow sine:
 //          y = sin((t + jitter) * freq) * amp + centre
-//        with its own grey level and a height of five to nine pixels.
+//        with its own grey level and a fixed height.
+//
+//        The jitter is not a per-band constant: rand() is called inside
+//        the draw loop (0x402eed) and `(rand() * 100) >> 15` is added to
+//        the clock for that band, that frame. So every band's y dithers
+//        a little every frame, and since the bands sit close together the
+//        gaps between them flicker — which reads as the bands changing
+//        height even though the height field never moves.
 //
 //   "1"  six bright lines that jump to new random parameters at the top
 //        of every 172 ms — the second parameter picks vertical (x from
@@ -47,7 +54,6 @@ export class ShowLines {
         grey: rnd(64) / 255 + 0.25,
         freq: rnd(5000) * 5e-7,
         height: rnd(5) + 5,
-        jitter: rnd(100),
       });
     }
     this.bars = [];
@@ -76,7 +82,7 @@ export class ShowLines {
     if (this.mode === '0') {
       mgl.begin(mgl.TRIANGLES);
       for (const b of this.bands) {
-        const y = Math.sin((ms + b.jitter) * b.freq) * b.amp + b.centre;
+        const y = Math.sin((ms + rnd(100)) * b.freq) * b.amp + b.centre;
         const c = b.grey;
         const quad = [[0, y], [SCREEN_W - 1, y],
                       [SCREEN_W - 1, y + b.height], [0, y + b.height]];
@@ -559,7 +565,10 @@ export class ShowPlanes {
       if (z < 0) z += 20;
       z -= 10;
       const f = 1 - Math.abs(z) * 0.1;
-      const c = f * f * f;
+      // The binary's curve is f cubed. Coat asked for 75% of that: the
+      // planes were bright enough to swamp their own fade, so the
+      // crossfade between them never read. A deliberate deviation.
+      const c = f * f * f * 0.75;
       const ax = Math.sin(k + wa) * 5 + this.ax[k];
       const by = Math.sin(k + wb) * 5 + this.by[k];
       const q = [[ax - 8, by - 8, 1, 0], [ax + 8, by - 8, 0, 0],
