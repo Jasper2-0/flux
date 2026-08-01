@@ -143,10 +143,17 @@ export class Scene {
     this.frameEnd = json.frameEnd || 1;
     this.materials = json.materials || [];
     this.cameras = json.cameras || [];
+    // Meshes arrive indexed unless per-corner texture coordinates forced
+    // the build to expand them, in which case the index list is implicit.
     this.meshes = json.meshes.map((m) => {
       const n = m.positions.length / 3;
-      const idx = new Uint32Array(n);
-      for (let i = 0; i < n; i++) idx[i] = i;
+      let idx = m.indices;
+      if (!idx || !idx.length) {
+        idx = new Uint32Array(n);
+        for (let i = 0; i < n; i++) idx[i] = i;
+      } else {
+        idx = new Uint32Array(idx);
+      }
       return {
         src: m,
         positions: new Float32Array(m.positions),

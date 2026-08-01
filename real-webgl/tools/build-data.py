@@ -207,12 +207,17 @@ def build_images(release, out, preload):
 def build_scene(scene, wanted):
     """Flatten one .i3d into draw-ready arrays.
 
-    Triangles become independent corners so that the two texture-coordinate
-    conventions in these files can be resolved per mesh: bolletje and cubes
-    store one UV per triangle corner, the credits TVs one per vertex, and
-    several meshes carry a few more UVs than vertices because the exporter
-    dropped 3ds Max's separate map-face table at the seam. Indexing by
-    vertex covers that last case as the engine does.
+    Geometry stays indexed, which matters: expanded to independent corners
+    the nine scenes come to 5.9 MB of JSON, indexed 1.8 MB. The exception
+    is a mesh that both carries a base texture and stores one UV per
+    triangle corner — those have to be expanded, and the index list is
+    then implicit.
+
+    Texture coordinates are dropped entirely for the meshes nothing
+    samples: most of these materials work through a reflection map, which
+    generates its own. That also sidesteps the seam the exporter leaves
+    behind by omitting 3ds Max's separate map-face table, which is why a
+    few meshes carry slightly more UVs than vertices.
     """
     mats = []
     for m in scene['materials']:
@@ -233,29 +238,48 @@ def build_scene(scene, wanted):
     meshes = []
     for m in scene['meshes']:
         nv, nf, nuv = len(m['verts']), len(m['faces']), len(m['uvs'])
-        pos, uv = [], []
-        per_corner = nuv == 3 * nf
-        for fi, f in enumerate(m['faces']):
-            for ci, vi in enumerate(f):
-                v = m['verts'][vi] if vi < nv else [0, 0, 0]
-                pos.extend(round(x, 3) for x in v)
-                if per_corner:
+        mat = mats[m['material']] if m['material'] is not None and m['material'] < len(mats) else None
+        # texture coordinates are only worth carrying when something
+        # samples them: a reflection-mapped surface generates its own
+        needs_uv = bool(mat and mat['base']) and nuv > 0
+        per_corner = needs_uv and nuv == 3 * nf
+        normals = smooth_normals(m['verts'], m['faces'])
+
+        if per_corner:
+            # one UV per triangle corner, so the geometry has to be
+            # expanded and the index list is implicit
+            pos, nrm, uv, idx = [], [], [], None
+            for fi, f in enumerate(m['faces']):
+                for ci, vi in enumerate(f):
+                    v = m['verts'][vi] if vi < nv else [0, 0, 0]
+                    pos.extend(round(x, 2) for x in v)
+                    nrm.extend(normals[vi] if vi < len(normals) else [0, 0, 1])
                     t = m['uvs'][fi * 3 + ci]
-                elif nuv:
-                    t = m['uvs'][vi] if vi < nuv else [0, 0]
-                else:
-                    t = None
-                if t:
                     uv.extend((round(t[0], 4), round(t[1], 4)))
+        else:
+            pos, nrm, idx = [], [], []
+            for v in m['verts']:
+                pos.extend(round(x, 2) for x in v)
+            for n in normals:
+                nrm.extend(n)
+            for f in m['faces']:
+                idx.extend(i if i < nv else 0 for i in f)
+            uv = []
+            if needs_uv:
+                for i in range(nv):
+                    t = m['uvs'][i] if i < nuv else [0, 0]
+                    uv.extend((round(t[0], 4), round(t[1], 4)))
+
         tr = m['transform'] or {}
         meshes.append({
             'name': m['name'], 'material': m['material'],
-            'pos': [round(x, 4) for x in tr.get('pos', [0, 0, 0])],
-            'rot': [round(x, 6) for x in tr.get('rot', [0, 0, 0, 1])],
-            'scale': [round(x, 5) for x in tr.get('scale', [1, 1, 1])],
+            'pos': [round(x, 3) for x in tr.get('pos', [0, 0, 0])],
+            'rot': [round(x, 5) for x in tr.get('rot', [0, 0, 0, 1])],
+            'scale': [round(x, 4) for x in tr.get('scale', [1, 1, 1])],
             'positions': pos,
+            'normals': nrm,
+            'indices': idx,
             'uvs': uv or None,
-            'normals': smooth_normals(m['verts'], m['faces']),
             'anim': pack_anim(m['anim']),
         })
 
@@ -274,8 +298,7 @@ def build_scene(scene, wanted):
 
 
 def smooth_normals(verts, faces):
-    """One normal per triangle corner, averaged over the faces meeting at a
-    vertex. The file only carries face normals — Energy3D computes vertex
+    """One normal per vertex, averaged over the faces meeting at it. The file only carries face normals — Energy3D computes vertex
     normals itself in c3dObject::CalcNormals — and the reflection maps that
     most of these materials use need smooth ones."""
     acc = [[0.0, 0.0, 0.0] for _ in verts]
@@ -293,11 +316,9 @@ def smooth_normals(verts, faces):
             for j in range(3):
                 acc[i][j] += n[j]
     out = []
-    for f in faces:
-        for i in f:
-            n = acc[i] if i < len(acc) else [0.0, 0.0, 1.0]
-            l = math.sqrt(n[0] ** 2 + n[1] ** 2 + n[2] ** 2) or 1.0
-            out.extend(round(x / l, 3) for x in n)
+    for n in acc:
+        l = math.sqrt(n[0] ** 2 + n[1] ** 2 + n[2] ** 2) or 1.0
+        out.append([round(n[0] / l, 3), round(n[1] / l, 3), round(n[2] / l, 3)])
     return out
 
 
