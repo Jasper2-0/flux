@@ -35,7 +35,19 @@ the `.i3d` scene container: a flat chunk stream behind a `0xDEAD` header.
 **`Real.exe`** is only 64 KB and holds xotrack's eight `show*` effects.
 One of the eight is ported so far; see `BACKLOG.md`.
 
-## Three things the disassembly settled
+## Four things the disassembly settled
+
+**A task is born with a keyframe on every property.** After splicing a
+cue's own `animate{}` blocks into the layer's five property lists, Red
+walks them (0x1000371a) and, for each list still *empty*, allocates a key
+at that cue's time from the property's default constructor — `(0, 0, 0)`
+for translation and rotation, `(1, 1, 1)` for scale, `(255, 255, 255)`
+for colour, `255` for alpha, ease terms zeroed. That baseline is what a
+lone later key interpolates *from*, and a lot of the script's motion is
+written assuming it: `zonnetje` carries one rotation key, `0 0 360` at
+16.253 s, and each of the ten `rotator_*` layers one `0 0 720`. Without
+the baseline they are single-key tracks that just snap to a whole number
+of turns, i.e. sit still — the intro sun stops turning.
 
 **The second `drawImage` parameter is a centre flag.** Nine of the 121
 image cues pass `1` instead of `-`, and `drawImage::run` (0x100025f0)

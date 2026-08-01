@@ -43,6 +43,12 @@ TIME = re.compile(r'^(\d+):(\d+(?:\.\d+)?)$')
 # trailing ease terms
 PROP_ARITY = {'alpha': 1, 'color': 3, 'translation': 3, 'rotation': 3, 'scale': 3}
 
+# what each property holds before anything animates it — the values Red's
+# per-property key constructors write (see the baseline pass below)
+PROP_DEFAULT = {'alpha': (255.0,), 'color': (255.0, 255.0, 255.0),
+                'translation': (0.0, 0.0, 0.0), 'rotation': (0.0, 0.0, 0.0),
+                'scale': (1.0, 1.0, 1.0)}
+
 DRAW = {'drawimage', 'drawscene', 'colorfade', 'show2d', 'showlines',
         'showcylinder', 'showbol', 'showdraai', 'showtunnel', 'showplanes',
         'showpartiekels'}
@@ -158,6 +164,27 @@ def build_instances(cues):
 
     for layer in list(live):
         close(layer, 1e9)
+
+    # Red seeds a baseline key when the task is created. After splicing that
+    # cue's own animate{} blocks in, it walks the five property lists
+    # (0x1000371a onwards) and, for each one still *empty*, allocates a key
+    # at the cue's time using that property's default constructor:
+    #
+    #   translation 0x10004410 -> (0, 0, 0)      color 0x10004480 -> (255, 255, 255)
+    #   rotation    0x10004430 -> (0, 0, 0)      alpha 0x100044b0 -> 255
+    #   scale       0x10004450 -> (1, 1, 1)
+    #
+    # with the ease terms zeroed, so the span into the first authored key is
+    # linear. Without it a lone later key would just snap, and half the
+    # script's motion is written that way: `zonnetje` has one rotation key,
+    # `0 0 360` at 16.253 s, and the ten `rotator_*` layers one each of
+    # `0 0 720` — a full turn and two turns ramped up from the baseline.
+    for inst in done:
+        for prop, keys in inst['tracks'].items():
+            if keys and keys[0]['t'] > inst['start']:
+                keys.insert(0, {'t': inst['start'], 'v': list(PROP_DEFAULT[prop]),
+                                'easeTo': 0.0, 'easeFrom': 0.0})
+
     done.sort(key=lambda i: (i['start'], i['layer'] if isinstance(i['layer'], int) else 0))
     return done
 
