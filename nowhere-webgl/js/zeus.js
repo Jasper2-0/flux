@@ -142,6 +142,11 @@ export class ZeuScene {
         this.frameEnd = o.frameEnd;
         continue;
       }
+      // the build rounds an all-zero TCB triple down to 0
+      for (const key of ['position', 'rotation', 'scale', 'fov', 'roll']) {
+        const sp = o[key];
+        if (sp) for (const k of sp.keys) if (!k.tcb) k.tcb = [0, 0, 0, 0, 0];
+      }
       const obj = {
         kind: o.kind,
         name: o.name,

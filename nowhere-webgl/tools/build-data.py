@@ -138,6 +138,28 @@ def compile_materials(files):
 
 # ------------------------------------------------------------------ main
 
+def round_scene(scene):
+    """3ds Max exports full float noise (-149.99998474121094 for -150).
+    Rounding costs nothing visible and halves the JSON, which matters for
+    the single-file build."""
+    r = lambda v, n: round(v, n) if isinstance(v, float) else v
+    for o in scene['objects']:
+        for v in o.get('vertices', ()):
+            for i in (0, 1, 2):
+                v[i] = r(v[i], 3)
+            for i in (6, 7):
+                v[i] = r(v[i], 5)
+        for key in ('position', 'rotation', 'scale', 'fov', 'roll'):
+            sp = o.get(key)
+            if not sp:
+                continue
+            for k in sp['keys']:
+                k['v'] = [r(x, 4) for x in k['v']]
+                k['tcb'] = [r(x, 4) for x in k['tcb']]
+                if not any(k['tcb']):
+                    k['tcb'] = 0          # the common case, expanded on load
+    return scene
+
 def main(release, out):
     lib = open(os.path.join(release, 'nowhere.stv'), 'rb').read()
     entries = read_toc(lib)
@@ -168,6 +190,7 @@ def main(release, out):
             scene = parse_zeu(blob)
             for o in scene['objects']:
                 o.pop('_consumed', None); o.pop('_size', None)
+            round_scene(scene)
             js = dst[:-4] + '.json'
             with open(js, 'w') as f:
                 json.dump(scene, f, separators=(',', ':'))
