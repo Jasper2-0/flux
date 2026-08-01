@@ -105,17 +105,23 @@ class Assets {
       img.src = this.base + rec.file;
       if (img.decode) await img.decode();
       else await new Promise((ok, no) => { img.onload = ok; img.onerror = no; });
-      // GL_REPEAT on both axes, and GL_LINEAR both ways with no mipmaps.
-      // That is what `energy3d_ogl::create_texture` (0x100023e0) does when
-      // its first bool is set, and every caller in the demo passes 1 for
-      // it. Nothing in the port relies on clamping — no scene mesh has a
-      // UV outside [0, 1] — but showTunnel's do, twice around the tube and
-      // twenty times along it, and clamped they smear instead of tile.
+      // `energy3d_ogl::create_texture` (0x100023e0) sets GL_REPEAT on both
+      // axes when its first bool is set, and every caller passes 1. That
+      // matters for showTunnel, whose UVs run twice around the tube and
+      // twenty times along it — clamped, they smear instead of tiling.
+      //
+      // The 2D bitmaps are the exception, and it is a resolution artefact
+      // rather than a disagreement with the original. Their quad is exactly
+      // UV 0..1, so a linear tap at the very edge wraps and pulls in the
+      // opposite edge's texel. At the original's 1:1 640x480 that lands on
+      // texel centres and is invisible; scaled up it draws a one-pixel grey
+      // line along the top and bottom of every masked bar. Clamped for
+      // those, repeat for everything else.
       //
       // The second bool builds mipmaps, and every caller passes 1 for that
       // too, but MIN_FILTER is set to plain GL_LINEAR either way, so they
       // are built and never sampled. Skipped here for the same result.
-      return this.mgl.createTextureFromImage(img, false, false);
+      return this.mgl.createTextureFromImage(img, false, !!rec.clamp);
     })();
     this.tex.set(rec.file, p);
     return p;
@@ -151,7 +157,7 @@ export class Demo {
       this.status('loading artwork… ' + ++n + '/' + images.length);
       await breathe();
       try {
-        this.textures.set(name, { tex: await this.assets.texture(rec), rec });
+        this.textures.set(name, { tex: await this.assets.texture({ ...rec, clamp: true }), rec });
       } catch (e) {
         // ptr_und_ul.jpg and ptr_up_ul.jpg are named by the script but
         // were never shipped in the release
@@ -316,7 +322,16 @@ export class Demo {
     let f = null;
     if (mode === 'add') f = [gl.ONE, gl.ONE];
     else if (mode === 'mul') f = [gl.DST_COLOR, gl.ZERO];
-    else if (mode === 'mask' || mode === 'alpha') f = [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA];
+    // Premultiplied, so ONE rather than SRC_ALPHA. The build guarantees it:
+    // the twelve images that name themselves as their own mask are
+    // white-on-black greyscale and so already carry colour * alpha, and the
+    // five with a separate mask get multiplied at build time to match.
+    //
+    // With SRC_ALPHA the self-masked ones square their own alpha — an
+    // anti-aliased edge at 0.5 lands at 0.25 — which is what made every
+    // piece of masked text in the demo fringe grey instead of reading as
+    // white with alpha.
+    else if (mode === 'mask' || mode === 'alpha') f = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA];
     if (!f) { mgl.enableBlend(false); return; }
     mgl.blendFunc(f[0], f[1]);
     mgl.enableBlend(true);

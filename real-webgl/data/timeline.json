@@ -1015,41 +1015,6 @@
    "end": 55.197
   },
   {
-   "layer": 6,
-   "command": "drawimage",
-   "args": [
-    "balk.jpg",
-    "-"
-   ],
-   "start": 33.137,
-   "tracks": {},
-   "end": 55.197
-  },
-  {
-   "layer": 7,
-   "command": "drawimage",
-   "args": [
-    "balk.jpg",
-    "-"
-   ],
-   "start": 33.137,
-   "tracks": {
-    "translation": [
-     {
-      "t": 33.137,
-      "v": [
-       0.0,
-       447.0,
-       0.0
-      ],
-      "easeTo": 0.0,
-      "easeFrom": 0.0
-     }
-    ]
-   },
-   "end": 55.197
-  },
-  {
    "layer": 8,
    "command": "drawscene",
    "args": [
@@ -1101,6 +1066,41 @@
       "v": [
        0.0,
        414.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 26,
+   "command": "drawimage",
+   "args": [
+    "balk.jpg",
+    "-"
+   ],
+   "start": 33.137,
+   "tracks": {},
+   "end": 55.197
+  },
+  {
+   "layer": 27,
+   "command": "drawimage",
+   "args": [
+    "balk.jpg",
+    "-"
+   ],
+   "start": 33.137,
+   "tracks": {
+    "translation": [
+     {
+      "t": 33.137,
+      "v": [
+       0.0,
+       447.0,
        0.0
       ],
       "easeTo": 0.0,

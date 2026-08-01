@@ -33,7 +33,7 @@ import re
 import shutil
 import sys
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 
 PRELOAD = re.compile(r'^xxx', re.I)
@@ -198,6 +198,19 @@ def build_instances(cues):
     for layer in list(live):
         close(layer, 1e9)
 
+    # A deliberate departure from the script, on the author's instruction.
+    #
+    # Part 2 puts balk.jpg on layers 6 and 7 and cubes.i3d on layer 8, and
+    # `red_base::run_tasks` walks its slot array ascending with no
+    # inversion, so as released the cubes spill over the bars. Coat, who
+    # designed the demo, remembers them letterboxing the scene and asked
+    # for them on top. Nothing in the binaries supports that reading — this
+    # is the intent, not the release.
+    for inst in done:
+        if inst['command'] == 'drawimage' and inst['args'][:1] == ['balk.jpg'] \
+                and 33.0 < inst['start'] < 34.0:
+            inst['layer'] += 20
+
     # Red seeds a baseline key when the task is created. After splicing that
     # cue's own animate{} blocks in, it walks the five property lists
     # (0x1000371a onwards) and, for each one still *empty*, allocates a key
@@ -256,6 +269,26 @@ def build_images(release, out, preload):
             mp = find(mask_name)
             if mp:
                 mk = Image.open(mp).convert('L').resize(im.size)
+                # Everything masked ends up premultiplied, because that is
+                # what the artwork already is in the commonest case and it
+                # lets one blend mode serve both.
+                #
+                # Twelve of the seventeen masked images name *themselves*
+                # as the mask -- `loadImage text_01.jpg mask text_01.jpg`.
+                # Those are white-on-black greyscale (verified: zero chroma
+                # across all of them), so the stored value is already
+                # white * alpha, i.e. premultiplied, and multiplying again
+                # would square it: an edge pixel at 0.5 would land at 0.25.
+                # That squaring is exactly what made anti-aliased text read
+                # grey instead of white-with-alpha.
+                #
+                # The other five pair a colour image with a separate mask
+                # (bovenbalk + bovenbalk_opacity, the three tsg_* pairs,
+                # solar_greets). Those are straight alpha, so the multiply
+                # has to happen here.
+                if mask_name != name:
+                    im = Image.merge('RGB',
+                                     [ImageChops.multiply(c, mk) for c in im.split()])
                 im = im.convert('RGBA')
                 im.putalpha(mk)
         im.save(os.path.join(dst, out_name))
