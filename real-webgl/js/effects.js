@@ -660,11 +660,194 @@ export class ShowCylinder {
   }
 }
 
+// show2d — 0x401000 (init) and 0x401160 (run).
+//
+// Plane deformation through the texture coordinates, which is what the
+// 0x65e78-byte block is for: eight grids of 161 x 81 floats end to end,
+// not the 640x480 working image the size suggests. The draw is a
+// screen-space grid of 160 x 80 quads at 4 x 6 pixels — exactly the
+// screen — and every vertex carries its own animated UV. It registers as
+// kind 1, so those vertices really are screen pixels.
+//
+// GRID[0] and GRID[1] are the live coordinates the draw reads; GRID[2]
+// and GRID[3] the rest grid, written once in init as j/160 and i/80;
+// GRID[4] and GRID[5] scratch deltas for the zoomer.
+//
+// Which of the four paths runs is decided by two different parameter
+// slots — the third picks only the texture, the first and second select
+// the variant by string-comparing xotrack's joke parameter names.
+const G_COLS = 161, G_ROWS = 81;   // 160 x 80 cells
+
+function grid() { return new Float32Array(G_COLS * G_ROWS); }
+
+// One task object is registered, and all five script instances share it,
+// so the grids persist between them. That matters: the zoomer reads
+// GRID[0]/GRID[1] as its starting point, and what it finds there is
+// whatever the previous instance's last frame left — a plasma field, not
+// zeroes, for every instance after the first.
+const S2D = {
+  live: [grid(), grid()],
+  rest: [grid(), grid()],
+  d: [grid(), grid()],
+  plasmaStart: -1,
+  ditisStart: -1,
+  fade: 1.0,
+  zoom: 0,
+  built: false,
+};
+
+function s2dInit() {
+  if (S2D.built) return;
+  for (let j = 0; j < G_COLS; j++) {
+    for (let i = 0; i < G_ROWS; i++) {
+      S2D.rest[0][j * G_ROWS + i] = j * 0.00625;   // 0 .. 1 across
+      S2D.rest[1][j * G_ROWS + i] = i * 0.0125;    // 0 .. 1 down
+    }
+  }
+  S2D.built = true;
+}
+
+const JOKE_XOTRACK = 'xotrackiseenbotteaapenhijverzintbotteparameternamen';
+const JOKE_DITIS = 'ditisparameternummertje2endieisookheelergbottoevallig';
+const JOKE_RANZIGE = 'ranzigebotteparamomeeneffecttekiezen';
+
+export class ShowTwoD {
+  static kind = 1;
+
+  constructor(inst) {
+    s2dInit();
+    this.p1 = String(inst.args[0] || '-');
+    this.p2 = String(inst.args[1] || '-');
+    this.p3 = String(inst.args[2] || '-');
+  }
+
+  draw(mgl, ms, p, demo) {
+    const gl = mgl.gl;
+    const t = ms;
+    // The third parameter picks the texture and nothing else (0x401179).
+    const name = this.p3[0] === '0' ? 'solar_groot.png'
+      : this.p3[0] === '2' ? 'bruut.png' : 'eeeeeeeenv.png';
+    const tex = demo.fxTex && demo.fxTex.get(name);
+
+    const ditis = this.p1 === JOKE_DITIS;
+    const xot = this.p1 === JOKE_XOTRACK;
+    const ranzige = this.p2 === JOKE_RANZIGE;
+
+    const A = S2D.live[0], B = S2D.live[1];
+    const C = S2D.rest[0], D = S2D.rest[1];
+    const E = S2D.d[0], F = S2D.d[1];
+
+    mgl.enableTexture(!!tex);
+    if (tex) mgl.bindTexture(tex);
+    mgl.enableBlend(false);
+    mgl.enableLighting(false);
+
+    let pushed = false;
+    if (ditis) {
+      // The demo's last ten seconds: a vertical-only zoom about the
+      // screen centre, plus a fade, on top of the zoomer below.
+      if (S2D.ditisStart < 0) S2D.ditisStart = t;
+      let e = (t - S2D.ditisStart) * 0.0023636;
+      if (e > 10.0) e = 10.0;
+      S2D.zoom = e;
+      mgl.matrixMode(mgl.MODELVIEW);
+      mgl.pushMatrix();
+      pushed = true;
+      mgl.translate(320, 240, 0);
+      mgl.scale(1.0, e * 1.5 + 1.0, 1.0);
+      mgl.translate(-320, -240, 0);
+      S2D.fade = 1.0 - e * 0.6;
+    }
+
+    if (ditis || xot) {
+      // The zoomer. E and F are the gap between where the coordinates are
+      // and where they rest; S winds from 0 to 50 over 7.2 seconds, so the
+      // texture opens out from a single texel to its full extent.
+      if (S2D.plasmaStart < 0) S2D.plasmaStart = t;
+      let e = (t - S2D.plasmaStart) * 0.000436564364;
+      if (e >= Math.PI) e = Math.PI;
+      const S = 50.0 - (Math.cos(e) + 1.0) * 25.0;
+      for (let k = 0; k < A.length; k++) {
+        E[k] = (A[k] - C[k]) * 0.02;
+        F[k] = (B[k] - D[k]) * 0.02;
+      }
+      for (let k = 0; k < A.length; k++) {
+        S2D.live[0][k] = A[k] - S * E[k];
+        S2D.live[1][k] = B[k] - S * F[k];
+      }
+    } else if (ranzige) {
+      // Plasma A (0x401581): a sine-warped field, then the whole thing
+      // rotated in UV space by an angle that is itself a slow function of
+      // the clock.
+      const P1 = t * 0.00083578345, P2 = t * 0.000234825456;
+      const P3 = t * 0.00034365459, P4 = t * 0.00022935649;
+      const P5 = Math.sin(t * 0.0007385268456) * 4.0;
+      const P6 = t * 0.000343655646, th = t * 0.000437659;
+      const cs = Math.cos(th), sn = Math.sin(th);
+      for (let i = 0; i < G_ROWS; i++) {
+        const W = Math.sin(3.0 * Math.sin(i * 0.0015 + P1) + i * 0.0025 + P2) +
+                  0.3 * Math.sin(i * 0.06 + P3);
+        const V = i * 0.0125;
+        for (let j = 0; j < G_COLS; j++) {
+          const uw = j * 0.00625 + W;
+          const vv = V + 0.3 * Math.sin(j * 0.06 + P4 - P5) +
+                         Math.sin(j * 0.0025 + P6);
+          const k = j * G_ROWS + i;
+          A[k] = 0.5 * (uw * cs - vv * sn);
+          B[k] = 0.5 * (uw * sn + vv * cs);
+        }
+      }
+    } else {
+      // Plasma B (0x401811): distance to a moving centre, computed
+      // separately for u and for v, so the two axes pull the plane towards
+      // different points.
+      const Q1 = t * 0.000303542453, Q2 = t * 0.000427342422;
+      const Q3 = t * 0.000529375252, Q4 = t * 0.000604371429;
+      const Q5 = Math.sin(t * 0.000234326) * 20.0;
+      const Q6 = Math.sin(t * 0.000392574) * 20.0;
+      for (let i = 0; i < G_ROWS; i++) {
+        const R1 = 40.0 + 20.0 * Math.sin(i * 0.0839895 + Q1);
+        const R2 = 40.0 + 20.0 * Math.sin(i * 0.1387539 + Q3);
+        for (let j = 0; j < G_COLS; j++) {
+          const x = 20.0 * (1.0 + Math.sin(j * 0.1383475 + Q2)) - i;
+          const y = 20.0 * (1.0 + Math.sin(j * 0.0985465 + Q4)) - i;
+          const k = j * G_ROWS + i;
+          A[k] = 0.02 * (Math.sqrt(x * x + (R1 - j) * (R1 - j)) + Q5);
+          B[k] = 0.02 * (Math.sqrt(y * y + (R2 - j) * (R2 - j)) + Q6);
+        }
+      }
+    }
+
+    const c = ditis ? S2D.fade : 1.0;
+    mgl.color4(c, c, c, 1);
+    const U = S2D.live[0], V = S2D.live[1];
+    mgl.begin(mgl.TRIANGLES);
+    for (let j = 0; j < G_COLS - 1; j++) {
+      const x = j * 4;
+      for (let i = 0; i < G_ROWS - 1; i++) {
+        const y = i * 6;
+        const a = j * G_ROWS + i, b = a + 1;
+        const d = (j + 1) * G_ROWS + i, e2 = d + 1;
+        const q = [[x, y, a], [x, y + 6, b], [x + 4, y + 6, e2], [x + 4, y, d]];
+        for (const n of [0, 1, 2, 0, 2, 3]) {
+          mgl.color4(c, c, c, 1);
+          mgl.texCoord2(U[q[n][2]], V[q[n][2]]);
+          mgl.vertex3(q[n][0], q[n][1], 0);
+        }
+      }
+    }
+    mgl.end();
+    if (pushed) mgl.popMatrix();
+    mgl.enableTexture(false);
+  }
+}
+
 // Named in Real.exe's string table and loaded by the effects themselves,
 // so they never pass through the script's `loadImage`.
 export const EFFECT_TEXTURES = [
   'envmap.png', 'eenv2.png', 'particle.png',
   'plane_01.png', 'plane_02.png', 'plane_03.png', 'plane_04.png',
+  'solar_groot.png', 'bruut.png', 'eeeeeeeenv.png',
 ];
 
 export const EFFECTS = {
@@ -675,4 +858,5 @@ export const EFFECTS = {
   showpartiekels: ShowPartiekels,
   showplanes: ShowPlanes,
   showcylinder: ShowCylinder,
+  show2d: ShowTwoD,
 };

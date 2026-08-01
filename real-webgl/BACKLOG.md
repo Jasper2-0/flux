@@ -9,7 +9,7 @@ is 64 KB.
 
 ---
 
-## Tier 1 — the `show*` tasks (one left)
+## Tier 1 — the `show*` tasks — **all eight ported**
 
 All eight of xotrack's effects live in `Real.exe` and register against
 Red's task table the same way, so the entry points are already known:
@@ -19,7 +19,7 @@ slot 4 returns the required parameter count.
 | effect | vtable | init | run | state | kind | screen time |
 |---|---|---|---|---|---|---|
 | `showLines` | `0x40c594` | `0x402c60` | `0x402e80` | `0x1c0` | 1 | 50 s — **done** |
-| `show2d` | `0x40c580` | `0x401000` | `0x401160` | `0x1c0` | 1 | 38 s |
+| `show2d` | `0x40c580` | `0x401000` | `0x401160` | `0x1c0` | 1 | 38 s — **done** |
 | `showPartiekels` | `0x40c56c` | `0x403150` | `0x403220` | `0x48` | 2 | 21 s — **done** |
 | `showCylinder` | `0x40c558` | `0x402350` | `0x4026a0` | `0x98` | 2 | 11 s — **done** |
 | `showPlanes` | `0x40c530` | `0x403590` | `0x4036d0` | `0x1e0` | 2 | 11 s — **done** |
@@ -108,9 +108,19 @@ extent. The `ditis` instance adds a vertical-only `glScalef` about
 (320, 240) and a fade over ten seconds on top, which is the demo's last
 ten seconds.
 
-**Left:** the two plasma paths, each about sixty instructions of nested
-sines per grid vertex, with their own constant sets. Nothing conceptually
-hard, but it has to be traced exactly rather than approximated.
+Both plasma paths are traced too. **A** (`0x401581`) warps the field with
+nested sines and then rotates the whole thing in UV space by an angle that
+is itself a slow function of the clock. **B** (`0x401811`) is different in
+kind: it takes the *distance* to a moving centre, separately for u and for
+v, so the two axes pull the plane towards different points — which is why
+it reads as folding rather than sliding.
+
+One consequence of the single shared task object: the grids persist
+between script instances. The zoomer reads the live coordinates as its
+starting point, and what it finds is whatever the previous instance's last
+frame left — a plasma field, not zeroes, for every instance after the
+first. So the demo's closing shot resolves out of the endtro's warp
+rather than out of nothing.
 
 - The assets, from the string table's cross-references — one per init,
   and none of them ever passing through `loadImage`, so the script never
