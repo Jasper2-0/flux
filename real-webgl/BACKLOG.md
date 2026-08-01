@@ -64,20 +64,46 @@ far looks tilted, so this may be zero throughout, but it is unverified.
 
 ### Three missing textures
 `zwart.jpg`, `Refmap.gif` and `lakerem2.jpg` are named by scene materials
-and were never shipped. `zwart` ("black") and the two reflection maps are
-cosmetic — the affected surfaces currently fall back to their reflection
-map or to flat white.
+and were never shipped. In the original all three took the *textured*
+branch of `ogl_material` and drew white plus their map; with the map gone
+the port falls back to the material's own colour, which is the artist's
+value and closer than flat white but is not what the engine did. Affects
+the Solar logo (`Metal_Dark_Gold`), bolletje's inner sphere
+(`Reflection_RefMap`) and the credits set (`Reflection_Lake`).
 
-### Lighting for `bolletje`
+### Lighting — four scenes, not one
 `ogl_scene::disable_all_lights` only enables `GL_LIGHTING` for a scene
-that carries lights, and `bolletje.i3d` is the only one of the nine that
-does (a single `Omni01`). It currently renders unlit like the rest.
+that carries lights, and four of the nine do: `bolletje` (one `Omni01`),
+`dings` (two omnis), `effect` (a `Spot01`) and `solar` (three omnis).
+All four currently render unlit, like the five that genuinely are.
+
+Note that `ogl_material` only sets `GL_AMBIENT` and `GL_SHININESS` from
+the material, so under lighting `GL_DIFFUSE` keeps GL's default
+(0.8, 0.8, 0.8) — a lit surface would come out much paler than the
+material colour the port currently shows.
+
+### Vertex animation — `0x47`
+`effect.i3d`'s `Cylinder01` carries a chunk `0x47` of 75,764 bytes: a
+count of 121, then 121 frames × 52 vertices × 12 bytes of morph targets.
+The handler is `0x1000a340`. That shape is supposed to deform through the
+section and currently sits still. It is the only `0x47` in the nine
+scenes.
 
 ### Texture-coordinate seams
 The exporter drops 3ds Max's separate map-face table, so a handful of
 meshes carry slightly more UVs than vertices (`Torus09`: 169 against 144).
 Indexing by vertex, as the engine does, leaves the seam column wrong.
 Only affects reflection-mapped meshes, where it is invisible.
+
+The same omission is what makes `cubes.i3d` unrecoverable — ten of every
+twelve triangles enclose no UV area — so those 96 boxes get a synthesised
+quad unwrap. If a capture ever turns up, that is the first thing to check
+against it.
+
+### Map amount
+Each texture record carries a Max map amount, which the parser skips. It
+is 1.000 for every texture in all nine scenes, so nothing is being lost
+today, but a scene added later could rely on it.
 
 ### `add` images and alpha
 `ogl_bitmap::render` maps `add` to `glBlendFunc(GL_ONE, GL_ONE)`, which
