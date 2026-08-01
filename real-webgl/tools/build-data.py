@@ -211,6 +211,19 @@ def build_instances(cues):
                 and 33.0 < inst['start'] < 34.0:
             inst['layer'] += 20
 
+    # Also on the author's instruction: part 13's onder.jpg is 640x80 and
+    # the script places it at y = 420, so twenty rows hang off the bottom
+    # of a 480-line screen. Every other bottom bar in the demo lands flush
+    # -- underbalk, onderdingsel and onderbalk all reach exactly 480, and
+    # balk, onderkant_glow and the rest come within two rows. This one is
+    # the outlier by a factor of ten, which makes it a slip rather than a
+    # choice. Moved to 400.
+    for inst in done:
+        if inst['command'] == 'drawimage' and inst['args'][:1] == ['onder.jpg']:
+            for k in inst['tracks'].get('translation', []):
+                if k['v'][1] == 420.0:
+                    k['v'][1] = 400.0
+
     # Red seeds a baseline key when the task is created. After splicing that
     # cue's own animate{} blocks in, it walks the five property lists
     # (0x1000371a onwards) and, for each one still *empty*, allocates a key

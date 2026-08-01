@@ -365,11 +365,20 @@ export class Demo {
 
     const [r, g, b] = p.color;
     const a = p.alpha[0] / 255;
+    // Premultiplied source has to be scaled on the way in, colour as well
+    // as alpha: the blend is ONE, ONE_MINUS_SRC_ALPHA, so the layer alpha
+    // only reaches the destination factor otherwise and the image holds
+    // full brightness while the background fades in behind it. Scaling rgb
+    // too gives C*texA*a + bg*(1 - texA*a), which is the fade the script
+    // asks for. Not applied to `add` or `mul`, where the original ignores
+    // source alpha entirely.
+    const pre = entry.rec.mask || entry.rec.mode === 'mask' || entry.rec.mode === 'alpha';
+    const ca = pre ? a : 1;
     const quad = [[0, 0, 0, 0], [w, 0, 1, 0], [w, h, 1, 1], [0, h, 0, 1]];
     mgl.begin(mgl.TRIANGLES);
     for (const i of [0, 1, 2, 0, 2, 3]) {
       const [x, y, u, v] = quad[i];
-      mgl.color4(r / 255, g / 255, b / 255, a);
+      mgl.color4(r / 255 * ca, g / 255 * ca, b / 255 * ca, a);
       mgl.texCoord2(u, v);
       mgl.vertex3(x, y, 0);
     }
@@ -434,6 +443,14 @@ export class Demo {
     mv.mult(mesh.world);
     mgl.loadMatrix(mv);
 
+    // A mesh with no material assignment draws nothing. `ogl_trimesh`
+    // renders per material group, and the loop at 0x10005441 reads the
+    // group count from [this+0x128] and jumps straight past the draw when
+    // it is zero — a mesh the exporter never assigned has no groups at
+    // all. gears.i3d's Cylinder04 is the only one in these nine scenes,
+    // and falling back to white was drawing it as a small pale object
+    // floating above the gear line.
+    if (mesh.src.material === null || mesh.src.material === undefined) return;
     const mat = scene.materials[mesh.src.material] || null;
     let uvs = null, tex = null;
     if (mat && mat.base) {
