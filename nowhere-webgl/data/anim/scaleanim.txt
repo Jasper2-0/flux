@@ -1,0 +1,8 @@
+.\anim\scale1.pcx
+.\anim\scale2.pcx
+.\anim\scale3.pcx
+.\anim\scale4.pcx
+.\anim\scale1.pcx
+.\anim\scale2.pcx
+.\anim\scale3.pcx
+.\anim\scale4.pcx

@@ -1,0 +1,16 @@
+
+
+texture smoke_jpg primary .\smoke\smoke.jpg
+texture smokeenv secondary .\smoke\smokeenv.jpg
+
+material {
+name smokemat
+texture smoke_jpg
+texture smokeenv
+envcalc
+}
+
+
+REGISTER smokeback backgr
+
+

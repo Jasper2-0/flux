@@ -1,0 +1,14 @@
+
+texture grid3_jpg primary .\slierten\slierten.jpg
+texture env_jpg secondary .\slierten\sliertenenv.jpg
+
+
+material {
+name sliertmat
+texture grid3_jpg
+texture env_jpg
+calcenv
+}
+
+
+REGISTER	sliertenback		backgr

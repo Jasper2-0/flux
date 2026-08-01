@@ -1,0 +1,4 @@
+.\anim\text1.pcx
+.\anim\text2.pcx
+.\anim\text3.pcx
+.\anim\text4.pcx

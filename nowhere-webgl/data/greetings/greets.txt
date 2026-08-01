@@ -1,0 +1,9 @@
+texture greetings_jpg primary .\greetings\greetings.jpg
+
+material {
+name greets
+texture greetings_jpg
+cull none
+}
+
+REGISTER greetsback backgr

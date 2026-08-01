@@ -1,0 +1,1827 @@
+{
+ "registrations": {
+  "creditsvic": "credits",
+  "creditssrx": "credits",
+  "creditsstv": "credits",
+  "animmeter": "anim",
+  "animsignal": "anim",
+  "animbanner": "anim",
+  "animshooter": "anim",
+  "animscale": "anim",
+  "animtext": "anim",
+  "332": "33",
+  "endpic": "backgr",
+  "flowerback": "backgr",
+  "flowerback2": "backgr",
+  "sliertenback": "backgr",
+  "kaleidoback": "backgr",
+  "sphereback": "backgr",
+  "kubusback": "backgr",
+  "boarderplay": "zeusplay",
+  "boarderback": "backgr",
+  "smokeback": "backgr",
+  "fireback": "backgr",
+  "greetsback": "backgr"
+ },
+ "sound": {
+  "filename": "sound.vic",
+  "start": "0",
+  "length": "206488",
+  "nosound": "false"
+ },
+ "timeline": [
+  {
+   "ms": -1000000,
+   "instance": "sbs",
+   "param": "material",
+   "value": "sbsmat"
+  },
+  {
+   "ms": -1000000,
+   "instance": "endpic",
+   "param": "filename",
+   "value": "endpic.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "endpic",
+   "param": "alphaname",
+   "value": "endpic.pcx"
+  },
+  {
+   "ms": -1000000,
+   "instance": "endpic",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": -1000000,
+   "instance": "endpic",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "endpic",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animshooter",
+   "param": "filename",
+   "value": ".\\anim\\shooteranim.txt"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animshooter",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animtext",
+   "param": "filename",
+   "value": ".\\anim\\textanim.txt"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animtext",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animscale",
+   "param": "filename",
+   "value": ".\\anim\\scaleanim.txt"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animscale",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animmeter",
+   "param": "filename",
+   "value": ".\\anim\\meteranim.txt"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animmeter",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animbanner",
+   "param": "filename",
+   "value": ".\\anim\\banneranim.txt"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animbanner",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animsignal",
+   "param": "filename",
+   "value": ".\\anim\\signalanim.txt"
+  },
+  {
+   "ms": -1000000,
+   "instance": "animsignal",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditsvic",
+   "param": "filename",
+   "value": ".\\creditsvic\\credits.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditsvic",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditsvic",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditssrx",
+   "param": "filename",
+   "value": ".\\creditssrx\\credits.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditssrx",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditssrx",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditsstv",
+   "param": "filename",
+   "value": ".\\creditsstv\\credits.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditsstv",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "creditsstv",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "sphereback",
+   "param": "filename",
+   "value": ".\\sphere\\sphereback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "sphereback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "sphere",
+   "param": "filename",
+   "value": ".\\sphere\\sphere.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "sphere",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "sphere",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kaleido",
+   "param": "material",
+   "value": "kaleidomat"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kaleidoback",
+   "param": "filename",
+   "value": ".\\kaleido\\kaleidooverlay.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kaleidoback",
+   "param": "alphaname",
+   "value": ".\\kaleido\\kaleidooverlay.pcx"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kaleidoback",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kaleidoback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kaleidoback",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "flowerback",
+   "param": "filename",
+   "value": ".\\flower\\flowerback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "flowerback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "33",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "33",
+   "param": "filename",
+   "value": ".\\flower\\flower.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "33",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "flowerback2",
+   "param": "filename",
+   "value": ".\\flower2\\flowerback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "flowerback2",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "332",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "332",
+   "param": "filename",
+   "value": ".\\flower2\\flower2.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "332",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "boarderback",
+   "param": "filename",
+   "value": ".\\boarder\\boarderback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "boarderback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "boarderplay",
+   "param": "filename",
+   "value": ".\\boarder\\boarder.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "boarderplay",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "boarderplay",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "greetsback",
+   "param": "filename",
+   "value": ".\\greetings\\greetingsback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "greetsback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "greets",
+   "param": "filename",
+   "value": ".\\greetings\\greets.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "greets",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "greets",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kubusback",
+   "param": "filename",
+   "value": ".\\kubus\\kubusback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kubusback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kubus",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kubus",
+   "param": "colorr",
+   "value": "255"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kubus",
+   "param": "colorg",
+   "value": "230"
+  },
+  {
+   "ms": -1000000,
+   "instance": "kubus",
+   "param": "colorb",
+   "value": "200"
+  },
+  {
+   "ms": -1000000,
+   "instance": "fire",
+   "param": "filename",
+   "value": ".\\fire\\fire.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "fireback",
+   "param": "filename",
+   "value": ".\\fire\\fireback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "fireback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "fire",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "fire",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": -1000000,
+   "instance": "fire",
+   "param": "stevieparm",
+   "value": "24"
+  },
+  {
+   "ms": -1000000,
+   "instance": "fire",
+   "param": "stevieadd",
+   "value": "5"
+  },
+  {
+   "ms": -1000000,
+   "instance": "smokeback",
+   "param": "filename",
+   "value": ".\\smoke\\smokeback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "smokeback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "smoke",
+   "param": "filename",
+   "value": ".\\smoke\\smoke.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "smoke",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "smoke",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "smoke",
+   "param": "hoeveelbobbels",
+   "value": "6"
+  },
+  {
+   "ms": -1000000,
+   "instance": "sliertenback",
+   "param": "filename",
+   "value": ".\\slierten\\sliertenback.jpg"
+  },
+  {
+   "ms": -1000000,
+   "instance": "sliertenback",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "slierten",
+   "param": "layer",
+   "value": "1"
+  },
+  {
+   "ms": -1000000,
+   "instance": "slierten",
+   "param": "filename",
+   "value": ".\\slierten\\slierten.zeu"
+  },
+  {
+   "ms": -1000000,
+   "instance": "slierten",
+   "param": "execute",
+   "value": "load"
+  },
+  {
+   "ms": -1000000,
+   "instance": "slierten",
+   "param": "uitslagx",
+   "value": "5"
+  },
+  {
+   "ms": -1000000,
+   "instance": "slierten",
+   "param": "uitslagy",
+   "value": "5"
+  },
+  {
+   "ms": -1000000,
+   "instance": "slierten",
+   "param": "uitslagz",
+   "value": "5"
+  },
+  {
+   "ms": 0,
+   "instance": "system",
+   "param": "sound",
+   "value": "start"
+  },
+  {
+   "ms": 0,
+   "instance": "sbs",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 8500,
+   "instance": "creditsvic",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 21000,
+   "instance": "creditsvic",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 21000,
+   "instance": "creditssrx",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 35000,
+   "instance": "creditssrx",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 35000,
+   "instance": "creditsstv",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 45400,
+   "instance": "sbs",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 45400,
+   "instance": "creditsstv",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 45400,
+   "instance": "sphereback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 45400,
+   "instance": "sphere",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 45400,
+   "instance": "animscale",
+   "param": "tlx",
+   "value": "100"
+  },
+  {
+   "ms": 45400,
+   "instance": "animscale",
+   "param": "tly",
+   "value": "100"
+  },
+  {
+   "ms": 45400,
+   "instance": "animscale",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": 45400,
+   "instance": "animscale",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": 45400,
+   "instance": "animscale",
+   "param": "speed",
+   "value": "12"
+  },
+  {
+   "ms": 45400,
+   "instance": "animscale",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 45400,
+   "instance": "animtext",
+   "param": "tlx",
+   "value": "50"
+  },
+  {
+   "ms": 45400,
+   "instance": "animtext",
+   "param": "tly",
+   "value": "100"
+  },
+  {
+   "ms": 45400,
+   "instance": "animtext",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": 45400,
+   "instance": "animtext",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": 45400,
+   "instance": "animtext",
+   "param": "speed",
+   "value": "12"
+  },
+  {
+   "ms": 45400,
+   "instance": "animtext",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 59200,
+   "instance": "animscale",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 59200,
+   "instance": "animtext",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 59200,
+   "instance": "sphereback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 59200,
+   "instance": "sphere",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 59200,
+   "instance": "kaleido",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 59200,
+   "instance": "kaleidoback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 72800,
+   "instance": "kaleido",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 72800,
+   "instance": "kaleidoback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 72800,
+   "instance": "flowerback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 72800,
+   "instance": "33",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 72800,
+   "instance": "33",
+   "param": "uitslag",
+   "value": "15"
+  },
+  {
+   "ms": 72800,
+   "instance": "33",
+   "param": "center",
+   "value": "15"
+  },
+  {
+   "ms": 72800,
+   "instance": "33",
+   "param": "bolscale",
+   "value": "1"
+  },
+  {
+   "ms": 72800,
+   "instance": "33",
+   "param": "bolturbdiv",
+   "value": "32"
+  },
+  {
+   "ms": 72800,
+   "instance": "33",
+   "param": "bolanglediv",
+   "value": "56"
+  },
+  {
+   "ms": 86000,
+   "instance": "33",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 86000,
+   "instance": "flowerback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 86000,
+   "instance": "flowerback2",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 86000,
+   "instance": "332",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 86000,
+   "instance": "332",
+   "param": "uitslag",
+   "value": "15"
+  },
+  {
+   "ms": 86000,
+   "instance": "332",
+   "param": "center",
+   "value": "15"
+  },
+  {
+   "ms": 86000,
+   "instance": "332",
+   "param": "bolscale",
+   "value": "1"
+  },
+  {
+   "ms": 86000,
+   "instance": "332",
+   "param": "bolturbdiv",
+   "value": "32"
+  },
+  {
+   "ms": 86000,
+   "instance": "332",
+   "param": "bolanglediv",
+   "value": "56"
+  },
+  {
+   "ms": 100300,
+   "instance": "332",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 100300,
+   "instance": "flowerback2",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 100300,
+   "instance": "boarderback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 100300,
+   "instance": "boarderplay",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 100300,
+   "instance": "animshooter",
+   "param": "tlx",
+   "value": "0"
+  },
+  {
+   "ms": 100300,
+   "instance": "animshooter",
+   "param": "tly",
+   "value": "216"
+  },
+  {
+   "ms": 100300,
+   "instance": "animshooter",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": 100300,
+   "instance": "animshooter",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": 100300,
+   "instance": "animshooter",
+   "param": "speed",
+   "value": "12"
+  },
+  {
+   "ms": 100300,
+   "instance": "animshooter",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 114050,
+   "instance": "animshooter",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 114050,
+   "instance": "boarderback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 114050,
+   "instance": "boarderplay",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 114050,
+   "instance": "greetsback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 114050,
+   "instance": "greets",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 114050,
+   "instance": "animbanner",
+   "param": "tlx",
+   "value": "500"
+  },
+  {
+   "ms": 114050,
+   "instance": "animbanner",
+   "param": "tly",
+   "value": "370"
+  },
+  {
+   "ms": 114050,
+   "instance": "animbanner",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": 114050,
+   "instance": "animbanner",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": 114050,
+   "instance": "animbanner",
+   "param": "speed",
+   "value": "12"
+  },
+  {
+   "ms": 114050,
+   "instance": "animbanner",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 128100,
+   "instance": "animbanner",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 128100,
+   "instance": "greets",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 128100,
+   "instance": "greetsback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 128100,
+   "instance": "kubus",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 128100,
+   "instance": "kubusback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 128100,
+   "instance": "animmeter",
+   "param": "tlx",
+   "value": "4"
+  },
+  {
+   "ms": 128100,
+   "instance": "animmeter",
+   "param": "tly",
+   "value": "20"
+  },
+  {
+   "ms": 128100,
+   "instance": "animmeter",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": 128100,
+   "instance": "animmeter",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": 128100,
+   "instance": "animmeter",
+   "param": "speed",
+   "value": "12"
+  },
+  {
+   "ms": 128100,
+   "instance": "animmeter",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 141400,
+   "instance": "animmeter",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 141400,
+   "instance": "kubus",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 141400,
+   "instance": "kubusback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 141400,
+   "instance": "fire",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 141400,
+   "instance": "fireback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 169200,
+   "instance": "fire",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 169200,
+   "instance": "fireback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 169200,
+   "instance": "smoke",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 169200,
+   "instance": "smokeback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 169200,
+   "instance": "animsignal",
+   "param": "tlx",
+   "value": "10"
+  },
+  {
+   "ms": 169200,
+   "instance": "animsignal",
+   "param": "tly",
+   "value": "20"
+  },
+  {
+   "ms": 169200,
+   "instance": "animsignal",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": 169200,
+   "instance": "animsignal",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": 169200,
+   "instance": "animsignal",
+   "param": "speed",
+   "value": "12"
+  },
+  {
+   "ms": 169200,
+   "instance": "animsignal",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 182400,
+   "instance": "animsignal",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 182400,
+   "instance": "smoke",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 182400,
+   "instance": "smokeback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 182400,
+   "instance": "sliertenback",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 182400,
+   "instance": "slierten",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 182400,
+   "instance": "animtext",
+   "param": "tlx",
+   "value": "2"
+  },
+  {
+   "ms": 182400,
+   "instance": "animtext",
+   "param": "tly",
+   "value": "200"
+  },
+  {
+   "ms": 182400,
+   "instance": "animtext",
+   "param": "layer",
+   "value": "2"
+  },
+  {
+   "ms": 182400,
+   "instance": "animtext",
+   "param": "zpos",
+   "value": "0"
+  },
+  {
+   "ms": 182400,
+   "instance": "animtext",
+   "param": "speed",
+   "value": "12"
+  },
+  {
+   "ms": 182400,
+   "instance": "animtext",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 196200,
+   "instance": "animtext",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 196200,
+   "instance": "sliertenback",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 196200,
+   "instance": "slierten",
+   "param": "run",
+   "value": "0"
+  },
+  {
+   "ms": 196200,
+   "instance": "sbs",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 196200,
+   "instance": "endpic",
+   "param": "run",
+   "value": "1"
+  },
+  {
+   "ms": 206400,
+   "instance": "system",
+   "param": "core",
+   "value": "exit"
+  }
+ ],
+ "textures": {
+  "flower": {
+   "slot": "primary",
+   "file": "flower2/flower.jpg",
+   "flags": []
+  },
+  "flowertv": {
+   "slot": "primary",
+   "file": "flower2/flowertv.jpg",
+   "flags": []
+  },
+  "picture": {
+   "slot": "primary",
+   "file": "flower2/anim.jpg",
+   "flags": []
+  },
+  "envmap": {
+   "slot": "secondary",
+   "file": "flower2/flowerenv.jpg",
+   "flags": []
+  },
+  "grid3_jpg": {
+   "slot": "primary",
+   "file": "slierten/slierten.jpg",
+   "flags": []
+  },
+  "env_jpg": {
+   "slot": "secondary",
+   "file": "slierten/sliertenenv.jpg",
+   "flags": []
+  },
+  "kaleido": {
+   "slot": "primary",
+   "file": "kaleido/kaleido.jpg",
+   "flags": []
+  },
+  "sphere-rect_jpg": {
+   "slot": "primary",
+   "file": "sphere/sphere-rect.jpg",
+   "flags": []
+  },
+  "sphere_jpg": {
+   "slot": "primary",
+   "file": "sphere/sphere.jpg",
+   "flags": []
+  },
+  "boarder_jpg": {
+   "slot": "primary",
+   "file": "boarder/boarder.jpg",
+   "flags": []
+  },
+  "boarderbox": {
+   "slot": "primary",
+   "file": "boarder/jumpgate.jpg",
+   "flags": []
+  },
+  "smoke_jpg": {
+   "slot": "primary",
+   "file": "smoke/smoke.jpg",
+   "flags": []
+  },
+  "smokeenv": {
+   "slot": "secondary",
+   "file": "smoke/smokeenv.jpg",
+   "flags": []
+  },
+  "fire_jpg": {
+   "slot": "primary",
+   "file": "fire/fire.jpg",
+   "flags": []
+  },
+  "sbs1": {
+   "slot": "primary",
+   "file": "sbs/sbs1.jpg",
+   "flags": []
+  },
+  "sbs2": {
+   "slot": "secondary",
+   "file": "sbs/sbs2.jpg",
+   "flags": []
+  },
+  "credvic_jpg": {
+   "slot": "primary",
+   "file": "creditsvic/credvic.jpg",
+   "flags": [
+    "nomipmap"
+   ]
+  },
+  "credvicbol": {
+   "slot": "primary",
+   "file": "creditsvic/credvicbol.jpg",
+   "flags": []
+  },
+  "credstv_jpg": {
+   "slot": "primary",
+   "file": "creditsstv/credstv.jpg",
+   "flags": [
+    "nomipmap"
+   ]
+  },
+  "credstvbol": {
+   "slot": "primary",
+   "file": "creditsstv/credstvbol.jpg",
+   "flags": []
+  },
+  "credsrx_jpg": {
+   "slot": "primary",
+   "file": "creditssrx/credsrx.jpg",
+   "flags": [
+    "nomipmap"
+   ]
+  },
+  "credsrxbol": {
+   "slot": "primary",
+   "file": "creditssrx/credsrxbol.jpg",
+   "flags": []
+  },
+  "greetings_jpg": {
+   "slot": "primary",
+   "file": "greetings/greetings.jpg",
+   "flags": []
+  }
+ },
+ "materials": {
+  "flowermat": {
+   "textures": [
+    "flower",
+    "envmap"
+   ],
+   "flags": [
+    "calcenv"
+   ],
+   "cull": "ccw"
+  },
+  "tvmat": {
+   "textures": [
+    "flowertv",
+    "envmap"
+   ],
+   "flags": [
+    "calcenv"
+   ],
+   "cull": "ccw"
+  },
+  "screen": {
+   "textures": [
+    "picture"
+   ],
+   "flags": [],
+   "cull": "ccw"
+  },
+  "sliertmat": {
+   "textures": [
+    "grid3_jpg",
+    "env_jpg"
+   ],
+   "flags": [
+    "calcenv"
+   ],
+   "cull": "ccw"
+  },
+  "kaleidomat": {
+   "textures": [
+    "kaleido"
+   ],
+   "flags": [],
+   "cull": "ccw"
+  },
+  "sphererect": {
+   "textures": [
+    "sphere-rect_jpg"
+   ],
+   "flags": [],
+   "cull": "ccw"
+  },
+  "spheremat": {
+   "textures": [
+    "sphere_jpg"
+   ],
+   "flags": [],
+   "cull": "ccw"
+  },
+  "boarderboxmap": {
+   "textures": [
+    "boarderbox"
+   ],
+   "flags": [],
+   "cull": "ccw"
+  },
+  "boardermap": {
+   "textures": [
+    "boarder_jpg"
+   ],
+   "flags": [],
+   "cull": "ccw"
+  },
+  "smokemat": {
+   "textures": [
+    "smoke_jpg",
+    "smokeenv"
+   ],
+   "flags": [
+    "envcalc"
+   ],
+   "cull": "ccw"
+  },
+  "firemat": {
+   "textures": [
+    "fire_jpg"
+   ],
+   "flags": [
+    "additive"
+   ],
+   "cull": "ccw"
+  },
+  "sbsmat": {
+   "textures": [
+    "sbs1",
+    "sbs2"
+   ],
+   "flags": [
+    "envmodulate"
+   ],
+   "cull": "ccw"
+  },
+  "mat": {
+   "textures": [
+    "sbs1"
+   ],
+   "flags": [],
+   "cull": "ccw"
+  },
+  "ringmat": {
+   "textures": [
+    "credvic_jpg"
+   ],
+   "flags": [
+    "additive"
+   ],
+   "cull": "ccw"
+  },
+  "bolmat": {
+   "textures": [
+    "credvicbol"
+   ],
+   "flags": [
+    "additive"
+   ],
+   "cull": "ccw"
+  },
+  "ringmatstv": {
+   "textures": [
+    "credstv_jpg"
+   ],
+   "flags": [
+    "additive"
+   ],
+   "cull": "ccw"
+  },
+  "bolmatstv": {
+   "textures": [
+    "credstvbol"
+   ],
+   "flags": [
+    "additive"
+   ],
+   "cull": "ccw"
+  },
+  "ringmatsrx": {
+   "textures": [
+    "credsrx_jpg"
+   ],
+   "flags": [
+    "additive"
+   ],
+   "cull": "ccw"
+  },
+  "bolmatsrx": {
+   "textures": [
+    "credsrxbol"
+   ],
+   "flags": [
+    "additive"
+   ],
+   "cull": "ccw"
+  },
+  "greets": {
+   "textures": [
+    "greetings_jpg"
+   ],
+   "flags": [],
+   "cull": "none"
+  }
+ },
+ "manifest": {
+  "images": {
+   "anim/banner1.png": [
+    128,
+    64
+   ],
+   "anim/banner2.png": [
+    128,
+    64
+   ],
+   "anim/banner3.png": [
+    128,
+    64
+   ],
+   "anim/banner4.png": [
+    128,
+    64
+   ],
+   "anim/meter1.png": [
+    256,
+    256
+   ],
+   "anim/meter2.png": [
+    256,
+    256
+   ],
+   "anim/meter3.png": [
+    256,
+    256
+   ],
+   "anim/meter4.png": [
+    256,
+    256
+   ],
+   "anim/scale1.png": [
+    512,
+    64
+   ],
+   "anim/scale2.png": [
+    512,
+    64
+   ],
+   "anim/scale3.png": [
+    512,
+    64
+   ],
+   "anim/scale4.png": [
+    512,
+    64
+   ],
+   "anim/shooter1.png": [
+    256,
+    256
+   ],
+   "anim/shooter2.png": [
+    256,
+    256
+   ],
+   "anim/shooter3.png": [
+    256,
+    256
+   ],
+   "anim/shooter4.png": [
+    256,
+    256
+   ],
+   "anim/signal1.png": [
+    128,
+    128
+   ],
+   "anim/signal2.png": [
+    128,
+    128
+   ],
+   "anim/signal3.png": [
+    128,
+    128
+   ],
+   "anim/signal4.png": [
+    128,
+    128
+   ],
+   "anim/text1.png": [
+    128,
+    64
+   ],
+   "anim/text2.png": [
+    128,
+    64
+   ],
+   "anim/text3.png": [
+    128,
+    64
+   ],
+   "anim/text4.png": [
+    128,
+    64
+   ],
+   "boarder/boarder.jpg": [
+    512,
+    512
+   ],
+   "boarder/boarderback.jpg": [
+    640,
+    480
+   ],
+   "boarder/jumpgate.jpg": [
+    512,
+    512
+   ],
+   "creditssrx/credsrx.jpg": [
+    512,
+    64
+   ],
+   "creditssrx/credsrxbol.jpg": [
+    512,
+    64
+   ],
+   "creditsstv/credstv.jpg": [
+    512,
+    64
+   ],
+   "creditsstv/credstvbol.jpg": [
+    512,
+    64
+   ],
+   "creditsvic/credvic.jpg": [
+    512,
+    64
+   ],
+   "creditsvic/credvicbol.jpg": [
+    512,
+    64
+   ],
+   "endpic.jpg": [
+    640,
+    480
+   ],
+   "endpic.png": [
+    640,
+    480
+   ],
+   "fire/fire.jpg": [
+    256,
+    256
+   ],
+   "fire/fireback.jpg": [
+    640,
+    480
+   ],
+   "flower/anim.jpg": [
+    1024,
+    64
+   ],
+   "flower/flower.jpg": [
+    256,
+    256
+   ],
+   "flower/flowerback.jpg": [
+    640,
+    480
+   ],
+   "flower/flowerenv.jpg": [
+    256,
+    256
+   ],
+   "flower/flowertv.jpg": [
+    256,
+    256
+   ],
+   "flower2/anim.jpg": [
+    1024,
+    64
+   ],
+   "flower2/flower.jpg": [
+    256,
+    256
+   ],
+   "flower2/flowerback.jpg": [
+    640,
+    480
+   ],
+   "flower2/flowerenv.jpg": [
+    256,
+    256
+   ],
+   "flower2/flowertv.jpg": [
+    256,
+    256
+   ],
+   "greetings/greetings.jpg": [
+    4096,
+    64
+   ],
+   "greetings/greetingsback.jpg": [
+    640,
+    480
+   ],
+   "kaleido/kaleido.jpg": [
+    256,
+    256
+   ],
+   "kaleido/kaleidooverlay.jpg": [
+    640,
+    480
+   ],
+   "kaleido/kaleidooverlay.png": [
+    640,
+    480
+   ],
+   "kubus/kubusback.jpg": [
+    640,
+    480
+   ],
+   "loading.jpg": [
+    256,
+    128
+   ],
+   "sbs/sbs1.jpg": [
+    256,
+    256
+   ],
+   "sbs/sbs2.jpg": [
+    640,
+    480
+   ],
+   "slierten/slierten.jpg": [
+    256,
+    256
+   ],
+   "slierten/sliertenback.jpg": [
+    640,
+    480
+   ],
+   "slierten/sliertenenv.jpg": [
+    256,
+    256
+   ],
+   "smoke/smoke.jpg": [
+    256,
+    256
+   ],
+   "smoke/smokeback.jpg": [
+    640,
+    480
+   ],
+   "smoke/smokeenv.jpg": [
+    256,
+    256
+   ],
+   "sphere/sphere-rect.jpg": [
+    256,
+    256
+   ],
+   "sphere/sphere.jpg": [
+    256,
+    256
+   ],
+   "sphere/sphereback.jpg": [
+    640,
+    480
+   ]
+  },
+  "scenes": {
+   "boarder/boarder.json": 1085,
+   "creditssrx/credits.json": 1506,
+   "creditsstv/credits.json": 1506,
+   "creditsvic/credits.json": 1506,
+   "fire/fire.json": 26,
+   "flower/flower.json": 3378,
+   "flower2/flower2.json": 3378,
+   "greetings/greets.json": 1706,
+   "slierten/slierten.json": 3388,
+   "smoke/smoke.json": 182,
+   "sphere/sphere.json": 920
+  },
+  "animations": {
+   "anim/banneranim.txt": [
+    "anim/banner1.png",
+    "anim/banner2.png",
+    "anim/banner3.png",
+    "anim/banner4.png"
+   ],
+   "anim/meteranim.txt": [
+    "anim/meter1.png",
+    "anim/meter2.png",
+    "anim/meter3.png",
+    "anim/meter4.png"
+   ],
+   "anim/scaleanim.txt": [
+    "anim/scale1.png",
+    "anim/scale2.png",
+    "anim/scale3.png",
+    "anim/scale4.png",
+    "anim/scale1.png",
+    "anim/scale2.png",
+    "anim/scale3.png",
+    "anim/scale4.png"
+   ],
+   "anim/shooteranim.txt": [
+    "anim/shooter1.png",
+    "anim/shooter2.png",
+    "anim/shooter3.png",
+    "anim/shooter4.png",
+    "anim/shooter1.png",
+    "anim/shooter2.png",
+    "anim/shooter3.png",
+    "anim/shooter4.png"
+   ],
+   "anim/signalanim.txt": [
+    "anim/signal1.png",
+    "anim/signal2.png",
+    "anim/signal3.png",
+    "anim/signal4.png"
+   ],
+   "anim/textanim.txt": [
+    "anim/text1.png",
+    "anim/text2.png",
+    "anim/text3.png",
+    "anim/text4.png"
+   ]
+  }
+ }
+}

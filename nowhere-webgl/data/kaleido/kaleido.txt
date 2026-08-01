@@ -1,0 +1,9 @@
+
+texture kaleido primary .\kaleido\kaleido.jpg
+
+material {
+name kaleidomat
+texture kaleido
+}
+
+REGISTER	kaleidoback	backgr
