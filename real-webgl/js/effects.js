@@ -400,13 +400,189 @@ export class ShowBol {
   }
 }
 
+// showPartiekels — 0x403150 (init) and 0x403220 (run).
+//
+// The other sphere.i3d effect, and the opposite of showBol: it never hands
+// the scene back to the engine, it walks the 1002 vertices itself and puts
+// a 1x1 additive quad of particle.jpg at each one. Coat's pole-free
+// geosphere is doing real work here — on a UV sphere the particles would
+// pile up at the poles and stripe along the seam.
+//
+// Where showBol *offsets* each axis, this one *scales* it: the vertex is
+// multiplied by a product of two sines rather than displaced by one, so
+// the cloud collapses through the origin and blooms out again instead of
+// wobbling around a fixed radius.
+//
+// The quads are axis-aligned, not billboarded — the same 1x1 square in
+// object space at every vertex, which under the spin below shears them.
+export class ShowPartiekels {
+  static kind = 2;
+  static scene = 'sphere.i3d';
+
+  draw(mgl, ms, p, demo) {
+    const gl = mgl.gl;
+    const scene = demo.scenes.get('sphere.i3d');
+    const tex = demo.fxTex && demo.fxTex.get('particle.png');
+    if (!scene) return;
+    const mesh = scene.meshes[0];
+    if (!mesh) return;
+    const base = mesh.base, out = mesh.positions;
+
+    // Four phases and two envelopes, all hoisted out of the vertex loop —
+    // the envelopes ride 0.4 * sin + 0.6, so they never quite reach zero.
+    const P1 = ms * 0.001854109754;
+    const P2 = ms * 0.002097526959;
+    const P3 = ms * 0.0002854109754;
+    const P4 = ms * 0.001293609752;
+    const S1 = Math.sin(ms * 0.0010363) * 0.4 + 0.6;
+    const S2 = Math.sin(ms * 0.0006363) * 0.4 + 0.6;
+
+    for (let i = 0; i < base.length; i += 3) {
+      const x = base[i], y = base[i + 1], z = base[i + 2];
+      const w = z + y, u = z + x, v = y + x;
+      out[i] = x * 2 * S1 * Math.sin(w * 0.084353453 + P1) * Math.sin(w * 0.019353453 + P3);
+      out[i + 1] = y * 3 * S1 * Math.sin(u * 0.053245335 + P2) * Math.sin(u * 0.029052457 + P3);
+      out[i + 2] = z * 4 * S2 * Math.sin(v * 0.025563549 + P3) * Math.sin(v * 0.065754676 + P4);
+    }
+
+    mgl.matrixMode(mgl.PROJECTION);
+    mgl.pushMatrix();
+    mgl.loadIdentity();
+    // gluPerspective(45, 4/3, 0.1, 5000). The original only reloads the
+    // projection and pops it at the end without ever pushing — it gets
+    // away with it because the stack is deeper than one. Pushed properly
+    // here.
+    const half = Math.tan(45 * Math.PI / 360) * 0.1;
+    mgl.frustum(-half * (4 / 3), half * (4 / 3), -half, half, 0.1, 5000);
+
+    mgl.matrixMode(mgl.MODELVIEW);
+    mgl.pushMatrix();
+    mgl.loadIdentity();
+    mgl.rotate(Math.sin(ms * 0.0002304234) * 360, 0, 0, 1);
+    mgl.translate(Math.sin(ms * 0.00023534) * 30, Math.sin(ms * 0.00032453) * 30, -200);
+
+    mgl.enableCullFace(false);
+    mgl.enableDepthTest(false);
+    mgl.depthMask(false);
+    mgl.blendFunc(gl.ONE, gl.ONE);
+    mgl.enableBlend(true);
+    mgl.enableLighting(false);
+    mgl.enableTexture(!!tex);
+    if (tex) mgl.bindTexture(tex);
+
+    // glColor3ub straight off the message — this is the one effect that
+    // reads the script's `color` property (0x40347d..0x403489).
+    const [r, g, b] = p.color;
+    mgl.color4(r / 255, g / 255, b / 255, 1);
+
+    mgl.begin(mgl.TRIANGLES);
+    for (let i = 0; i < out.length; i += 3) {
+      const x = out[i], y = out[i + 1], z = out[i + 2];
+      const q = [[x, y, 0, 0], [x + 1, y, 1, 0], [x + 1, y + 1, 1, 1], [x, y + 1, 0, 1]];
+      for (const k of [0, 1, 2, 0, 2, 3]) {
+        mgl.color4(r / 255, g / 255, b / 255, 1);
+        mgl.texCoord2(q[k][2], q[k][3]);
+        mgl.vertex3(q[k][0], q[k][1], z);
+      }
+    }
+    mgl.end();
+
+    mgl.popMatrix();
+    mgl.matrixMode(mgl.PROJECTION);
+    mgl.popMatrix();
+    mgl.matrixMode(mgl.MODELVIEW);
+    mgl.enableTexture(false);
+    mgl.enableBlend(false);
+  }
+}
+
+// showPlanes — 0x403590 (init) and 0x4036d0 (run).
+//
+// Fifty 16x16 additive quads cycling towards the viewer down a twenty-unit
+// loop, cycling through plane_01..04.jpg by index & 3. Each has a fixed
+// scatter from init — `rand() % 400 - 200` scaled by 0.01, so a couple of
+// units either way — plus a slow sine wobble five times that size, which
+// is what keeps them from reading as a fixed grid.
+//
+// The brightness is `(1 - |z| / 10)` cubed, so a plane fades up out of
+// nothing at the far end of the loop and back down as it passes. Cubing a
+// linear ramp is what makes the fade feel like it has a threshold.
+export class ShowPlanes {
+  static kind = 2;
+
+  constructor() {
+    this.ax = [];
+    this.by = [];
+    for (let i = 0; i < 50; i++) {
+      this.ax.push((rnd(400) - 200) * 0.01);
+      this.by.push((rnd(400) - 200) * 0.01);
+    }
+  }
+
+  draw(mgl, ms, p, demo) {
+    const gl = mgl.gl;
+    const tex = [1, 2, 3, 4].map((n) =>
+      demo.fxTex && demo.fxTex.get('plane_0' + n + '.png'));
+
+    mgl.matrixMode(mgl.MODELVIEW);
+    mgl.pushMatrix();
+    mgl.loadIdentity();
+    // One spin about the view axis, its angle a sine of a sine.
+    const spin = Math.sin(ms * 0.000324774764) *
+      Math.sin(Math.sin(ms * 0.0002346574675) * 3.0 + ms * 0.00043675) * 360.0;
+    mgl.rotate(spin, 0, 0, 1);
+    mgl.multMatrix(lookAt([0, 0, 15], [0, 0, 0], [0, 1, 0]));
+
+    mgl.enableTexture(true);
+    mgl.enableCullFace(false);
+    mgl.enableDepthTest(false);
+    mgl.depthMask(false);
+    mgl.blendFunc(gl.ONE, gl.ONE);
+    mgl.enableBlend(true);
+    mgl.enableLighting(false);
+
+    const dz = ms * 0.00243565;
+    const wa = ms * 0.0002353, wb = ms * 0.0003236;
+    for (let k = 0; k < 50; k++) {
+      const t = tex[k & 3];
+      if (t) mgl.bindTexture(t);
+      // fmod against 20, then centred, so z runs -10 .. 10 and wraps
+      let z = (4 * k * 0.4 + dz) % 20;
+      if (z < 0) z += 20;
+      z -= 10;
+      const f = 1 - Math.abs(z) * 0.1;
+      const c = f * f * f;
+      const ax = Math.sin(k + wa) * 5 + this.ax[k];
+      const by = Math.sin(k + wb) * 5 + this.by[k];
+      const q = [[ax - 8, by - 8, 1, 0], [ax + 8, by - 8, 0, 0],
+                 [ax + 8, by + 8, 0, 1], [ax - 8, by + 8, 1, 1]];
+      mgl.begin(mgl.TRIANGLES);
+      for (const i of [0, 1, 2, 0, 2, 3]) {
+        mgl.color4(c, c, c, 1);
+        mgl.texCoord2(q[i][2], q[i][3]);
+        mgl.vertex3(q[i][0], q[i][1], z);
+      }
+      mgl.end();
+    }
+
+    mgl.popMatrix();
+    mgl.enableTexture(false);
+    mgl.enableBlend(false);
+  }
+}
+
 // Named in Real.exe's string table and loaded by the effects themselves,
 // so they never pass through the script's `loadImage`.
-export const EFFECT_TEXTURES = ['envmap.png', 'eenv2.png'];
+export const EFFECT_TEXTURES = [
+  'envmap.png', 'eenv2.png', 'particle.png',
+  'plane_01.png', 'plane_02.png', 'plane_03.png', 'plane_04.png',
+];
 
 export const EFFECTS = {
   showlines: ShowLines,
   showdraai: ShowDraai,
   showtunnel: ShowTunnel,
   showbol: ShowBol,
+  showpartiekels: ShowPartiekels,
+  showplanes: ShowPlanes,
 };

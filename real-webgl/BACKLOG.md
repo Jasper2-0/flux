@@ -20,9 +20,9 @@ slot 4 returns the required parameter count.
 |---|---|---|---|---|---|---|
 | `showLines` | `0x40c594` | `0x402c60` | `0x402e80` | `0x1c0` | 1 | 50 s — **done** |
 | `show2d` | `0x40c580` | `0x401000` | `0x401160` | `0x1c0` | 1 | 38 s |
-| `showPartiekels` | `0x40c56c` | `0x403150` | `0x403220` | `0x48` | 2 | 21 s |
-| `showCylinder` | `0x40c558` | `0x402350` | `0x4026a0` | `0x98` | 2 | 11 s |
-| `showPlanes` | `0x40c530` | `0x403590` | `0x4036d0` | `0x1e0` | 2 | 11 s |
+| `showPartiekels` | `0x40c56c` | `0x403150` | `0x403220` | `0x48` | 2 | 21 s — **done** |
+| `showCylinder` | `0x40c558` | `0x402350` | `0x4026a0` | `0x98` | 2 | 11 s — init is a byte-for-byte copy of `showTunnel`'s, same 13x128 tube; only the run differs |
+| `showPlanes` | `0x40c530` | `0x403590` | `0x4036d0` | `0x1e0` | 2 | 11 s — **done** |
 | `showBol` | `0x40c5a8` | `0x401d70` | `0x4021b0` | `0x64` | 2 | 11 s — **done** |
 | `showDraai` | `0x40c544` | `0x4029f0` | `0x402a30` | `0x38` | 2 | 11 s — **done** |
 | `showTunnel` | `0x40c5bc` | `0x4039e0` | `0x403e60` | `0x98` | 2 | 11 s — **done** |
