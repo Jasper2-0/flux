@@ -15,6 +15,8 @@ import { Backgr } from './effects/backgr.js';
 import { Anim } from './effects/anim.js';
 import { ZeusPlay } from './effects/zeusplay.js';
 import { Sphere } from './effects/sphere.js';
+import { Credits } from './effects/credits.js';
+import { Flower } from './effects/flower.js';
 
 const DEMO_LENGTH = 206.5;   // `sound length 206488`
 
@@ -25,6 +27,8 @@ const EFFECTS = {
   anim: Anim,
   zeusplay: ZeusPlay,
   sphere: Sphere,
+  credits: Credits,
+  33: Flower,
 };
 
 // Every other 3D part loads a .zeu and then deforms it procedurally —
@@ -33,7 +37,7 @@ const EFFECTS = {
 // blobs. Until each of those is written, the scene is played straight,
 // which gets the camera, the timing and the geometry right and is
 // labelled as such in the readout.
-const RAW_SCENE = new Set(['credits', 'greets', 'fire', 'smoke', 'slierten', '33']);
+const RAW_SCENE = new Set(['greets', 'fire', 'smoke', 'slierten']);
 
 class Assets {
   constructor(mgl, base = 'data/') {

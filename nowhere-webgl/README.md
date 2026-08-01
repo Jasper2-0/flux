@@ -50,8 +50,8 @@ sprite overlays at layer 2. Ascending order it is.
 | sprite overlays (6) | throughout | **done** — 4-frame PCX loops at 12 fps, placed by `tlx`/`tly` |
 | boarder | 1:40–1:54 | **done** — `zeusPlay` on `boarder.zeu` |
 | sphere | 0:45–0:59 | **done** — per-triangle prisms pulsing between the two geospheres |
-| credits ×3 | 0:08–0:45 | scene only |
-| flower ×2 | 1:12–1:40 | scene only |
+| credits ×3 | 0:08–0:45 | **done** — fisheye-mapped hemispheres, additive over `sbs` |
+| flower ×2 | 1:12–1:40 | **ball done** — two moving bumps displace the sphere; poles and TV movie pending |
 | greets | 1:54–2:08 | scene only |
 | fire | 2:21–2:49 | scene only |
 | smoke | 2:49–3:02 | scene only |
@@ -118,6 +118,62 @@ spikes, each breathing at its own rate.
 tops out at 32767, so that division is always zero and every triangle
 gets exactly 0.2 — a latent bug in the original. The port reproduces it,
 because reproducing it is what matches the release.
+
+## The credits, decoded
+
+`credits.srx` never moves a vertex. Its scene holds two hemispheres —
+`GeoSphere01` and `GeoSphere02`, 751 vertices each, radius 360 — plus
+`Rectangle01`, an 800×100 plate carrying the credit name that the scene
+animates itself. Every frame the plugin rewrites each hemisphere's
+texture coordinates and vertex colour, normalising position by that same
+360:
+
+    ang = atan2(Z, X)                       r = hypot(X, Z)
+    s   = 2·|X|·r^1.2 + 1
+    ang = (−π/2 < ang ≤ π/2) ? ang/s : (ang − π)/s + π
+    u   = asin(asin(cos(ang)·r·0.8))·0.25 + time/75 − 2 + 0.5
+    v   = 0.5 − sin(ang)·r / (2.4 − 1.8·r)
+    grey = clamp(Y − 1.2·r, 0.1, 1)
+
+— a pinch centred on the poles, so the lettering in `credvicbol.jpg`
+wraps and lenses across the dome, lit by height minus radius and walked
+slowly sideways. The routine also carries two earlier passes that scroll
+`u` directly from a saved copy of the original coordinates; both are
+overwritten by the fisheye passes before anything is drawn, so they are
+dead code in the shipped build and are not reproduced.
+
+The credits render *additively over the `sbs` plasma*, which runs
+underneath them for the whole first 45 seconds. Until `sbs` exists they
+float on black, which is faithful but looks far darker than the release.
+
+## The flower's ball, decoded
+
+`33` generates most of its own geometry. What is implemented is the ball
+(`0x10001d20`), which rewrites GeoSphere01's texture coordinates and then
+pushes every vertex out along its own direction by two moving circular
+bumps:
+
+    scale = sin(time / bolturbdiv) · 0.15 + 0.75
+    u = (x/70 + 0.5)·scale        v = (y/70 + 0.5)·scale
+
+    a = time / bolanglediv
+    bump(P, Q, gain):
+        p = wrap(P + u·255) − 128     q = wrap(Q + v·255) − 128
+        return max(0, 255 − hypot(p, q)·512/182) / 255 · gain
+    r = bolscale + bump(50a, −31.8835a, 0.5) + bump(−23.796a, 34.4485a, 0.6)
+    vertex ← source vertex · r
+
+`wrap(t) = t − trunc(t) + (trunc(t) & 255)` is the binary's way of
+folding a float into [0, 256) with an `and eax, 0xff`. The script sets
+bolscale 1, bolturbdiv 32, bolanglediv 56; the constructor's defaults are
+0.4, 50 and 60.
+
+Still missing from this part: the **eighteen poles** the effect builds
+itself — `0x10001fc0` allocates 18 tubes of 41×3 vertices and 240
+triangles each, and `0x10001930` sways them using `center` and `uitslag`
+("maximale uitslag van de paal") — and the movie playing on the four TV
+screens, which `movietime` divides the frame rate for. Those parts of the
+scene currently render straight.
 
 ## What is reconstruction, and what is read from the data
 
