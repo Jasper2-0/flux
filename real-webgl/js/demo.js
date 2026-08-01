@@ -60,9 +60,6 @@ function ease(u, a, b) {
   return 1 - k * w * w / b;
 }
 
-// Walk to the last key at or before `time`, then interpolate towards the
-// next one. Red holds the final value after the last key, and leaves the
-// property at its default before the first.
 // Hand the main thread back to the renderer. Chains of `await` only
 // drain the microtask queue, so without a real task boundary a phone
 // runs the whole load with nothing repainted and the status line frozen
@@ -71,6 +68,9 @@ function breathe() {
   return new Promise((r) => setTimeout(r, 0));
 }
 
+// Walk to the last key at or before `time`, then interpolate towards the
+// next one. Red holds the final value after the last key, and leaves the
+// property at its default before the first.
 function track(keys, prop, time, out) {
   if (!keys || !keys.length || time < keys[0].t) return DEFAULTS[prop];
   let i = 0;
@@ -122,11 +122,6 @@ export class Demo {
     this.timeOverride = null;
     this.onActiveChange = opts.onActiveChange || (() => {});
     this._v = [0, 0, 0];
-    // Blend state persists between draws exactly as it does in the
-    // original: ogl_bitmap::render only touches glBlendFunc/glEnable when
-    // the image declares a mode, so a `none` image inherits whatever the
-    // last blended one left behind.
-    this._blendState = null;
   }
 
   async load() {
@@ -245,6 +240,11 @@ export class Demo {
   // The four modes `loadImage` accepts, as ogl_bitmap::render maps them.
   // A 32-bit image — one given a separate opacity JPEG — always takes the
   // alpha path whatever it declared.
+  //
+  // `none` means blending off, not "inherit". render() ends with
+  // glDisable(GL_BLEND) (0x10002d7a), so every bitmap starts from a clean
+  // state and an unblended image is genuinely opaque — it does not pick up
+  // the mode of whatever was drawn on the layer below it.
   _blend(mode, masked) {
     const mgl = this.mgl, gl = mgl.gl;
     if (masked) mode = 'mask';
@@ -252,11 +252,8 @@ export class Demo {
     if (mode === 'add') f = [gl.ONE, gl.ONE];
     else if (mode === 'mul') f = [gl.DST_COLOR, gl.ZERO];
     else if (mode === 'mask' || mode === 'alpha') f = [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA];
-    if (!f) return;          // `none`: leave the state alone, as the original does
-    if (!this._blendState || this._blendState[0] !== f[0] || this._blendState[1] !== f[1]) {
-      mgl.blendFunc(f[0], f[1]);
-      this._blendState = f;
-    }
+    if (!f) { mgl.enableBlend(false); return; }
+    mgl.blendFunc(f[0], f[1]);
     mgl.enableBlend(true);
   }
 
@@ -307,7 +304,6 @@ export class Demo {
     this._setup2d();
     mgl.enableTexture(false);
     mgl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    this._blendState = [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA];
     mgl.enableBlend(true);
     mgl.begin(mgl.TRIANGLES);
     const quad = [[0, 0], [SCREEN_W, 0], [SCREEN_W, SCREEN_H], [0, SCREEN_H]];
@@ -377,11 +373,9 @@ export class Demo {
     if (a < 0.999) {
       mgl.enableBlend(true);
       mgl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      this._blendState = [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA];
       mgl.depthMask(false);
     } else {
       mgl.enableBlend(false);
-      this._blendState = null;
     }
     mgl.color4(r / 255, g / 255, b / 255, a);
 
@@ -422,7 +416,6 @@ export class Demo {
     }
     this._setup2d();
     fx.draw(this.mgl, (time - inst.start) * 1000, p);
-    this._blendState = null;
   }
 
   renderFrame(time) {

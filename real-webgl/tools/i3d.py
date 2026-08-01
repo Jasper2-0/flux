@@ -234,7 +234,10 @@ def read_trimesh(r, end):
         elif cid == 0x14:
             if sub.u8() == 1:
                 n = sub.u16()
-                m['uvs'] = [[sub.f32(), sub.f32()] for _ in range(n)]
+                # V is flipped on load (0x1000a1ea: fld 1.0; fsub v), which
+                # is what reconciles 3ds Max's bottom-left texture origin
+                # with an image uploaded top row first
+                m['uvs'] = [[sub.f32(), 1.0 - sub.f32()] for _ in range(n)]
         elif cid == 0x15:
             if sub.u8() and sub.u8() == 0:
                 m['material'] = sub.u16()
