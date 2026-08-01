@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>We Ain't Real by Solar — WebGL port</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  html, body {
+    margin: 0; height: 100%; background: #000; color: #8fa4b8;
+    font-family: "Lucida Console", Monaco, monospace; overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+  #wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; }
+  #stage { position: relative; display: none; }
+  #screen { background: #000; width: min(100vw, calc(92vh * 4 / 3)); aspect-ratio: 4 / 3; touch-action: none; }
+  #parts {
+    position: absolute; left: 10px; bottom: 10px; font-size: 10px; line-height: 1.7;
+    color: #4d5c6b; text-shadow: 0 1px 2px #000; pointer-events: none; max-height: 85%; overflow: hidden;
+  }
+  #parts .on { color: #a8c8e8; }
+  #panel { text-align: center; max-width: 40em; line-height: 1.6; padding: 0 16px; }
+  #panel h1 { font-size: 20px; font-weight: normal; letter-spacing: 0.5em; color: #cfe2f2; margin-bottom: 4px; }
+  .sub { font-size: 12px; color: #63788c; }
+  #status { font-size: 12px; color: #4d5c6b; min-height: 1.6em; margin-top: 10px; }
+  #play {
+    margin-top: 12px; padding: 12px 46px; background: transparent; color: #cfe2f2;
+    border: 1px solid #35485c; font: inherit; letter-spacing: 0.3em; cursor: pointer; display: none;
+  }
+  #play:hover { background: #0c141c; }
+  #hint { font-size: 11px; color: #35485c; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="panel">
+    <h1>W E &nbsp; A I N ' T &nbsp; R E A L</h1>
+    <div class="sub">solar, bizarre 2000 &mdash; webgl port</div>
+    <div class="sub" style="margin-top:8px">
+      the demo's own script, <code>real.scp</code>, drives this cue for cue
+      against the shipped soundtrack. implemented layers render; the rest
+      are listed live in the corner as the script starts them.
+    </div>
+    <div id="status">loading…</div>
+    <button id="play">play</button>
+    <div id="hint">runs 3:40 &middot; sound on &middot; tap the screen to stop &middot; arrows to seek</div>
+  </div>
+  <div id="stage">
+    <canvas id="screen" width="1280" height="960"></canvas>
+    <div id="parts"></div>
+  </div>
+</div>
+<script type="module">
+import { Demo } from './js/demo.js';
+
+const canvas = document.getElementById('screen');
+const stage = document.getElementById('stage');
+const panel = document.getElementById('panel');
+const statusEl = document.getElementById('status');
+const playBtn = document.getElementById('play');
+const partsEl = document.getElementById('parts');
+
+const demo = new Demo(canvas, (m) => { statusEl.textContent = m; }, {
+  onActiveChange(time, active) {
+    let html = 't = ' + time.toFixed(1) + 's<br>';
+    for (const a of active) {
+      html += '<span class="' + (a.done ? 'on' : '') + '">' +
+        (a.done ? '▶ ' : '· ') + String(a.layer).padStart(3, ' ') +
+        '  ' + a.command + (a.what ? ' ' + a.what : '') +
+        (a.done ? '' : ' (not ported yet)') + '</span><br>';
+    }
+    partsEl.innerHTML = html;
+  },
+});
+window.demo = demo;
+
+try {
+  await demo.load();
+  statusEl.textContent = 'ready';
+  playBtn.style.display = 'inline-block';
+} catch (err) {
+  statusEl.textContent = 'error: ' + err.message;
+  throw err;
+}
+
+const stop = () => {
+  demo.stop();
+  stage.style.display = 'none';
+  panel.style.display = 'block';
+  statusEl.textContent = 'stopped — tap play to restart';
+};
+
+playBtn.addEventListener('click', () => {
+  panel.style.display = 'none';
+  stage.style.display = 'block';
+  demo.start();
+});
+canvas.addEventListener('pointerdown', stop);
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') stop();
+  else if (e.key === 'ArrowRight') demo.seek(demo.getTime() + 5);
+  else if (e.key === 'ArrowLeft') demo.seek(demo.getTime() - 5);
+});
+</script>
+</body>
+</html>

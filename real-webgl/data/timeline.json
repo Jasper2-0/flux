@@ -1,0 +1,8454 @@
+{
+ "width": 640,
+ "height": 480,
+ "length": 220.0,
+ "preload": [
+  {
+   "command": "loadimage",
+   "args": [
+    "the_solar_group.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "zonnetje.jpg",
+    "mask",
+    "zonnetje.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "ring.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "multiplier.jpg",
+    "mul",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "lines.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "cube_text.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "onderkant_glow.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "bovenkant_glow.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "balk.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "bovenbalkje_01.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "onderbalkje_01.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "wit.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "cubes.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "cubes.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "metro_background.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "photo_scroller.jpg",
+    "mask",
+    "photo_scroller_mask.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "ptr_und_ul.jpg",
+    "mul",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "ptr_und_abs.jpg",
+    "mul",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "ptr_up_ul.jpg",
+    "mul",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "ptr_up_abs.jpg",
+    "mul",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "text_scroller.jpg",
+    "mask",
+    "text_scroller.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "tsg_the_01.jpg",
+    "mask",
+    "tsg_the_01_mask.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "tsg_solar_02.jpg",
+    "mask",
+    "tsg_solar_02_mask.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "tsg_group_03.jpg",
+    "mask",
+    "tsg_group_03_mask.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_02.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_03.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_04.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_05.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_06.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_07.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_08.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_09.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rotator_10.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "effect.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "effect.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "cross.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "cross.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "adder.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "weird_scroller01.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "weird_scroller02.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "blokje.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "leeg_blokje.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "gears.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "gears.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "gearscroll01.jpg",
+    "mask",
+    "gearscroll01.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "gearscroll02.jpg",
+    "mask",
+    "gearscroll02.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "oberbalk.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "underbalk.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "text_01.jpg",
+    "mask",
+    "text_01.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "text_02.jpg",
+    "mask",
+    "text_02.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "text_03.jpg",
+    "mask",
+    "text_03.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "text_04.jpg",
+    "mask",
+    "text_04.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "text_05.jpg",
+    "mask",
+    "text_05.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "noise_background.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "cirkel.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "cyl_boven_balkje.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "cyl_onder_balkje.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "bovendingsel.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "onderdingsel.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "credits_coat.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "credits_druid.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "credits_masterboy.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "credits_xotrack.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "credits_mbz.jpg",
+    "alpha",
+    "-"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "credits.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "credits.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "bovenbalk.jpg",
+    "mask",
+    "bovenbalk_opacity.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "onderbalk.jpg",
+    "mask",
+    "onderbalk_opacity.jpg"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "bolletje.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "bolletje.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "bovenkantje_text.jpg",
+    "mask",
+    "bovenkantje_text_opacity.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "weird_scroller.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "onderdeel.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "greets_lines.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "solar_greets.jpg",
+    "mask",
+    "solar_greets_alpha.jpg"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "greetz_background.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "aardbei_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "astral_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "domage_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "groovestation_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "issue_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "kaleido_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "mysticgd_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "nostalgia_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "oryx_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "rbi_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "revolution_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "tbl_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "te_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "threestate_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "trinity_01.jpg",
+    "add",
+    "-"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "solar.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "solar.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadscene",
+   "args": [
+    "dings.i3d"
+   ]
+  },
+  {
+   "command": "initscene",
+   "args": [
+    "dings.i3d",
+    "0"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "boven.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "onder.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "bg.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadimage",
+   "args": [
+    "grijs.jpg",
+    "none",
+    "-"
+   ]
+  },
+  {
+   "command": "loadmusic",
+   "args": [
+    "real.mp3"
+   ]
+  },
+  {
+   "command": "playmusic",
+   "args": [
+    "0"
+   ]
+  }
+ ],
+ "instances": [
+  {
+   "layer": 0,
+   "command": "drawimage",
+   "args": [
+    "ring.jpg",
+    "1"
+   ],
+   "start": 0.0,
+   "tracks": {
+    "translation": [
+     {
+      "t": 0.0,
+      "v": [
+       0.0,
+       25.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 33.137
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "zonnetje.jpg",
+    "1"
+   ],
+   "start": 0.0,
+   "tracks": {
+    "translation": [
+     {
+      "t": 0.0,
+      "v": [
+       0.0,
+       40.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 16.253,
+      "v": [
+       0.0,
+       0.0,
+       360.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 33.137
+  },
+  {
+   "layer": 10,
+   "command": "showlines",
+   "args": [
+    "0",
+    "-"
+   ],
+   "start": 0.0,
+   "tracks": {},
+   "end": 33.137
+  },
+  {
+   "layer": 11,
+   "command": "colorfade",
+   "args": [],
+   "start": 0.0,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 0.0,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 10.0,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 0.0,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 33.137
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "the_solar_group.jpg",
+    "1"
+   ],
+   "start": 11.131,
+   "tracks": {
+    "translation": [
+     {
+      "t": 11.131,
+      "v": [
+       0.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 33.137
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "multiplier.jpg",
+    "-"
+   ],
+   "start": 11.131,
+   "tracks": {
+    "translation": [
+     {
+      "t": 11.131,
+      "v": [
+       -400.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 16.253,
+      "v": [
+       500.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 33.137
+  },
+  {
+   "layer": 20,
+   "command": "showlines",
+   "args": [
+    "1",
+    "0"
+   ],
+   "start": 22.058,
+   "tracks": {},
+   "end": 33.137
+  },
+  {
+   "layer": 0,
+   "command": "colorfade",
+   "args": [],
+   "start": 33.137,
+   "tracks": {
+    "color": [
+     {
+      "t": 33.137,
+      "v": [
+       32.0,
+       64.0,
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "lines.jpg",
+    "-"
+   ],
+   "start": 33.137,
+   "tracks": {},
+   "end": 55.197
+  },
+  {
+   "layer": 6,
+   "command": "drawimage",
+   "args": [
+    "balk.jpg",
+    "-"
+   ],
+   "start": 33.137,
+   "tracks": {},
+   "end": 55.197
+  },
+  {
+   "layer": 7,
+   "command": "drawimage",
+   "args": [
+    "balk.jpg",
+    "-"
+   ],
+   "start": 33.137,
+   "tracks": {
+    "translation": [
+     {
+      "t": 33.137,
+      "v": [
+       0.0,
+       447.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 8,
+   "command": "drawscene",
+   "args": [
+    "cubes.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 33.137,
+   "tracks": {},
+   "end": 55.197
+  },
+  {
+   "layer": 9,
+   "command": "drawimage",
+   "args": [
+    "bovenkant_glow.jpg",
+    "-"
+   ],
+   "start": 33.137,
+   "tracks": {
+    "translation": [
+     {
+      "t": 33.137,
+      "v": [
+       0.0,
+       -3.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 10,
+   "command": "drawimage",
+   "args": [
+    "onderkant_glow.jpg",
+    "-"
+   ],
+   "start": 33.137,
+   "tracks": {
+    "translation": [
+     {
+      "t": 33.137,
+      "v": [
+       0.0,
+       414.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 11,
+   "command": "drawimage",
+   "args": [
+    "cube_text.jpg",
+    "1"
+   ],
+   "start": 38.773,
+   "tracks": {
+    "translation": [
+     {
+      "t": 38.773,
+      "v": [
+       80.0,
+       48.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 38.773,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 44.384,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 52.437,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 52.437,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 52.487,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 52.537
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 52.537,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 52.537,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 52.587,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 52.637
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 52.637,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 52.637,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 52.687,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 52.737
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 52.737,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 52.737,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 52.787,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 52.837
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 52.837,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 52.837,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 52.887,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 52.937
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 52.937,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 52.937,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 52.987,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.037
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.037,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.037,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.087,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.137
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.137,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.137,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.187,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.237
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.237,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.237,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.287,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.337
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.337,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.337,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.387,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.437
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.437,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.437,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.487,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.537
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.537,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.537,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.587,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.637
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.637,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.637,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.687,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.737
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.737,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.737,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.787,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.837
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.837,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.837,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.887,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 53.937
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 53.937,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 53.937,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 53.987,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.037
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.037,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.037,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.087,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.137
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.137,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.137,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.187,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.237
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.237,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.237,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.287,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.337
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.337,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.337,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.387,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.437
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.437,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.437,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.487,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.537
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.537,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.537,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.587,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.637
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.637,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.637,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.687,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.687,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 25,
+   "command": "colorfade",
+   "args": [],
+   "start": 54.687,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.887,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       32.0,
+       64.0,
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 26,
+   "command": "drawimage",
+   "args": [
+    "bovenbalkje_01.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.887,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       -500.0,
+       144.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.887,
+      "v": [
+       0.0,
+       144.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 27,
+   "command": "drawimage",
+   "args": [
+    "onderbalkje_01.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.887,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       640.0,
+       336.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.887,
+      "v": [
+       0.0,
+       336.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 28,
+   "command": "drawimage",
+   "args": [
+    "wit.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 54.887,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       176.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 32,
+   "command": "drawimage",
+   "args": [
+    "rotator_01.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 33,
+   "command": "drawimage",
+   "args": [
+    "rotator_02.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 34,
+   "command": "drawimage",
+   "args": [
+    "rotator_03.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 35,
+   "command": "drawimage",
+   "args": [
+    "rotator_04.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 36,
+   "command": "drawimage",
+   "args": [
+    "rotator_05.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 37,
+   "command": "drawimage",
+   "args": [
+    "rotator_06.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 38,
+   "command": "drawimage",
+   "args": [
+    "rotator_07.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 39,
+   "command": "drawimage",
+   "args": [
+    "rotator_08.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 40,
+   "command": "drawimage",
+   "args": [
+    "rotator_09.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 41,
+   "command": "drawimage",
+   "args": [
+    "rotator_10.jpg",
+    "-"
+   ],
+   "start": 54.687,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.687,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.687,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 54.887
+  },
+  {
+   "layer": 32,
+   "command": "drawimage",
+   "args": [
+    "rotator_01.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 33,
+   "command": "drawimage",
+   "args": [
+    "rotator_02.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 34,
+   "command": "drawimage",
+   "args": [
+    "rotator_03.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 35,
+   "command": "drawimage",
+   "args": [
+    "rotator_04.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 36,
+   "command": "drawimage",
+   "args": [
+    "rotator_05.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 37,
+   "command": "drawimage",
+   "args": [
+    "rotator_06.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 38,
+   "command": "drawimage",
+   "args": [
+    "rotator_07.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 39,
+   "command": "drawimage",
+   "args": [
+    "rotator_08.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 40,
+   "command": "drawimage",
+   "args": [
+    "rotator_09.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 41,
+   "command": "drawimage",
+   "args": [
+    "rotator_10.jpg",
+    "-"
+   ],
+   "start": 54.887,
+   "tracks": {
+    "color": [
+     {
+      "t": 54.887,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 54.887,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 55.197
+  },
+  {
+   "layer": 0,
+   "command": "drawimage",
+   "args": [
+    "metro_background.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {},
+   "end": 66.229
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "ptr_und_abs.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       100.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 57.197,
+      "v": [
+       500.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 59.197,
+      "v": [
+       200.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 63.197,
+      "v": [
+       500.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "ptr_up_abs.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       200.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 57.197,
+      "v": [
+       400.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 59.197,
+      "v": [
+       300.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 63.197,
+      "v": [
+       100.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "ptr_up_abs.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       300.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 57.197,
+      "v": [
+       50.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 59.197,
+      "v": [
+       550.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 63.197,
+      "v": [
+       350.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "ptr_und_abs.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       400.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 57.197,
+      "v": [
+       100.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 59.197,
+      "v": [
+       400.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 63.197,
+      "v": [
+       600.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 8,
+   "command": "drawimage",
+   "args": [
+    "text_scroller.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       0.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 10,
+   "command": "drawimage",
+   "args": [
+    "photo_scroller.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       0.0,
+       190.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 63.197,
+      "v": [
+       -1215.0,
+       190.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 17,
+   "command": "drawimage",
+   "args": [
+    "tsg_the_01.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       -500.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 57.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 58.697,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 59.197,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 59.197
+  },
+  {
+   "layer": 32,
+   "command": "drawimage",
+   "args": [
+    "rotator_01.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 33,
+   "command": "drawimage",
+   "args": [
+    "rotator_02.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 34,
+   "command": "drawimage",
+   "args": [
+    "rotator_03.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 35,
+   "command": "drawimage",
+   "args": [
+    "rotator_04.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 36,
+   "command": "drawimage",
+   "args": [
+    "rotator_05.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 37,
+   "command": "drawimage",
+   "args": [
+    "rotator_06.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 38,
+   "command": "drawimage",
+   "args": [
+    "rotator_07.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 39,
+   "command": "drawimage",
+   "args": [
+    "rotator_08.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 40,
+   "command": "drawimage",
+   "args": [
+    "rotator_09.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 41,
+   "command": "drawimage",
+   "args": [
+    "rotator_10.jpg",
+    "-"
+   ],
+   "start": 55.197,
+   "tracks": {
+    "color": [
+     {
+      "t": 55.197,
+      "v": [
+       25.0,
+       25.0,
+       25.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 55.197,
+      "v": [
+       500.0,
+       5.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "rotation": [
+     {
+      "t": 63.197,
+      "v": [
+       0.0,
+       0.0,
+       720.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 15,
+   "command": "drawimage",
+   "args": [
+    "tsg_the_01.jpg",
+    "-"
+   ],
+   "start": 57.197,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 57.197,
+      "v": [
+       64.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 57.697,
+      "v": [
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 57.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 57.697,
+      "v": [
+       78.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ]
+   },
+   "end": 59.197
+  },
+  {
+   "layer": 16,
+   "command": "drawimage",
+   "args": [
+    "tsg_the_01.jpg",
+    "-"
+   ],
+   "start": 57.197,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 57.197,
+      "v": [
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 57.697,
+      "v": [
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 57.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 57.697,
+      "v": [
+       47.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ]
+   },
+   "end": 59.197
+  },
+  {
+   "layer": 15,
+   "command": "drawimage",
+   "args": [
+    "tsg_solar_02.jpg",
+    "-"
+   ],
+   "start": 59.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 59.197,
+      "v": [
+       -500.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 61.197
+  },
+  {
+   "layer": 16,
+   "command": "drawimage",
+   "args": [
+    "tsg_solar_02.jpg",
+    "-"
+   ],
+   "start": 59.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 59.197,
+      "v": [
+       -500.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 61.197
+  },
+  {
+   "layer": 17,
+   "command": "drawimage",
+   "args": [
+    "tsg_solar_02.jpg",
+    "-"
+   ],
+   "start": 59.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 59.197,
+      "v": [
+       -500.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 61.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 62.697,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 63.197,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 63.197
+  },
+  {
+   "layer": 15,
+   "command": "drawimage",
+   "args": [
+    "tsg_solar_02.jpg",
+    "-"
+   ],
+   "start": 61.197,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 61.197,
+      "v": [
+       64.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 61.697,
+      "v": [
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 61.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 61.697,
+      "v": [
+       80.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ]
+   },
+   "end": 63.197
+  },
+  {
+   "layer": 16,
+   "command": "drawimage",
+   "args": [
+    "tsg_solar_02.jpg",
+    "-"
+   ],
+   "start": 61.197,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 61.197,
+      "v": [
+       128.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 61.697,
+      "v": [
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 61.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 61.697,
+      "v": [
+       48.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ]
+   },
+   "end": 63.197
+  },
+  {
+   "layer": 15,
+   "command": "drawimage",
+   "args": [
+    "tsg_group_03.jpg",
+    "-"
+   ],
+   "start": 63.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 63.197,
+      "v": [
+       -500.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 65.197
+  },
+  {
+   "layer": 16,
+   "command": "drawimage",
+   "args": [
+    "tsg_group_03.jpg",
+    "-"
+   ],
+   "start": 63.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 63.197,
+      "v": [
+       -500.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 65.197
+  },
+  {
+   "layer": 17,
+   "command": "drawimage",
+   "args": [
+    "tsg_group_03.jpg",
+    "-"
+   ],
+   "start": 63.197,
+   "tracks": {
+    "translation": [
+     {
+      "t": 63.197,
+      "v": [
+       -500.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 65.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 15,
+   "command": "drawimage",
+   "args": [
+    "tsg_group_03.jpg",
+    "-"
+   ],
+   "start": 65.197,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 65.197,
+      "v": [
+       64.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 65.697,
+      "v": [
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 65.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 65.697,
+      "v": [
+       80.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 16,
+   "command": "drawimage",
+   "args": [
+    "tsg_group_03.jpg",
+    "-"
+   ],
+   "start": 65.197,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 65.197,
+      "v": [
+       128.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 65.697,
+      "v": [
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 65.197,
+      "v": [
+       16.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 150.0,
+      "easeFrom": 150.0
+     },
+     {
+      "t": 65.697,
+      "v": [
+       48.0,
+       80.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 66.229
+  },
+  {
+   "layer": 0,
+   "command": "colorfade",
+   "args": [],
+   "start": 66.229,
+   "tracks": {
+    "color": [
+     {
+      "t": 66.229,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 77.413
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "effect.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 66.229,
+   "tracks": {
+    "translation": [
+     {
+      "t": 67.197,
+      "v": [
+       200.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 71.197,
+      "v": [
+       800.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 77.413
+  },
+  {
+   "layer": 2,
+   "command": "drawscene",
+   "args": [
+    "cross.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 66.229,
+   "tracks": {
+    "translation": [
+     {
+      "t": 67.197,
+      "v": [
+       450.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 71.197,
+      "v": [
+       100.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 77.413
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "adder.jpg",
+    "-"
+   ],
+   "start": 66.229,
+   "tracks": {
+    "translation": [
+     {
+      "t": 67.197,
+      "v": [
+       50.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 71.197,
+      "v": [
+       550.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 77.413
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "weird_scroller01.jpg",
+    "-"
+   ],
+   "start": 66.229,
+   "tracks": {
+    "translation": [
+     {
+      "t": 66.229,
+      "v": [
+       0.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 67.197,
+      "v": [
+       0.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 71.197,
+      "v": [
+       500.0,
+       124.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 76.229,
+      "v": [
+       0.0,
+       -2048.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 77.413
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "weird_scroller02.jpg",
+    "-"
+   ],
+   "start": 66.229,
+   "tracks": {
+    "translation": [
+     {
+      "t": 66.229,
+      "v": [
+       576.0,
+       -2048.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 76.229,
+      "v": [
+       576.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 77.413
+  },
+  {
+   "layer": 0,
+   "command": "colorfade",
+   "args": [],
+   "start": 77.413,
+   "tracks": {
+    "color": [
+     {
+      "t": 77.413,
+      "v": [
+       32.0,
+       64.0,
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 88.28
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "gears.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 77.413,
+   "tracks": {},
+   "end": 88.28
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "oberbalk.jpg",
+    "-"
+   ],
+   "start": 77.413,
+   "tracks": {},
+   "end": 88.28
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "underbalk.jpg",
+    "-"
+   ],
+   "start": 77.413,
+   "tracks": {
+    "translation": [
+     {
+      "t": 77.413,
+      "v": [
+       0.0,
+       448.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 88.28
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "gearscroll01.jpg",
+    "-"
+   ],
+   "start": 77.413,
+   "tracks": {
+    "translation": [
+     {
+      "t": 77.413,
+      "v": [
+       640.0,
+       20.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 87.413,
+      "v": [
+       -2500.0,
+       20.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 88.28
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "gearscroll01.jpg",
+    "-"
+   ],
+   "start": 77.413,
+   "tracks": {
+    "translation": [
+     {
+      "t": 77.413,
+      "v": [
+       -2500.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 87.413,
+      "v": [
+       640.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 88.28
+  },
+  {
+   "layer": 0,
+   "command": "colorfade",
+   "args": [],
+   "start": 88.28,
+   "tracks": {
+    "color": [
+     {
+      "t": 88.28,
+      "v": [
+       32.0,
+       64.0,
+       128.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 1,
+   "command": "showcylinder",
+   "args": [],
+   "start": 88.28,
+   "tracks": {},
+   "end": 99.317
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "text_01.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       0.0,
+       -2048.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "text_01.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       64.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "text_02.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       128.0,
+       -2048.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "text_03.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       192.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 6,
+   "command": "drawimage",
+   "args": [
+    "text_04.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       256.0,
+       -2048.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 7,
+   "command": "drawimage",
+   "args": [
+    "text_05.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       320.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 8,
+   "command": "drawimage",
+   "args": [
+    "text_04.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       384.0,
+       -2048.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 9,
+   "command": "drawimage",
+   "args": [
+    "text_03.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       448.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 10,
+   "command": "drawimage",
+   "args": [
+    "text_02.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       512.0,
+       -2048.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 11,
+   "command": "drawimage",
+   "args": [
+    "text_01.jpg",
+    "-"
+   ],
+   "start": 88.28,
+   "tracks": {
+    "translation": [
+     {
+      "t": 88.28,
+      "v": [
+       576.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 99.317
+  },
+  {
+   "layer": 0,
+   "command": "drawimage",
+   "args": [
+    "noise_background.jpg",
+    "-"
+   ],
+   "start": 99.317,
+   "tracks": {},
+   "end": 110.344
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "cirkel.jpg",
+    "1"
+   ],
+   "start": 99.317,
+   "tracks": {
+    "scale": [
+     {
+      "t": 99.317,
+      "v": [
+       0.25,
+       0.25,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 99.817,
+      "v": [
+       2.0,
+       2.0,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 99.317,
+      "v": [
+       0.0,
+       -17.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 99.317,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 99.817,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 102.075
+  },
+  {
+   "layer": 2,
+   "command": "showbol",
+   "args": [],
+   "start": 99.317,
+   "tracks": {
+    "translation": [
+     {
+      "t": 104.28,
+      "v": [
+       0.0,
+       480.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 110.344
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "cirkel.jpg",
+    "1"
+   ],
+   "start": 102.075,
+   "tracks": {
+    "scale": [
+     {
+      "t": 102.075,
+      "v": [
+       0.25,
+       0.25,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 102.575,
+      "v": [
+       2.0,
+       2.0,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 102.075,
+      "v": [
+       0.0,
+       -17.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 102.075,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 102.575,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 104.834
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "cirkel.jpg",
+    "1"
+   ],
+   "start": 104.834,
+   "tracks": {
+    "scale": [
+     {
+      "t": 104.834,
+      "v": [
+       0.25,
+       0.25,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 105.334,
+      "v": [
+       2.0,
+       2.0,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 104.834,
+      "v": [
+       0.0,
+       -17.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 104.834,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 105.334,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 106.213
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "cirkel.jpg",
+    "1"
+   ],
+   "start": 106.213,
+   "tracks": {
+    "scale": [
+     {
+      "t": 106.213,
+      "v": [
+       0.25,
+       0.25,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 106.713,
+      "v": [
+       2.0,
+       2.0,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 106.213,
+      "v": [
+       0.0,
+       -17.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 106.213,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 106.713,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 107.592
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "cirkel.jpg",
+    "1"
+   ],
+   "start": 107.592,
+   "tracks": {
+    "scale": [
+     {
+      "t": 107.592,
+      "v": [
+       0.25,
+       0.25,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.092,
+      "v": [
+       2.0,
+       2.0,
+       1.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 107.592,
+      "v": [
+       0.0,
+       -17.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "color": [
+     {
+      "t": 107.592,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.092,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 110.344
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 107.592,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 107.592,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 107.642,
+      "v": [
+       4.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 107.692
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 107.692,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 107.692,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 107.742,
+      "v": [
+       8.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 107.792
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 107.792,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 107.792,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 107.842,
+      "v": [
+       12.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 107.892
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 107.892,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 107.892,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 107.942,
+      "v": [
+       16.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 107.992
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 107.992,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 107.992,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.042,
+      "v": [
+       20.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.092
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.092,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.092,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.142,
+      "v": [
+       24.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.192
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.192,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.192,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.242,
+      "v": [
+       28.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.292
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.292,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.292,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.342,
+      "v": [
+       32.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.392
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.392,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.392,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.442,
+      "v": [
+       36.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.492
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.492,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.492,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.542,
+      "v": [
+       40.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.592
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.592,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.592,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.642,
+      "v": [
+       44.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.692
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.692,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.692,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.742,
+      "v": [
+       48.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.792
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.792,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.792,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.842,
+      "v": [
+       52.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.892
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.892,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.892,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 108.942,
+      "v": [
+       56.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 108.992
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 108.992,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 108.992,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.042,
+      "v": [
+       60.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.092
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.092,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.092,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.142,
+      "v": [
+       64.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.192
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.192,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.192,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.242,
+      "v": [
+       68.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.292
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.292,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.292,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.342,
+      "v": [
+       72.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.392
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.392,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.392,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.442,
+      "v": [
+       76.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.492
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.492,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.492,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.542,
+      "v": [
+       80.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.592
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.592,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.592,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.642,
+      "v": [
+       84.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.692
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.692,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.692,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 109.742,
+      "v": [
+       88.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 109.792
+  },
+  {
+   "layer": 20,
+   "command": "colorfade",
+   "args": [],
+   "start": 109.792,
+   "tracks": {
+    "alpha": [
+     {
+      "t": 109.792,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 110.292,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 110.344
+  },
+  {
+   "layer": 0,
+   "command": "showdraai",
+   "args": [],
+   "start": 110.344,
+   "tracks": {},
+   "end": 121.366
+  },
+  {
+   "layer": 1,
+   "command": "showtunnel",
+   "args": [],
+   "start": 110.344,
+   "tracks": {},
+   "end": 121.366
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "cyl_onder_balkje.jpg",
+    "-"
+   ],
+   "start": 110.344,
+   "tracks": {
+    "translation": [
+     {
+      "t": 110.344,
+      "v": [
+       0.0,
+       420.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 121.366
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "cyl_boven_balkje.jpg",
+    "-"
+   ],
+   "start": 110.344,
+   "tracks": {},
+   "end": 121.366
+  },
+  {
+   "layer": 0,
+   "command": "showplanes",
+   "args": [],
+   "start": 121.366,
+   "tracks": {},
+   "end": 132.403
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "bovendingsel.jpg",
+    "-"
+   ],
+   "start": 121.366,
+   "tracks": {},
+   "end": 132.403
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "onderdingsel.jpg",
+    "-"
+   ],
+   "start": 121.366,
+   "tracks": {
+    "translation": [
+     {
+      "t": 121.366,
+      "v": [
+       0.0,
+       448.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 132.403
+  },
+  {
+   "layer": 0,
+   "command": "colorfade",
+   "args": [],
+   "start": 132.403,
+   "tracks": {
+    "color": [
+     {
+      "t": 132.403,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 148.947
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "credits.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 132.403,
+   "tracks": {},
+   "end": 135.603
+  },
+  {
+   "layer": 2,
+   "command": "colorfade",
+   "args": [],
+   "start": 132.403,
+   "tracks": {
+    "color": [
+     {
+      "t": 132.403,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 132.403,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 135.403,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 135.603,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 135.603
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "credits_coat.jpg",
+    "-"
+   ],
+   "start": 132.403,
+   "tracks": {
+    "translation": [
+     {
+      "t": 132.403,
+      "v": [
+       -450.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 135.403,
+      "v": [
+       135.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 135.403,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 135.603,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 135.603
+  },
+  {
+   "layer": 7,
+   "command": "drawimage",
+   "args": [
+    "bovenbalk.jpg",
+    "-"
+   ],
+   "start": 132.403,
+   "tracks": {},
+   "end": 148.947
+  },
+  {
+   "layer": 8,
+   "command": "drawimage",
+   "args": [
+    "onderbalk.jpg",
+    "-"
+   ],
+   "start": 132.403,
+   "tracks": {
+    "translation": [
+     {
+      "t": 132.403,
+      "v": [
+       0.0,
+       416.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 148.947
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "credits.i3d",
+    "Camera02",
+    "-",
+    "0"
+   ],
+   "start": 135.603,
+   "tracks": {},
+   "end": 138.803
+  },
+  {
+   "layer": 2,
+   "command": "colorfade",
+   "args": [],
+   "start": 135.603,
+   "tracks": {
+    "color": [
+     {
+      "t": 135.603,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 135.603,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 138.603,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 138.803,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 138.803
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "credits_druid.jpg",
+    "-"
+   ],
+   "start": 135.603,
+   "tracks": {
+    "translation": [
+     {
+      "t": 135.603,
+      "v": [
+       -450.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 138.603,
+      "v": [
+       135.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 138.603,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 138.803,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 138.803
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "credits.i3d",
+    "Camera03",
+    "-",
+    "0"
+   ],
+   "start": 138.803,
+   "tracks": {},
+   "end": 142.003
+  },
+  {
+   "layer": 2,
+   "command": "colorfade",
+   "args": [],
+   "start": 138.803,
+   "tracks": {
+    "color": [
+     {
+      "t": 138.803,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 138.803,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 141.803,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 142.003,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 142.003
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "credits_masterboy.jpg",
+    "-"
+   ],
+   "start": 138.803,
+   "tracks": {
+    "translation": [
+     {
+      "t": 138.803,
+      "v": [
+       -450.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 141.803,
+      "v": [
+       135.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 141.803,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 142.003,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 142.003
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "credits.i3d",
+    "Camera04",
+    "-",
+    "0"
+   ],
+   "start": 142.003,
+   "tracks": {},
+   "end": 145.203
+  },
+  {
+   "layer": 2,
+   "command": "colorfade",
+   "args": [],
+   "start": 142.003,
+   "tracks": {
+    "color": [
+     {
+      "t": 142.003,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 142.003,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 145.003,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 145.203,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 145.203
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "credits_xotrack.jpg",
+    "-"
+   ],
+   "start": 142.003,
+   "tracks": {
+    "translation": [
+     {
+      "t": 142.003,
+      "v": [
+       -450.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 145.003,
+      "v": [
+       135.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 145.003,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 145.203,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 145.203
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "credits.i3d",
+    "Camera05",
+    "-",
+    "0"
+   ],
+   "start": 145.203,
+   "tracks": {},
+   "end": 148.947
+  },
+  {
+   "layer": 2,
+   "command": "colorfade",
+   "args": [],
+   "start": 145.203,
+   "tracks": {
+    "color": [
+     {
+      "t": 145.203,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 145.203,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 148.203,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 148.403,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 148.947
+  },
+  {
+   "layer": 5,
+   "command": "drawimage",
+   "args": [
+    "credits_mbz.jpg",
+    "-"
+   ],
+   "start": 145.203,
+   "tracks": {
+    "translation": [
+     {
+      "t": 145.203,
+      "v": [
+       -450.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     },
+     {
+      "t": 148.203,
+      "v": [
+       135.0,
+       350.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ],
+    "alpha": [
+     {
+      "t": 148.203,
+      "v": [
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 148.403,
+      "v": [
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 148.947
+  },
+  {
+   "layer": 0,
+   "command": "show2d",
+   "args": [
+    "-",
+    "ranzigebotteparamomeeneffecttekiezen",
+    "-"
+   ],
+   "start": 148.947,
+   "tracks": {},
+   "end": 154.46
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "bovenkantje_text.jpg",
+    "-"
+   ],
+   "start": 148.947,
+   "tracks": {
+    "translation": [
+     {
+      "t": 148.947,
+      "v": [
+       0.0,
+       192.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 154.46
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "onderdeel.jpg",
+    "-"
+   ],
+   "start": 148.947,
+   "tracks": {
+    "translation": [
+     {
+      "t": 148.947,
+      "v": [
+       0.0,
+       224.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 154.46
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "weird_scroller.jpg",
+    "-"
+   ],
+   "start": 148.947,
+   "tracks": {
+    "translation": [
+     {
+      "t": 148.947,
+      "v": [
+       0.0,
+       232.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 154.46
+  },
+  {
+   "layer": 4,
+   "command": "showlines",
+   "args": [
+    "1",
+    "1"
+   ],
+   "start": 148.947,
+   "tracks": {},
+   "end": 154.46
+  },
+  {
+   "layer": 0,
+   "command": "drawscene",
+   "args": [
+    "bolletje.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 154.46,
+   "tracks": {},
+   "end": 165.492
+  },
+  {
+   "layer": 0,
+   "command": "drawimage",
+   "args": [
+    "bg.jpg",
+    "-"
+   ],
+   "start": 165.492,
+   "tracks": {},
+   "end": 176.521
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "dings.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 165.492,
+   "tracks": {},
+   "end": 176.521
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "boven.jpg",
+    "-"
+   ],
+   "start": 165.492,
+   "tracks": {},
+   "end": 176.521
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "onder.jpg",
+    "-"
+   ],
+   "start": 165.492,
+   "tracks": {
+    "translation": [
+     {
+      "t": 165.492,
+      "v": [
+       0.0,
+       420.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 176.521
+  },
+  {
+   "layer": 0,
+   "command": "drawimage",
+   "args": [
+    "greetz_background.jpg",
+    "-"
+   ],
+   "start": 176.521,
+   "tracks": {},
+   "end": 187.551
+  },
+  {
+   "layer": 1,
+   "command": "drawimage",
+   "args": [
+    "greets_lines.jpg",
+    "-"
+   ],
+   "start": 176.521,
+   "tracks": {},
+   "end": 187.551
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "aardbei_01.jpg",
+    "-"
+   ],
+   "start": 176.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 176.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 176.771,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 176.521,
+      "v": [
+       16.0,
+       208.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 178.521
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "astral_01.jpg",
+    "-"
+   ],
+   "start": 176.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 176.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 176.771,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 177.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 176.521,
+      "v": [
+       32.0,
+       288.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 178.521
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "domage_01.jpg",
+    "-"
+   ],
+   "start": 176.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 176.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 177.021,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 177.271,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 176.521,
+      "v": [
+       48.0,
+       368.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 178.521
+  },
+  {
+   "layer": 10,
+   "command": "drawimage",
+   "args": [
+    "solar_greets.jpg",
+    "-"
+   ],
+   "start": 176.521,
+   "tracks": {
+    "translation": [
+     {
+      "t": 176.521,
+      "v": [
+       432.0,
+       130.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 187.551
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "groovestation_01.jpg",
+    "-"
+   ],
+   "start": 178.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 178.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.771,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 178.521,
+      "v": [
+       16.0,
+       208.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 180.521
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "issue_01.jpg",
+    "-"
+   ],
+   "start": 178.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 178.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 178.771,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 179.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 178.521,
+      "v": [
+       32.0,
+       288.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 180.521
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "kaleido_01.jpg",
+    "-"
+   ],
+   "start": 178.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 178.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 179.021,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 179.271,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 178.521,
+      "v": [
+       48.0,
+       368.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 180.521
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "mysticgd_01.jpg",
+    "-"
+   ],
+   "start": 180.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 180.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.771,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 180.521,
+      "v": [
+       16.0,
+       208.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 182.521
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "nostalgia_01.jpg",
+    "-"
+   ],
+   "start": 180.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 180.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 180.771,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 181.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 180.521,
+      "v": [
+       32.0,
+       288.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 182.521
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "oryx_01.jpg",
+    "-"
+   ],
+   "start": 180.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 180.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 181.021,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 181.271,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 180.521,
+      "v": [
+       48.0,
+       368.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 182.521
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "rbi_01.jpg",
+    "-"
+   ],
+   "start": 182.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 182.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.771,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 182.521,
+      "v": [
+       16.0,
+       208.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 184.521
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "revolution_01.jpg",
+    "-"
+   ],
+   "start": 182.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 182.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 182.771,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 183.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 182.521,
+      "v": [
+       32.0,
+       288.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 184.521
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "tbl_01.jpg",
+    "-"
+   ],
+   "start": 182.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 182.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 183.021,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 183.271,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 182.521,
+      "v": [
+       48.0,
+       368.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 184.521
+  },
+  {
+   "layer": 2,
+   "command": "drawimage",
+   "args": [
+    "te_01.jpg",
+    "-"
+   ],
+   "start": 184.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 184.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.771,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 186.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 186.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 184.521,
+      "v": [
+       16.0,
+       208.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 187.551
+  },
+  {
+   "layer": 3,
+   "command": "drawimage",
+   "args": [
+    "threestate_01.jpg",
+    "-"
+   ],
+   "start": 184.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 184.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 184.771,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 185.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 186.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 186.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 184.521,
+      "v": [
+       32.0,
+       288.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 187.551
+  },
+  {
+   "layer": 4,
+   "command": "drawimage",
+   "args": [
+    "trinity_01.jpg",
+    "-"
+   ],
+   "start": 184.521,
+   "tracks": {
+    "color": [
+     {
+      "t": 184.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 185.021,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 185.271,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 186.021,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 186.521,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ],
+    "translation": [
+     {
+      "t": 184.521,
+      "v": [
+       48.0,
+       368.0,
+       0.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     }
+    ]
+   },
+   "end": 187.551
+  },
+  {
+   "layer": 0,
+   "command": "show2d",
+   "args": [
+    "-",
+    "-",
+    "2"
+   ],
+   "start": 187.551,
+   "tracks": {},
+   "end": 198.582
+  },
+  {
+   "layer": 1,
+   "command": "drawscene",
+   "args": [
+    "solar.i3d",
+    "Camera01",
+    "-",
+    "0"
+   ],
+   "start": 187.551,
+   "tracks": {},
+   "end": 198.582
+  },
+  {
+   "layer": 0,
+   "command": "show2d",
+   "args": [
+    "-",
+    "-",
+    "0"
+   ],
+   "start": 198.582,
+   "tracks": {},
+   "end": 209.103
+  },
+  {
+   "layer": 1,
+   "command": "showpartiekels",
+   "args": [],
+   "start": 198.582,
+   "tracks": {
+    "color": [
+     {
+      "t": 209.103,
+      "v": [
+       255.0,
+       255.0,
+       255.0
+      ],
+      "easeTo": 0.0,
+      "easeFrom": 0.0
+     },
+     {
+      "t": 211.103,
+      "v": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "easeTo": 25.0,
+      "easeFrom": 25.0
+     }
+    ]
+   },
+   "end": 1000000000.0
+  },
+  {
+   "layer": 0,
+   "command": "show2d",
+   "args": [
+    "xotrackiseenbotteaapenhijverzintbotteparameternamen",
+    "-",
+    "0"
+   ],
+   "start": 209.103,
+   "tracks": {},
+   "end": 220.0
+  },
+  {
+   "layer": 0,
+   "command": "show2d",
+   "args": [
+    "ditisparameternummertje2endieisookheelergbottoevallig",
+    "-",
+    "0"
+   ],
+   "start": 220.0,
+   "tracks": {},
+   "end": 1000000000.0
+  }
+ ],
+ "images": {
+  "aardbei_01.jpg": {
+   "file": "images/aardbei_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "adder.jpg": {
+   "file": "images/adder.png",
+   "mode": "add",
+   "size": [
+    640,
+    480
+   ],
+   "mask": false
+  },
+  "astral_01.jpg": {
+   "file": "images/astral_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "balk.jpg": {
+   "file": "images/balk.png",
+   "mode": "none",
+   "size": [
+    640,
+    32
+   ],
+   "mask": false
+  },
+  "bg.jpg": {
+   "file": "images/bg.png",
+   "mode": "none",
+   "size": [
+    640,
+    480
+   ],
+   "mask": false
+  },
+  "blokje.jpg": {
+   "file": "images/blokje.png",
+   "mode": "none",
+   "size": [
+    16,
+    16
+   ],
+   "mask": false
+  },
+  "boven.jpg": {
+   "file": "images/boven.png",
+   "mode": "none",
+   "size": [
+    640,
+    81
+   ],
+   "mask": false
+  },
+  "bovenbalk.jpg": {
+   "file": "images/bovenbalk.png",
+   "mode": "mask",
+   "size": [
+    640,
+    64
+   ],
+   "mask": true
+  },
+  "bovenbalkje_01.jpg": {
+   "file": "images/bovenbalkje_01.png",
+   "mode": "alpha",
+   "size": [
+    640,
+    32
+   ],
+   "mask": false
+  },
+  "bovendingsel.jpg": {
+   "file": "images/bovendingsel.png",
+   "mode": "none",
+   "size": [
+    640,
+    32
+   ],
+   "mask": false
+  },
+  "bovenkant_glow.jpg": {
+   "file": "images/bovenkant_glow.png",
+   "mode": "add",
+   "size": [
+    640,
+    64
+   ],
+   "mask": false
+  },
+  "bovenkantje_text.jpg": {
+   "file": "images/bovenkantje_text.png",
+   "mode": "mask",
+   "size": [
+    640,
+    32
+   ],
+   "mask": true
+  },
+  "cirkel.jpg": {
+   "file": "images/cirkel.png",
+   "mode": "add",
+   "size": [
+    512,
+    512
+   ],
+   "mask": false
+  },
+  "credits_coat.jpg": {
+   "file": "images/credits_coat.png",
+   "mode": "alpha",
+   "size": [
+    512,
+    128
+   ],
+   "mask": false
+  },
+  "credits_druid.jpg": {
+   "file": "images/credits_druid.png",
+   "mode": "alpha",
+   "size": [
+    512,
+    128
+   ],
+   "mask": false
+  },
+  "credits_masterboy.jpg": {
+   "file": "images/credits_masterboy.png",
+   "mode": "alpha",
+   "size": [
+    512,
+    128
+   ],
+   "mask": false
+  },
+  "credits_mbz.jpg": {
+   "file": "images/credits_mbz.png",
+   "mode": "alpha",
+   "size": [
+    512,
+    128
+   ],
+   "mask": false
+  },
+  "credits_xotrack.jpg": {
+   "file": "images/credits_xotrack.png",
+   "mode": "alpha",
+   "size": [
+    512,
+    128
+   ],
+   "mask": false
+  },
+  "cube_text.jpg": {
+   "file": "images/cube_text.png",
+   "mode": "add",
+   "size": [
+    424,
+    24
+   ],
+   "mask": false
+  },
+  "cyl_boven_balkje.jpg": {
+   "file": "images/cyl_boven_balkje.png",
+   "mode": "none",
+   "size": [
+    640,
+    64
+   ],
+   "mask": false
+  },
+  "cyl_onder_balkje.jpg": {
+   "file": "images/cyl_onder_balkje.png",
+   "mode": "none",
+   "size": [
+    640,
+    64
+   ],
+   "mask": false
+  },
+  "domage_01.jpg": {
+   "file": "images/domage_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "gearscroll01.jpg": {
+   "file": "images/gearscroll01.png",
+   "mode": "mask",
+   "size": [
+    2048,
+    128
+   ],
+   "mask": true
+  },
+  "gearscroll02.jpg": {
+   "file": "images/gearscroll02.png",
+   "mode": "mask",
+   "size": [
+    2048,
+    128
+   ],
+   "mask": true
+  },
+  "greets_lines.jpg": {
+   "file": "images/greets_lines.png",
+   "mode": "add",
+   "size": [
+    640,
+    480
+   ],
+   "mask": false
+  },
+  "greetz_background.jpg": {
+   "file": "images/greetz_background.png",
+   "mode": "none",
+   "size": [
+    640,
+    480
+   ],
+   "mask": false
+  },
+  "grijs.jpg": {
+   "file": "images/grijs.png",
+   "mode": "none",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "groovestation_01.jpg": {
+   "file": "images/groovestation_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "issue_01.jpg": {
+   "file": "images/issue_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "kaleido_01.jpg": {
+   "file": "images/kaleido_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "leeg_blokje.jpg": {
+   "file": "images/leeg_blokje.png",
+   "mode": "none",
+   "size": [
+    16,
+    16
+   ],
+   "mask": false
+  },
+  "lines.jpg": {
+   "file": "images/lines.png",
+   "mode": "add",
+   "size": [
+    640,
+    480
+   ],
+   "mask": false
+  },
+  "metro_background.jpg": {
+   "file": "images/metro_background.png",
+   "mode": "none",
+   "size": [
+    640,
+    480
+   ],
+   "mask": false
+  },
+  "multiplier.jpg": {
+   "file": "images/multiplier.png",
+   "mode": "mul",
+   "size": [
+    1024,
+    128
+   ],
+   "mask": false
+  },
+  "mysticgd_01.jpg": {
+   "file": "images/mysticgd_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "noise_background.jpg": {
+   "file": "images/noise_background.png",
+   "mode": "none",
+   "size": [
+    640,
+    480
+   ],
+   "mask": false
+  },
+  "nostalgia_01.jpg": {
+   "file": "images/nostalgia_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "oberbalk.jpg": {
+   "file": "images/oberbalk.png",
+   "mode": "none",
+   "size": [
+    640,
+    32
+   ],
+   "mask": false
+  },
+  "onder.jpg": {
+   "file": "images/onder.png",
+   "mode": "none",
+   "size": [
+    640,
+    80
+   ],
+   "mask": false
+  },
+  "onderbalk.jpg": {
+   "file": "images/onderbalk.png",
+   "mode": "mask",
+   "size": [
+    640,
+    64
+   ],
+   "mask": true
+  },
+  "onderbalkje_01.jpg": {
+   "file": "images/onderbalkje_01.png",
+   "mode": "alpha",
+   "size": [
+    640,
+    32
+   ],
+   "mask": false
+  },
+  "onderdeel.jpg": {
+   "file": "images/onderdeel.png",
+   "mode": "none",
+   "size": [
+    640,
+    256
+   ],
+   "mask": false
+  },
+  "onderdingsel.jpg": {
+   "file": "images/onderdingsel.png",
+   "mode": "none",
+   "size": [
+    640,
+    32
+   ],
+   "mask": false
+  },
+  "onderkant_glow.jpg": {
+   "file": "images/onderkant_glow.png",
+   "mode": "add",
+   "size": [
+    640,
+    64
+   ],
+   "mask": false
+  },
+  "oryx_01.jpg": {
+   "file": "images/oryx_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "photo_scroller.jpg": {
+   "file": "images/photo_scroller.png",
+   "mode": "mask",
+   "size": [
+    2048,
+    128
+   ],
+   "mask": true
+  },
+  "ptr_und_abs.jpg": {
+   "file": "images/ptr_und_abs.png",
+   "mode": "mul",
+   "size": [
+    32,
+    256
+   ],
+   "mask": false
+  },
+  "ptr_up_abs.jpg": {
+   "file": "images/ptr_up_abs.png",
+   "mode": "mul",
+   "size": [
+    32,
+    256
+   ],
+   "mask": false
+  },
+  "rbi_01.jpg": {
+   "file": "images/rbi_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "revolution_01.jpg": {
+   "file": "images/revolution_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "ring.jpg": {
+   "file": "images/ring.png",
+   "mode": "none",
+   "size": [
+    288,
+    288
+   ],
+   "mask": false
+  },
+  "rotator_01.jpg": {
+   "file": "images/rotator_01.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_02.jpg": {
+   "file": "images/rotator_02.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_03.jpg": {
+   "file": "images/rotator_03.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_04.jpg": {
+   "file": "images/rotator_04.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_05.jpg": {
+   "file": "images/rotator_05.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_06.jpg": {
+   "file": "images/rotator_06.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_07.jpg": {
+   "file": "images/rotator_07.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_08.jpg": {
+   "file": "images/rotator_08.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_09.jpg": {
+   "file": "images/rotator_09.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "rotator_10.jpg": {
+   "file": "images/rotator_10.png",
+   "mode": "add",
+   "size": [
+    128,
+    128
+   ],
+   "mask": false
+  },
+  "solar_greets.jpg": {
+   "file": "images/solar_greets.png",
+   "mode": "mask",
+   "size": [
+    184,
+    12
+   ],
+   "mask": true
+  },
+  "tbl_01.jpg": {
+   "file": "images/tbl_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "te_01.jpg": {
+   "file": "images/te_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "text_01.jpg": {
+   "file": "images/text_01.png",
+   "mode": "mask",
+   "size": [
+    64,
+    2048
+   ],
+   "mask": true
+  },
+  "text_02.jpg": {
+   "file": "images/text_02.png",
+   "mode": "mask",
+   "size": [
+    64,
+    2048
+   ],
+   "mask": true
+  },
+  "text_03.jpg": {
+   "file": "images/text_03.png",
+   "mode": "mask",
+   "size": [
+    64,
+    2048
+   ],
+   "mask": true
+  },
+  "text_04.jpg": {
+   "file": "images/text_04.png",
+   "mode": "mask",
+   "size": [
+    64,
+    2048
+   ],
+   "mask": true
+  },
+  "text_05.jpg": {
+   "file": "images/text_05.png",
+   "mode": "mask",
+   "size": [
+    64,
+    2048
+   ],
+   "mask": true
+  },
+  "text_scroller.jpg": {
+   "file": "images/text_scroller.png",
+   "mode": "mask",
+   "size": [
+    2048,
+    128
+   ],
+   "mask": true
+  },
+  "the_solar_group.jpg": {
+   "file": "images/the_solar_group.png",
+   "mode": "none",
+   "size": [
+    640,
+    96
+   ],
+   "mask": false
+  },
+  "threestate_01.jpg": {
+   "file": "images/threestate_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "trinity_01.jpg": {
+   "file": "images/trinity_01.png",
+   "mode": "add",
+   "size": [
+    256,
+    64
+   ],
+   "mask": false
+  },
+  "tsg_group_03.jpg": {
+   "file": "images/tsg_group_03.png",
+   "mode": "mask",
+   "size": [
+    256,
+    64
+   ],
+   "mask": true
+  },
+  "tsg_solar_02.jpg": {
+   "file": "images/tsg_solar_02.png",
+   "mode": "mask",
+   "size": [
+    256,
+    64
+   ],
+   "mask": true
+  },
+  "tsg_the_01.jpg": {
+   "file": "images/tsg_the_01.png",
+   "mode": "mask",
+   "size": [
+    256,
+    64
+   ],
+   "mask": true
+  },
+  "underbalk.jpg": {
+   "file": "images/underbalk.png",
+   "mode": "none",
+   "size": [
+    640,
+    32
+   ],
+   "mask": false
+  },
+  "weird_scroller.jpg": {
+   "file": "images/weird_scroller.png",
+   "mode": "none",
+   "size": [
+    2048,
+    64
+   ],
+   "mask": false
+  },
+  "weird_scroller01.jpg": {
+   "file": "images/weird_scroller01.png",
+   "mode": "none",
+   "size": [
+    64,
+    2048
+   ],
+   "mask": false
+  },
+  "weird_scroller02.jpg": {
+   "file": "images/weird_scroller02.png",
+   "mode": "none",
+   "size": [
+    64,
+    2048
+   ],
+   "mask": false
+  },
+  "wit.jpg": {
+   "file": "images/wit.png",
+   "mode": "alpha",
+   "size": [
+    640,
+    160
+   ],
+   "mask": false
+  },
+  "zonnetje.jpg": {
+   "file": "images/zonnetje.png",
+   "mode": "mask",
+   "size": [
+    256,
+    256
+   ],
+   "mask": true
+  }
+ }
+}
