@@ -54,13 +54,52 @@ Notes gathered so far:
 
 ## Tier 2 — fidelity gaps in what is already ported
 
-### Camera roll
+### Camera roll — traced, and dead in the `.i3d` path
 `ogl_camera::calculate` issues `glRotatef(roll, 0, 0, 1)` before
-`gluLookAt`, and `energy3d_camera::set_roll` writes `+0x124`, but the
-loader path that feeds it has not been traced. Every camera in these nine
-scenes has a rotation on its node, so the roll is in the file — it is only
-a question of which handler reads it. Nothing in the sections rendered so
-far looks tilted, so this may be zero throughout, but it is unverified.
+`gluLookAt`, reading the roll from `+0x124`. That field has exactly one
+setter, `0x10009470`, and exactly one caller: `0x10006f20`, which is
+reached from the chunk dispatcher at `0x10008780` — and that dispatcher
+switches on `0x3d3d / 0x4000 / 0x4100 / 0x4600 / 0x4700 / 0xafff /
+0xb005`. Those are **3DS** chunk ids, not `.i3d` ones. Energy3D can load
+raw `.3ds` files too, and roll only arrives on that path.
+
+The `.i3d` camera loader (`0x1000bdc0`, jump table at `0x1000bf70`)
+therefore never touches roll: it stays at the zero the constructor writes
+at `0x1000cb85`. Cameras render unrolled, which is what the port does.
+
+There *is* a roll track in the file. `gears.i3d`'s `Camera01` carries a
+`0x44` chunk — a scalar TCB track, three keys, `0 → -2.823 → -1.290`
+radians over 359 frames, so Max had the camera swinging through about
+160°. Handler `0x1000b3d0` appends it to the list at container `+0x180`,
+and that list has no read site anywhere in the DLL: the only three
+references to offset `0x180` are the two loaders appending to it and one
+unrelated byte store. The track is parsed and dropped on the floor.
+
+So `gears` was authored with a rolling camera and shipped without one.
+The port reproduces the release, not the intent. Implementing `0x44`
+would be a visible regression against the original, which is why the
+parser keeps it in `anim['extra']` and the exporter ignores it.
+
+### Camera chunk `0x21`
+One byte, present once per camera in all nine scenes, always `01`. Its
+handler is `0x1000bdb0`, which reads the byte into a stack local and
+returns without storing it. Nothing to implement.
+
+### Camera near and far
+Chunk `0x22` carries Max's clip planes ahead of the field of view; they
+are `(0, 1000)` in every camera in all nine scenes. `ogl_camera::calculate`
+ignores them and passes literal `2` and `5000` to `gluPerspective`, so the
+port hardcodes the same pair. `targetDist` is likewise a constant 160
+everywhere and is unused — the target node supplies the look-at point.
+
+### Chunk inventory
+For the record, the ids that actually occur across the nine scenes:
+`0x00` `0x10` `0x12` `0x13` `0x14` `0x15` `0x20` `0x21` `0x22` `0x30`
+`0x31` `0x33` `0x40` `0x41` `0x42` `0x44` `0x47` `0x50` `0x51` `0x60`,
+under the `0xdead` header. Every one is either implemented or, in the
+case of `0x21` and `0x44`, proven inert in the original engine. `0x43`
+(scale keys), `0x45` and `0x46` are handled by the parser but never
+appear — no object in this demo is scaled over time.
 
 ### Three missing textures
 `zwart.jpg`, `Refmap.gif` and `lakerem2.jpg` are named by scene materials
@@ -71,23 +110,45 @@ value and closer than flat white but is not what the engine did. Affects
 the Solar logo (`Metal_Dark_Gold`), bolletje's inner sphere
 (`Reflection_RefMap`) and the credits set (`Reflection_Lake`).
 
-### Lighting — four scenes, not one
+### Lighting — four scenes, not one — **done**
 `ogl_scene::disable_all_lights` only enables `GL_LIGHTING` for a scene
 that carries lights, and four of the nine do: `bolletje` (one `Omni01`),
 `dings` (two omnis), `effect` (a `Spot01`) and `solar` (three omnis).
-All four currently render unlit, like the five that genuinely are.
+Chunks `0x31` (spot flag) and `0x33` (diffuse plus cutoff) now load, and
+`minigl` grew an eight-light fixed-function path.
 
-Note that `ogl_material` only sets `GL_AMBIENT` and `GL_SHININESS` from
-the material, so under lighting `GL_DIFFUSE` keeps GL's default
-(0.8, 0.8, 0.8) — a lit surface would come out much paler than the
-material colour the port currently shows.
+`ogl_light::calculate` writes only `GL_POSITION`, `GL_DIFFUSE`,
+`GL_AMBIENT` and, for a spot, direction, cutoff and exponent. Ambient is
+never written by any chunk and the constructor leaves it at zero, and
+`ogl_material` never sets specular — so the whole model collapses to a
+diffuse term, which is what the shader implements.
 
-### Vertex animation — `0x47`
-`effect.i3d`'s `Cylinder01` carries a chunk `0x47` of 75,764 bytes: a
-count of 121, then 121 frames × 52 vertices × 12 bytes of morph targets.
-The handler is `0x1000a340`. That shape is supposed to deform through the
-section and currently sits still. It is the only `0x47` in the nine
-scenes.
+One thing to keep an eye on: lighting has to be turned back *off* on the
+way out of a scene, or the 2D layers that follow get dimmed by it. That
+bug showed up as `bg.png` rendering dark grey behind the `dings` chrome
+instead of near-white.
+
+### Vertex animation — `0x47` — **done**
+`effect.i3d`'s `Cylinder01` carries a chunk `0x47` of 75,764 bytes,
+handler `0x1000a340`. It is a snapshot cache, not a morph target set: a
+count of 121, then vertex count, end frame, a stride, and per sample a
+`u16` frame index followed by a full copy of the mesh's vertices. The
+frames come out contiguous `0..120` and the engine picks the snapshot for
+the current frame with no blending between them, so the port does the
+same. Max vertex travel between samples 0 and 60 is 71.5 units — the
+shape genuinely deforms across the section. It is the only `0x47` in the
+nine scenes.
+
+### The material flag byte is Wire, not 2-Sided — **done**
+Bit 1 of the material flag byte is 3ds Max's **Wire** checkbox. It sets
+`mat[0xd0]`, and the only code that reads it (`0x1000559d`) swaps the
+primitive to `GL_LINES` over the same index list — same triangles, drawn
+as edges. It is not a two-sided flag; back-face culling is decided per
+pass by `ogl::draw_display`, not per material.
+
+Only `effect.i3d` uses it, and it is the difference between that section
+reading as a solid white blob and as the radiating wireframe mandala it
+is supposed to be.
 
 ### Texture-coordinate seams
 The exporter drops 3ds Max's separate map-face table, so a handful of

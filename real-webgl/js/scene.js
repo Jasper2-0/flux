@@ -143,6 +143,7 @@ export class Scene {
     this.frameEnd = json.frameEnd || 1;
     this.materials = json.materials || [];
     this.cameras = json.cameras || [];
+    this.lights = json.lights || [];
     // Meshes arrive indexed unless per-corner texture coordinates forced
     // the build to expand them, in which case the index list is implicit.
     this.meshes = json.meshes.map((m) => {
@@ -154,13 +155,19 @@ export class Scene {
       } else {
         idx = new Uint32Array(idx);
       }
+      const morph = m.morph
+        ? { step: m.morph.step, at: m.morph.at,
+            frames: m.morph.frames.map((f) => new Float32Array(f)) }
+        : null;
       return {
         src: m,
+        base: new Float32Array(m.positions),
         positions: new Float32Array(m.positions),
         normals: new Float32Array(m.normals || n * 3),
         uvs: m.uvs ? new Float32Array(m.uvs) : null,
         zeroUV: new Float32Array(n * 2),
         indices: idx,
+        morph,
         envUV: null,
         world: new Mat4(),
       };
@@ -179,6 +186,15 @@ export class Scene {
   update(frame) {
     const rot = new Mat4();
     for (const mesh of this.meshes) {
+      // A baked vertex animation replaces the positions outright. The
+      // engine holds these as an energy3d_sample and picks the snapshot
+      // for the frame; there is no blending between them.
+      if (mesh.morph) {
+        const f = mesh.morph.frames;
+        let i = Math.round(frame / (mesh.morph.step || 1));
+        i = i < 0 ? 0 : i >= f.length ? f.length - 1 : i;
+        mesh.positions = f[i];
+      }
       const m = mesh.src, a = m.anim || {};
       const p = evalKeys(a.pos, frame, 3, this._v.slice()) || m.pos;
       const q = evalQuat(a.rot, frame, this._q.slice()) || m.rot;

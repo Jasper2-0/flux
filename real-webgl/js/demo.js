@@ -235,6 +235,7 @@ export class Demo {
     mgl.enableDepthTest(false);
     mgl.depthMask(false);
     mgl.enableCullFace(false);
+    mgl.enableLighting(false);
   }
 
   // The four modes `loadImage` accepts, as ogl_bitmap::render maps them.
@@ -383,7 +384,38 @@ export class Demo {
     else mgl.color4(mat.color[0], mat.color[1], mat.color[2], alpha * op);
     mgl.enableTexture(!!tex);
     if (tex) mgl.bindTexture(tex);
-    mgl.drawElements(mesh.positions, uvs || mesh.zeroUV, mesh.indices);
+
+    // Max's Wire checkbox: the same index list, drawn as GL_LINES
+    // (0x1000559d). effect.i3d's shape is the only one in these scenes.
+    const prim = mat && mat.wire ? gl.LINES : null;
+    mgl.drawElements(mesh.positions, uvs || mesh.zeroUV, mesh.indices,
+                     null, mesh.normals, prim);
+  }
+
+  // Lights, transformed into eye space the way glLightfv would have them
+  // after gluLookAt. Position is a point light unless the scene marks it
+  // a spot, in which case the direction is target - position and the
+  // cutoff is halved, as ogl_light::calculate does.
+  _sceneLights(scene, view, frame) {
+    const m = view.m;
+    const xf = (p, w) => [
+      m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12] * w,
+      m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13] * w,
+      m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14] * w,
+      w,
+    ];
+    return scene.lights.map((l) => {
+      const pos = xf(l.pos, 1);
+      const out = { pos, diffuse: l.diffuse };
+      if (l.spot) {
+        const t = xf(l.target, 1);
+        const d = [t[0] - pos[0], t[1] - pos[1], t[2] - pos[2]];
+        const len = Math.hypot(d[0], d[1], d[2]) || 1;
+        out.spotDir = [d[0] / len, d[1] / len, d[2] / len];
+        out.spotCos = Math.cos(l.cutoff * 0.5 * Math.PI / 180);
+      }
+      return out;
+    });
   }
 
   _drawScene(inst, p, time) {
@@ -419,6 +451,12 @@ export class Demo {
     // on, depth writes go off, culling goes off, and the transparent
     // objects follow — which is why the additive cubes read as six-sided:
     // nothing is culled and nothing occludes.
+    // ogl_scene::disable_all_lights only enables GL_LIGHTING for a scene
+    // that carries lights; four of the nine do.
+    const lit = scene.lights && scene.lights.length > 0;
+    mgl.enableLighting(lit);
+    if (lit) mgl.setLights(this._sceneLights(scene, view, frame));
+
     const transparent = (mat) => !!mat && (mat.additive || mat.opacity < 1);
     const opaque = [], blended = [];
     for (const mesh of scene.meshes) {
@@ -442,6 +480,10 @@ export class Demo {
     mgl.enableCullFace(false);
     mgl.enableDepthTest(false);
     mgl.depthMask(false);
+    // ogl_scene::disable_all_lights runs on the way out too. Without this
+    // the lighting stays on for the 2D layers that follow, which dims every
+    // bitmap after a lit scene — bg.png in the dings section went grey.
+    mgl.enableLighting(false);
   }
 
   // One of xotrack's show* tasks. They keep per-instance state, so each

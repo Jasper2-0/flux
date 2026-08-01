@@ -133,7 +133,10 @@ def read_material(r):
     if full:
         r.u8(); r.f32(); r.f32()
         flags = r.u8()
-        mat['twoSided'] = bool(flags & 2)
+        # Bit 1 is 3ds Max's Wire checkbox, not 2-Sided: it sets
+        # mat[0xd0], and the only thing that reads it (0x1000559d) swaps
+        # the primitive to GL_LINES over the same index list.
+        mat['wire'] = bool(flags & 2)
         # 3ds Max's transparency Type: filter / subtractive / additive.
         # The loader turns a 2 into mat[0x30] = 1 (0x1000a913), and the
         # renderer reads exactly that to pick glBlendFunc(GL_ONE, GL_ONE).
@@ -225,7 +228,7 @@ def read_transform(r):
 
 def read_trimesh(r, end):
     m = {'verts': [], 'faces': [], 'uvs': [], 'material': None,
-         'transform': None, 'anim': [], 'name': '', 'parent': ''}
+         'transform': None, 'anim': [], 'name': '', 'parent': '', 'morph': None}
     for cid, size, start in r.chunks(end):
         sub = Reader(r.d, start)
         if cid == 0x50:
@@ -248,9 +251,29 @@ def read_trimesh(r, end):
         elif cid == 0x15:
             if sub.u8() and sub.u8() == 0:
                 m['material'] = sub.u16()
+        elif cid == 0x47:
+            m['morph'] = read_morph(sub)
         elif cid == 0x40:
             m['anim'].append(read_anim(sub, start + size))
     return m
+
+
+def read_morph(r):
+    """0x47 — a baked vertex animation, held by the engine as an
+    energy3d_sample. A header, then one snapshot of every vertex per
+    frame. effect.i3d's Cylinder01 is the only one in these scenes:
+    121 samples of 52 vertices, and 121 * (2 + 52*12) + 18 accounts for
+    the chunk to the byte."""
+    n = r.u32()
+    if n == 0:
+        return None
+    nverts, end, _ = r.u32(), r.u32(), r.u32()
+    step = r.u16()
+    frames, at = [], []
+    for _ in range(n):
+        at.append(r.u16())              # the frame this snapshot belongs to
+        frames.append([remap(r.f32n(3)) for _ in range(nverts)])
+    return {'end': end, 'step': step, 'nverts': nverts, 'at': at, 'frames': frames}
 
 
 def read_camera(r, end):
@@ -279,17 +302,40 @@ def read_camera(r, end):
 
 
 def read_light(r, end):
-    l = {'name': '', 'parent': '', 'nodes': [], 'anim': []}
+    """A light. `ogl_light::calculate` (0x10003480) turns it into
+
+        glLightfv(id, GL_POSITION, position)
+        glLightfv(id, GL_DIFFUSE,  +0x12c)   glLightfv(id, GL_AMBIENT, +0x120)
+        if spot:
+            glLightfv(id, GL_SPOT_DIRECTION, normalize(target - position))
+            glLightf (id, GL_SPOT_CUTOFF,    cutoff * 0.5)
+            glLightf (id, GL_SPOT_EXPONENT,  1)
+
+    Ambient is never written by any chunk and the constructor leaves it
+    at zero, and material specular is never set either, so the whole
+    lighting model collapses to a diffuse term.
+    """
+    l = {'name': '', 'parent': '', 'nodes': [], 'anim': [],
+         'spot': False, 'diffuse': [1.0, 1.0, 1.0], 'cutoff': 180.0}
     for cid, size, start in r.chunks(end):
         sub = Reader(r.d, start)
         if cid == 0x50:
             l['name'] = sub.s(); l['parent'] = sub.s()
         elif cid == 0x51:
             l['nodes'].append(read_transform(sub))
+        elif cid == 0x31:
+            l['spot'] = sub.u8() == 1
+        elif cid == 0x33:
+            l['diffuse'] = sub.f32n(3)
+            sub.f32(); sub.f32()
+            if sub.u8() == 1:
+                l['cutoff'] = sub.f32()
         elif cid == 0x40:
             l['anim'].append(read_anim(sub, start + size))
     if l['nodes']:
         l['pos'] = l['nodes'][0]['pos']
+    if len(l['nodes']) > 1:
+        l['target'] = l['nodes'][1]['pos']
     return l
 
 

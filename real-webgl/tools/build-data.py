@@ -234,7 +234,7 @@ def build_scene(scene, wanted):
             'color': [round(x, 4) for x in m['color']],
             'opacity': round(m['opacity'], 4),
             'additive': bool(m.get('additive')),
-            'twoSided': bool(m.get('twoSided')),
+            'wire': bool(m.get('wire')),
         })
 
     meshes = []
@@ -284,7 +284,20 @@ def build_scene(scene, wanted):
             'normals': nrm,
             'indices': idx,
             'uvs': uv or None,
+            'morph': pack_morph(m.get('morph'), per_corner, m['faces']),
             'anim': pack_anim(m['anim']),
+        })
+
+    lights = []
+    for l in scene['lights']:
+        lights.append({
+            'name': l['name'],
+            'pos': [round(x, 3) for x in l.get('pos', [0, 0, 0])],
+            'target': [round(x, 3) for x in l.get('target', [0, 0, 0])],
+            'spot': bool(l['spot']),
+            'cutoff': round(l['cutoff'], 3),
+            'diffuse': [round(x, 4) for x in l['diffuse']],
+            'anim': pack_anim(l['anim']),
         })
 
     cams = []
@@ -298,7 +311,7 @@ def build_scene(scene, wanted):
         })
 
     return {'frameEnd': scene['frameEnd'], 'fps': scene.get('fps', 30),
-            'materials': mats, 'meshes': meshes, 'cameras': cams}
+            'materials': mats, 'meshes': meshes, 'cameras': cams, 'lights': lights}
 
 
 def uvs_are_degenerate(uvs, faces):
@@ -364,6 +377,29 @@ def f_lower(name):
 
 def is_target(node):
     return node.lower().endswith('.target')
+
+
+def pack_morph(morph, per_corner, faces):
+    """The baked vertex animation, flattened to one run per frame.
+
+    Meshes expanded to per-corner have to have each snapshot expanded the
+    same way; indexed ones can keep the snapshot as it is stored.
+    """
+    if not morph:
+        return None
+    out = []
+    for frame in morph['frames']:
+        flat = []
+        if per_corner:
+            for f in faces:
+                for vi in f:
+                    v = frame[vi] if vi < len(frame) else [0, 0, 0]
+                    flat.extend(round(x, 2) for x in v)
+        else:
+            for v in frame:
+                flat.extend(round(x, 2) for x in v)
+        out.append(flat)
+    return {'step': morph['step'], 'at': morph['at'], 'frames': out}
 
 
 def pack_anim(anims):

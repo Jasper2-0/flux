@@ -5,23 +5,55 @@
 
 import { Mat4 } from './mathlib.js';
 
+const MAX_LIGHTS = 8;
+
+// Lighting is per vertex, as OpenGL 1.x does it. The model is narrower
+// than the full fixed-function one because of what Energy3D actually
+// sets: GL_COLOR_MATERIAL is on with its default GL_AMBIENT_AND_DIFFUSE,
+// so glColor drives both material terms; light ambient is left at zero by
+// the constructor and never written; material specular is never set, so
+// there is no specular term at all. What survives is
+//
+//     lit = 0.2 (GL's default global ambient) + sum of diffuse * N.L
 const VS = `#version 300 es
 precision highp float;
 in vec3 aPos;
 in vec2 aUV;
 in vec4 aColor;
+in vec3 aNormal;
 uniform mat4 uModelView;
 uniform mat4 uProjection;
 uniform mat4 uTexMatrix;
+uniform int uLightCount;
+uniform vec4 uLightPos[${MAX_LIGHTS}];      // eye space; w = 0 for directional
+uniform vec3 uLightDiffuse[${MAX_LIGHTS}];
+uniform vec4 uLightSpot[${MAX_LIGHTS}];     // xyz direction (eye space), w = cos(cutoff) or -1
 out vec2 vUV;
 out vec4 vColor;
 out float vEyeDist;
+out vec3 vLit;
 void main() {
   vec4 eye = uModelView * vec4(aPos, 1.0);
   gl_Position = uProjection * eye;
   vUV = (uTexMatrix * vec4(aUV, 0.0, 1.0)).xy;
   vColor = aColor;
   vEyeDist = -eye.z;
+  vec3 lit = vec3(0.2);
+  if (uLightCount > 0) {
+    vec3 n = normalize(mat3(uModelView) * aNormal);
+    for (int i = 0; i < ${MAX_LIGHTS}; i++) {
+      if (i >= uLightCount) break;
+      vec3 toLight = uLightPos[i].xyz - eye.xyz * uLightPos[i].w;
+      vec3 l = normalize(toLight);
+      float d = max(dot(n, l), 0.0);
+      if (uLightSpot[i].w > -1.0) {
+        float c = dot(normalize(-l), normalize(uLightSpot[i].xyz));
+        d *= c < uLightSpot[i].w ? 0.0 : c;
+      }
+      lit += uLightDiffuse[i] * d;
+    }
+  }
+  vLit = lit;
 }`;
 
 const FS = `#version 300 es
@@ -29,9 +61,11 @@ precision mediump float;
 in vec2 vUV;
 in vec4 vColor;
 in float vEyeDist;
+in vec3 vLit;
 uniform sampler2D uSampler;
 uniform bool uTexEnabled;
 uniform bool uUseVertexColor;
+uniform bool uLightingEnabled;
 uniform vec4 uColor;
 uniform vec3 uFog; // x: enabled, y: start, z: end (linear fog, black)
 out vec4 outColor;
@@ -39,6 +73,7 @@ void main() {
   // uniform color for array draws: constant vertex attributes are
   // historically unreliable on Safari's Metal-backed WebGL
   vec4 c = uUseVertexColor ? vColor : uColor;
+  if (uLightingEnabled) c.rgb *= vLit;
   if (uTexEnabled) c *= texture(uSampler, vUV);
   if (uFog.x > 0.5) {
     float f = clamp((uFog.z - vEyeDist) / (uFog.z - uFog.y), 0.0, 1.0);
@@ -101,9 +136,17 @@ export class MiniGL {
     this.uUseVertexColor = gl.getUniformLocation(prog, 'uUseVertexColor');
     this.uColor = gl.getUniformLocation(prog, 'uColor');
     this.uFog = gl.getUniformLocation(prog, 'uFog');
+    this.uLightingEnabled = gl.getUniformLocation(prog, 'uLightingEnabled');
+    this.uLightCount = gl.getUniformLocation(prog, 'uLightCount');
+    this.uLightPos = gl.getUniformLocation(prog, 'uLightPos');
+    this.uLightDiffuse = gl.getUniformLocation(prog, 'uLightDiffuse');
+    this.uLightSpot = gl.getUniformLocation(prog, 'uLightSpot');
     this.aPos = gl.getAttribLocation(prog, 'aPos');
     this.aUV = gl.getAttribLocation(prog, 'aUV');
     this.aColor = gl.getAttribLocation(prog, 'aColor');
+    this.aNormal = gl.getAttribLocation(prog, 'aNormal');
+    this.lightingOn = false;
+    this.nLights = 0;
 
     // matrix stacks
     this.matrices = [new Mat4(), new Mat4(), new Mat4()];
@@ -141,6 +184,7 @@ export class MiniGL {
     // scratch buffers for array draws
     this.posVBO = gl.createBuffer();
     this.uvVBO = gl.createBuffer();
+    this.nrmVBO = gl.createBuffer();
     this.idxIBO = gl.createBuffer();
 
     gl.disable(gl.DEPTH_TEST);
@@ -290,6 +334,32 @@ export class MiniGL {
   enableDepthTest(on) { const gl = this.gl; on ? gl.enable(gl.DEPTH_TEST) : gl.disable(gl.DEPTH_TEST); }
   enableCullFace(on) { const gl = this.gl; on ? gl.enable(gl.CULL_FACE) : gl.disable(gl.CULL_FACE); }
   enableFog(on) { this.fogEnabled = on; }
+
+  // ----- lighting -----
+  //
+  // `lights` is an array of { pos, diffuse, spotDir, spotCos }, all in eye
+  // space, matching what ogl_light::calculate hands to glLightfv. A light
+  // with spotCos < 0 is an omni.
+  enableLighting(on) { this.lightingOn = !!on; }
+
+  setLights(lights) {
+    const gl = this.gl;
+    const n = Math.min(lights.length, MAX_LIGHTS);
+    const pos = new Float32Array(MAX_LIGHTS * 4);
+    const dif = new Float32Array(MAX_LIGHTS * 3);
+    const spot = new Float32Array(MAX_LIGHTS * 4);
+    for (let i = 0; i < n; i++) {
+      const l = lights[i];
+      pos.set([l.pos[0], l.pos[1], l.pos[2], l.pos.length > 3 ? l.pos[3] : 1], i * 4);
+      dif.set([l.diffuse[0], l.diffuse[1], l.diffuse[2]], i * 3);
+      const d = l.spotDir || [0, 0, -1];
+      spot.set([d[0], d[1], d[2], l.spotCos === undefined ? -1 : l.spotCos], i * 4);
+    }
+    this.nLights = n;
+    gl.uniform4fv(this.uLightPos, pos);
+    gl.uniform3fv(this.uLightDiffuse, dif);
+    gl.uniform4fv(this.uLightSpot, spot);
+  }
   fog(start, end) { this.fogStart = start; this.fogEnd = end; }
   blendFunc(src, dst) { this.gl.blendFunc(src, dst); }
   depthMask(on) { this.gl.depthMask(!!on); }
@@ -306,6 +376,8 @@ export class MiniGL {
     const gl = this.gl;
     this._syncMatrices();
     gl.uniform1i(this.uTexEnabled, this.texEnabled ? 1 : 0);
+    gl.uniform1i(this.uLightingEnabled, this.lightingOn ? 1 : 0);
+    gl.uniform1i(this.uLightCount, this.lightingOn ? this.nLights : 0);
     gl.uniform3f(this.uFog, this.fogEnabled ? 1 : 0, this.fogStart, this.fogEnd);
     if (!this.texEnabled) this.bindTexture(this.whiteTex);
   }
@@ -346,6 +418,12 @@ export class MiniGL {
     gl.enableVertexAttribArray(this.aColor);
     gl.vertexAttribPointer(this.aColor, 4, gl.FLOAT, false, 36, 20);
     gl.uniform1i(this.uUseVertexColor, 1);
+    // The immediate-mode buffer has no normals; without this, aNormal stays
+    // enabled and pointing into nrmVBO from whatever mesh drew last.
+    if (this.aNormal >= 0) {
+      gl.disableVertexAttribArray(this.aNormal);
+      gl.vertexAttrib3f(this.aNormal, 0, 0, 1);
+    }
 
     if (this.immMode === this.QUADS) {
       const quads = n >> 2;
@@ -378,7 +456,7 @@ export class MiniGL {
   // colors (optional): Float32Array of rgba per vertex — the D3D-era
   // XYZ|DIFFUSE|TEX1 vertex layout; omitted, the current color applies.
 
-  drawElements(positions, uvs, indices, colors = null) {
+  drawElements(positions, uvs, indices, colors = null, normals = null, mode = null) {
     const gl = this.gl;
     this._applyCommonUniforms();
 
@@ -386,6 +464,16 @@ export class MiniGL {
     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STREAM_DRAW);
     gl.enableVertexAttribArray(this.aPos);
     gl.vertexAttribPointer(this.aPos, 3, gl.FLOAT, false, 0, 0);
+
+    if (normals && this.aNormal >= 0) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.nrmVBO);
+      gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STREAM_DRAW);
+      gl.enableVertexAttribArray(this.aNormal);
+      gl.vertexAttribPointer(this.aNormal, 3, gl.FLOAT, false, 0, 0);
+    } else if (this.aNormal >= 0) {
+      gl.disableVertexAttribArray(this.aNormal);
+      gl.vertexAttrib3f(this.aNormal, 0, 0, 1);
+    }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.uvVBO);
     gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STREAM_DRAW);
@@ -417,7 +505,7 @@ export class MiniGL {
       gl.drawElements(gl.LINES, lines.length, gl.UNSIGNED_INT, 0);
     } else {
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STREAM_DRAW);
-      gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
+      gl.drawElements(mode === null ? gl.TRIANGLES : mode, indices.length, gl.UNSIGNED_INT, 0);
     }
   }
 }
