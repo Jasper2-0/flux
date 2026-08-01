@@ -49,8 +49,8 @@ sprite overlays at layer 2. Ascending order it is.
 | backgrounds (12 of them) | throughout | **done** — 640×480 JPEG, optional PCX alpha mask |
 | sprite overlays (6) | throughout | **done** — 4-frame PCX loops at 12 fps, placed by `tlx`/`tly` |
 | boarder | 1:40–1:54 | **done** — `zeusPlay` on `boarder.zeu` |
+| sphere | 0:45–0:59 | **done** — per-triangle prisms pulsing between the two geospheres |
 | credits ×3 | 0:08–0:45 | scene only |
-| sphere | 0:45–0:59 | scene only |
 | flower ×2 | 1:12–1:40 | scene only |
 | greets | 1:54–2:08 | scene only |
 | fire | 2:21–2:49 | scene only |
@@ -96,6 +96,29 @@ size, which is what makes the layout trustworthy rather than plausible.
 the 628 keys in these scenes have all-zero TCB and degenerate to
 Catmull-Rom, but 42 do not, so the full form is implemented.
 
+## The sphere, decoded
+
+`sphere.srx` asks the scene for two objects by name and will not run
+without them: `GeoSphere01` ("Please name the minimal object") and
+`GeoSphere02` ("the maximal object"), which share topology — 418
+vertices, 720 triangles, radius 50 and 200. At load it packs one
+0x110-byte record per triangle holding *both* copies of it, and each
+frame it computes
+
+    phase = (i & 15) + 10                     // 10..25, per triangle
+    blend = (sin(phase · k · π · time · 0.01) + 1) / 2
+
+then rebuilds the mesh by lerping the maximal triangle towards the
+minimal one — `(B − A) · blend + A`, coordinate by coordinate — and
+allocates 6 vertices and 7 polygons per triangle: the base on the small
+sphere, the moving triangle at the tip, and the walls between. A ball of
+spikes, each breathing at its own rate.
+
+`k` is drawn per triangle from `rand() / 43690 + 0.2`. MSVC's `rand()`
+tops out at 32767, so that division is always zero and every triangle
+gets exactly 0.2 — a latent bug in the original. The port reproduces it,
+because reproducing it is what matches the release.
+
 ## What is reconstruction, and what is read from the data
 
 Read from the data and solid: the script and all its cue times, the
@@ -118,6 +141,15 @@ Reconstructed, and worth doubting:
 - **Sprite blending.** The overlay frames are white line art on black and
   are drawn additively, which is what makes them read as overlays; the
   plugin's own blend state has not been recovered.
+- **Lighting.** Zeus scenes carry lights and `CalcNormals` is called on
+  rebuilt geometry, but nothing here is lit yet — everything is drawn
+  flat-textured. The sphere in particular reads as a silhouette because
+  of it.
+- **The sphere's clock unit.** Its blend runs off the effect's own timer
+  scaled by 0.01; taken as seconds that puts the slowest triangles on a
+  100-second cycle and the fastest on 40, which is a slow staggered
+  bloom across the section. Milliseconds would make it a blur, so
+  seconds it is, but a capture would settle it.
 
 ## Tooling
 
