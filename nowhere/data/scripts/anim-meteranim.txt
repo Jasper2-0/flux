@@ -1,0 +1,4 @@
+.\anim\meter1.pcx
+.\anim\meter2.pcx
+.\anim\meter3.pcx
+.\anim\meter4.pcx

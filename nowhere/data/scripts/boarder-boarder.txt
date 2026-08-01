@@ -1,0 +1,19 @@
+// Textures and materials for: E:\test\boarder.ZEU
+
+texture boarder_jpg primary .\boarder\boarder.jpg
+texture boarderbox primary .\boarder\jumpgate.jpg
+
+material {
+name boarderboxmap
+texture boarderbox
+}
+
+material {
+name boardermap
+texture boarder_jpg
+}
+
+
+
+REGISTER	boarderplay		zeusplay
+REGISTER	boarderback		backgr

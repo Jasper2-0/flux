@@ -1,0 +1,14 @@
+
+texture fire_jpg primary .\fire\fire.jpg
+
+material {
+name firemat
+texture fire_jpg
+additive
+}
+
+REGISTER fireback backgr
+
+
+
+

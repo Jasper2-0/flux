@@ -1,0 +1,15 @@
+
+texture sbs1 primary .\sbs\sbs1.jpg
+texture sbs2 secondary .\sbs\sbs2.jpg
+
+material {
+name sbsmat
+texture sbs1
+texture sbs2
+envmodulate
+}
+
+material {
+name mat
+texture sbs1
+}

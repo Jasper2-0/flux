@@ -1,0 +1,295 @@
+/*------------------------------------------
+ Demoscript system by sarix3state
+-------------------------------------------*/
+#define true	1
+#define false	0
+#define PREDEMO			-1000000
+//#define FLOWERTIME		00000000
+//#define SLIERTENTIME	00020000
+//#define KALEIDOTIME		00000000
+//#define SPHERETIME		00000000
+//#define KUBUS2TIME		00000000
+//#define BOARDERTIME		00000000
+//#define SMOKETIME		00000000
+//#define FIRETIME		00000000
+//#define SBSPLAY			00000000
+//#define DEMOEND			00000000
+//#define KUBUSTIME	00040000
+
+REGISTER	creditsvic	credits
+REGISTER	creditssrx	credits
+REGISTER	creditsstv	credits
+REGISTER	animmeter	anim
+REGISTER	animsignal	anim
+REGISTER	animbanner	anim
+REGISTER	animshooter	anim
+REGISTER	animscale	anim
+REGISTER	animtext	anim
+REGISTER	332		33
+REGISTER	endpic		backgr
+
+
+#include .\flower\flower.txt
+#include .\flower2\flower2.txt
+#include .\slierten\slierten.txt
+#include .\kaleido\kaleido.txt
+#include .\sphere\sphere.txt
+#include .\kubus\kubus.txt
+#include .\boarder\boarder.txt
+#include .\smoke\smoke.txt
+#include .\fire\fire.txt
+//#include .\fire\firescene2.txt
+#include .\sbs\sbs.txt
+#include .\creditsvic\creditsvic.txt
+#include .\creditsstv\creditsstv.txt
+#include .\creditssrx\creditssrx.txt
+#include .\greetings\greets.txt
+
+sound		filename	sound.vic
+//sound		start		40000
+sound		start		0
+sound		length		206488
+sound		nosound		false
+
+
+/* initialize the demo */
+
+PREDEMo			sbs			material	sbsmat
+
+PREDEMO			endpic			filename	endpic.jpg
+PREDEMO			endpic			alphaname	endpic.pcx
+PREDEMO			endpic			zpos		0
+PREDEMO			endpic			execute		load
+PREDEMO			endpic			layer		1
+
+PREDEMO			animshooter		filename	.\anim\shooteranim.txt
+PREDEMO			animshooter		execute		load
+
+PREDEMO			animtext		filename	.\anim\textanim.txt
+PREDEMO			animtext		execute		load
+
+PREDEMO			animscale		filename	.\anim\scaleanim.txt
+PREDEMO			animscale		execute		load
+
+PREDEMO			animmeter		filename	.\anim\meteranim.txt
+PREDEMO			animmeter		execute		load
+
+PREDEMO			animbanner		filename	.\anim\banneranim.txt
+PREDEMO			animbanner		execute		load
+
+PREDEMO			animsignal		filename	.\anim\signalanim.txt
+PREDEMO			animsignal		execute		load
+
+PREDEMO			creditsvic		filename	.\creditsvic\credits.zeu
+PREDEMO			creditsvic		execute		load
+PREDEMo			creditsvic		layer		1	
+
+PREDEMO			creditssrx		filename	.\creditssrx\credits.zeu
+PREDEMO			creditssrx		execute		load
+PREDEMo			creditssrx		layer		1	
+
+PREDEMO			creditsstv		filename	.\creditsstv\credits.zeu
+PREDEMO			creditsstv		execute		load
+PREDEMo			creditsstv		layer		1	
+
+PREDEMO			sphereback		filename	.\sphere\sphereback.jpg
+PREDEMO			sphereback		execute		load
+PREDEMO			sphere			filename	.\sphere\sphere.zeu
+PREDEMO			sphere			execute		load
+PREDEMO			sphere			layer		1
+
+PREDEMO			kaleido			material	kaleidomat
+PREDEMO			kaleidoback		filename	.\kaleido\kaleidooverlay.jpg
+PREDEMO			kaleidoback		alphaname	.\kaleido\kaleidooverlay.pcx
+PREDEMO			kaleidoback		zpos		0
+PREDEMO			kaleidoback		execute		load
+PREDEMO			kaleidoback		layer		1
+	
+PREDEMO			flowerback		filename	.\flower\flowerback.jpg
+PREDEMO			flowerback		execute		load
+PREDEMO			33			layer		1
+PREDEMO			33			filename	.\flower\flower.zeu
+PREDEMO			33			execute		load
+
+PREDEMO			flowerback2		filename	.\flower2\flowerback.jpg
+PREDEMO			flowerback2		execute		load
+PREDEMO			332			layer		1
+PREDEMO			332			filename	.\flower2\flower2.zeu
+PREDEMO			332			execute		load
+
+PREDEMO			boarderback		filename	.\boarder\boarderback.jpg
+PREDEMO			boarderback		execute		load
+PREDEMO			boarderplay		filename	.\boarder\boarder.zeu
+PREDEMO			boarderplay		execute		load
+PREDEMO			boarderplay		layer		1
+
+PREDEMO			greetsback		filename	.\greetings\greetingsback.jpg
+PREDEMO			greetsback		execute		load
+PREDEMO			greets			filename	.\greetings\greets.zeu
+PREDEMo			greets			execute		load
+PREDEMO			greets			layer		1
+
+
+PREDEMO			kubusback		filename	.\kubus\kubusback.jpg
+PREDEMO			kubusback		execute		load
+PREDEMO			kubus			layer		1
+PREDEMO			kubus			colorR		255
+PREDEMO			kubus			colorG		230
+PREDEMO			kubus			colorB		200
+
+PREDEMO			fire			filename	.\fire\fire.zeu
+PREDEMO			fireback		filename	.\fire\fireback.jpg
+PREDEMO			fireback		execute		load
+PREDEMO			fire			execute		load
+PREDEMO			fire			layer		2
+PREDEMO			fire			stevieparm	24
+PREDEMO			fire			stevieadd	5
+
+PREDEMO			smokeback		filename	.\smoke\smokeback.jpg
+PREDEMO			smokeback		execute		load
+PREDEMO			smoke			filename	.\smoke\smoke.zeu
+PREDEMO			smoke			execute		load
+PREDEMO			smoke			layer		1
+PREDEMO			smoke			hoeveelbobbels	6
+
+PREDEMO			sliertenback		filename	.\slierten\sliertenback.jpg
+PREDEMO			sliertenback		execute		load
+PREDEMO			slierten		layer		1
+PREDEMO	    		slierten       		filename        .\slierten\slierten.zeu
+PREDEMO 		slierten        	execute         load
+PREDEMO			slierten		uitslagx	5
+PREDEMO			slierten		uitslagy	5
+PREDEMO			slierten		uitslagz	5
+
+
+000000000		system			sound		start
+
+/* start of demo */
+000000000		sbs			run		true
+000008500		creditsvic		run		true
+000021000		creditsvic		run		false
+000021000		creditssrx		run		true
+000035000		creditssrx		run		false
+000035000		creditsstv		run		true
+000045400		sbs			run		false
+000045400		creditsstv		run		false
+000045400		sphereback		run		true
+000045400		sphere			run		true
+
+000045400		animscale		tlx		100		
+000045400		animscale		tly		100
+000045400		animscale		layer		2
+000045400		animscale		zpos		0
+000045400		animscale		speed		12
+000045400		animscale		run		true
+
+000045400		animtext		tlx		50		
+000045400		animtext		tly		100
+000045400		animtext		layer		2
+000045400		animtext		zpos		0
+000045400		animtext		speed		12
+000045400		animtext		run		true
+
+000059200		animscale		run		false
+000059200		animtext		run		false
+000059200		sphereback		run		false
+000059200		sphere			run		false
+000059200		kaleido			run		true
+000059200		kaleidoback		run		true
+000072800		kaleido			run		false
+000072800		kaleidoback		run		false
+000072800		flowerback		run		true
+000072800		33			run		true
+000072800		33			uitslag		15
+000072800		33			center		15
+000072800		33			bolscale	1
+000072800		33			bolturbdiv 	32
+000072800		33			bolanglediv 	56
+000086000		33			run		false
+000086000		flowerback		run		false
+
+000086000		flowerback2		run		true
+000086000		332			run		true
+000086000		332			uitslag		15
+000086000		332			center		15
+000086000		332			bolscale	1
+000086000		332			bolturbdiv 	32
+000086000		332			bolanglediv 	56
+000100300		332			run		false
+000100300		flowerback2		run		false
+
+000100300		boarderback		run		true
+000100300		boarderplay		run		true
+000100300		animshooter		tlx		0		
+000100300		animshooter		tly		216
+000100300		animshooter		layer		2
+000100300		animshooter		zpos		0
+000100300		animshooter		speed		12
+000100300		animshooter		run		true
+
+000114050		animshooter		run		false
+000114050		boarderback		run		false
+000114050		boarderplay		run		false
+000114050		greetsback		run		true
+000114050		greets			run		true
+
+000114050		animbanner		tlx		500		
+000114050		animbanner		tly		370
+000114050		animbanner		layer		2
+000114050		animbanner		zpos		0
+000114050		animbanner		speed		12
+000114050		animbanner		run		true
+
+000128100		animbanner		run		false
+000128100		greets			run		false
+000128100		greetsback		run		false
+000128100		kubus			run		true
+000128100		kubusback		run		true
+
+000128100		animmeter		tlx		4		
+000128100		animmeter		tly		20
+000128100		animmeter		layer		2
+000128100		animmeter		zpos		0
+000128100		animmeter		speed		12
+000128100		animmeter		run		true
+
+000141400		animmeter		run		false
+000141400		kubus			run		false
+000141400		kubusback		run		false
+000141400		fire			run		true
+000141400		fireback		run		true
+000169200		fire			run		false
+000169200		fireback		run		false
+000169200		smoke			run		true
+000169200		smokeback		run		true
+
+000169200		animsignal		tlx		10		
+000169200		animsignal		tly		20
+000169200		animsignal		layer		2
+000169200		animsignal		zpos		0
+000169200		animsignal		speed		12
+000169200		animsignal		run		true
+
+000182400		animsignal		run		false
+000182400		smoke			run		false
+000182400		smokeback		run		false
+000182400		sliertenback		run		true
+000182400		slierten		run		true
+
+000182400		animtext		tlx		2		
+000182400		animtext		tly		200
+000182400		animtext		layer		2
+000182400		animtext		zpos		0
+000182400		animtext		speed		12
+000182400		animtext		run		true
+
+000196200		animtext		run		false
+000196200		sliertenback		run		false
+000196200		slierten		run		false	
+000196200		sbs			run		true
+000196200		endpic			run		true
+
+	
+
+000206400		system			core		exit
+

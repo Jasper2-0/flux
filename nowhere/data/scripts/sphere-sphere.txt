@@ -1,0 +1,19 @@
+// Textures and materials for: E:\test\sphere.ZEU
+
+texture sphere-rect_jpg primary .\sphere\sphere-rect.jpg
+texture sphere_jpg primary .\sphere\sphere.jpg
+
+material {
+name sphererect
+texture sphere-rect_jpg
+}
+
+material {
+name spheremat
+texture sphere_jpg
+}
+
+REGISTER	sphereback		backgr
+
+
+

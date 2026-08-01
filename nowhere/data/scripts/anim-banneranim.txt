@@ -1,0 +1,4 @@
+.\anim\banner1.pcx
+.\anim\banner2.pcx
+.\anim\banner3.pcx
+.\anim\banner4.pcx

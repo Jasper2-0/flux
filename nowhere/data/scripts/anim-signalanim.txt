@@ -1,0 +1,4 @@
+.\anim\signal1.pcx
+.\anim\signal2.pcx
+.\anim\signal3.pcx
+.\anim\signal4.pcx

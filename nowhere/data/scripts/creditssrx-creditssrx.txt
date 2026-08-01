@@ -1,0 +1,20 @@
+// Textures and materials for: E:\test\credits\credits.ZEU
+
+texture credsrx_jpg primary .\creditssrx\credsrx.jpg nomipmap
+texture	credsrxbol primary .\creditssrx\credsrxbol.jpg
+
+material {
+name ringmatsrx
+texture credsrx_jpg 
+additive
+}
+
+material {
+name bolmatsrx
+texture credsrxbol 
+additive
+}
+
+
+
+

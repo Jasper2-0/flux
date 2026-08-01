@@ -1,0 +1,29 @@
+// Textures and materials for: E:\test\33tv.ZEU
+
+texture flower primary .\flower\flower.jpg
+texture flowertv primary .\flower\flowertv.jpg
+texture picture primary .\flower\anim.jpg
+texture	envmap secondary .\flower\flowerenv.jpg
+
+material {
+name flowermat
+texture flower
+texture envmap
+calcenv
+}
+
+material {
+name tvmat
+texture flowertv
+texture envmap
+calcenv
+}
+
+material {
+name screen
+texture picture
+}
+
+REGISTER	flowerback		backgr
+
+

@@ -1,0 +1,8 @@
+.\anim\shooter1.pcx
+.\anim\shooter2.pcx
+.\anim\shooter3.pcx
+.\anim\shooter4.pcx
+.\anim\shooter1.pcx
+.\anim\shooter2.pcx
+.\anim\shooter3.pcx
+.\anim\shooter4.pcx
