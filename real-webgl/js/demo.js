@@ -105,7 +105,17 @@ class Assets {
       img.src = this.base + rec.file;
       if (img.decode) await img.decode();
       else await new Promise((ok, no) => { img.onload = ok; img.onerror = no; });
-      return this.mgl.createTextureFromImage(img, false, true);
+      // GL_REPEAT on both axes, and GL_LINEAR both ways with no mipmaps.
+      // That is what `energy3d_ogl::create_texture` (0x100023e0) does when
+      // its first bool is set, and every caller in the demo passes 1 for
+      // it. Nothing in the port relies on clamping — no scene mesh has a
+      // UV outside [0, 1] — but showTunnel's do, twice around the tube and
+      // twenty times along it, and clamped they smear instead of tile.
+      //
+      // The second bool builds mipmaps, and every caller passes 1 for that
+      // too, but MIN_FILTER is set to plain GL_LINEAR either way, so they
+      // are built and never sampled. Skipped here for the same result.
+      return this.mgl.createTextureFromImage(img, false, false);
     })();
     this.tex.set(rec.file, p);
     return p;
