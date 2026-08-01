@@ -63,6 +63,14 @@ function ease(u, a, b) {
 // Walk to the last key at or before `time`, then interpolate towards the
 // next one. Red holds the final value after the last key, and leaves the
 // property at its default before the first.
+// Hand the main thread back to the renderer. Chains of `await` only
+// drain the microtask queue, so without a real task boundary a phone
+// runs the whole load with nothing repainted and the status line frozen
+// on whatever it said first.
+function breathe() {
+  return new Promise((r) => setTimeout(r, 0));
+}
+
 function track(keys, prop, time, out) {
   if (!keys || !keys.length || time < keys[0].t) return DEFAULTS[prop];
   let i = 0;
@@ -85,19 +93,19 @@ class Assets {
     this.tex = new Map();
   }
 
+  // Straight from the decoded image element. Going via a 2D canvas and
+  // getImageData would work too, but it allocates a full backing store
+  // per image and iOS caps how much canvas memory a page may hold — with
+  // eighty-odd images, some of them 2048 wide, that is the difference
+  // between loading and not.
   async texture(rec) {
     if (this.tex.has(rec.file)) return this.tex.get(rec.file);
     const p = (async () => {
       const img = new Image();
       img.src = this.base + rec.file;
-      await img.decode();
-      const cv = document.createElement('canvas');
-      cv.width = img.naturalWidth; cv.height = img.naturalHeight;
-      const ctx = cv.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(img, 0, 0);
-      const id = ctx.getImageData(0, 0, cv.width, cv.height);
-      return this.mgl.createTextureFromData(
-        new Uint8Array(id.data.buffer), cv.width, cv.height, false, true);
+      if (img.decode) await img.decode();
+      else await new Promise((ok, no) => { img.onload = ok; img.onerror = no; });
+      return this.mgl.createTextureFromImage(img, false, true);
     })();
     this.tex.set(rec.file, p);
     return p;
@@ -123,15 +131,19 @@ export class Demo {
 
   async load() {
     this.status('initialising WebGL…');
+    await breathe();
     this.mgl = new MiniGL(this.canvas);
     this.assets = new Assets(this.mgl, this.base);
 
     this.status('loading the demo script…');
     this.script = await (await fetch(this.base + 'timeline.json')).json();
 
-    this.status('loading artwork…');
     this.textures = new Map();
-    for (const [name, rec] of Object.entries(this.script.images)) {
+    const images = Object.entries(this.script.images);
+    let n = 0;
+    for (const [name, rec] of images) {
+      this.status('loading artwork… ' + ++n + '/' + images.length);
+      await breathe();
       try {
         this.textures.set(name, { tex: await this.assets.texture(rec), rec });
       } catch (e) {
@@ -140,14 +152,16 @@ export class Demo {
       }
     }
 
-    this.status('loading the scenes…');
     this.scenes = new Map();
     this.sceneTex = new Map();
     const names = new Set();
     for (const inst of this.script.instances) {
       if (inst.command === 'drawscene' && inst.args[0]) names.add(String(inst.args[0]).toLowerCase());
     }
+    let sn = 0;
     for (const n of names) {
+      this.status('loading the scenes… ' + ++sn + '/' + names.size);
+      await breathe();
       try {
         const file = n.replace(/\.i3d$/, '') + '.json';
         const json = await (await fetch(this.base + 'scenes/' + file)).json();

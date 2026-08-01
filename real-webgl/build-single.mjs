@@ -62,8 +62,16 @@ function walk(dir, acc = []) {
   return acc;
 }
 
+// Each asset goes into its own <script type="text/plain"> block rather
+// than into one giant JS object literal. Base64 is only [A-Za-z0-9+/=],
+// so it can never close the tag, and the browser stores the text without
+// running it through the JavaScript parser — which is what keeps a phone
+// from having to parse fourteen million characters of source before the
+// first line of the demo runs.
 const embed = {};
+const blocks = [];
 let bytes = 0;
+let id = 0;
 for (const p of walk(join(root, 'data'))) {
   const rel = relative(root, p).replace(/\\/g, '/');
   const ext = rel.slice(rel.lastIndexOf('.'));
@@ -71,7 +79,9 @@ for (const p of walk(join(root, 'data'))) {
   if (!mime) continue;
   const buf = readFileSync(p);
   bytes += buf.length;
-  embed[rel.replace(/^data\//, '')] = { mime, b64: buf.toString('base64') };
+  const tag = 'a' + id++;
+  embed[rel.replace(/^data\//, '')] = { mime, id: tag };
+  blocks.push(`<script type="text/plain" id="${tag}">${buf.toString('base64')}</` + `script>`);
 }
 
 const html = `<!DOCTYPE html>
@@ -111,7 +121,8 @@ const html = `<!DOCTYPE html>
   h1 { font-size: clamp(13px, 4.4vw, 24px); font-weight: normal; letter-spacing: 0.34em;
        color: #cfe2f2; margin: 0 0 6px 0; text-indent: 0.34em; white-space: nowrap; }
   .sub { font-size: clamp(11px, 3.2vw, 13px); color: #63788c; line-height: 1.6; max-width: 30em; }
-  #status { font-size: 12px; color: #4d5c6b; min-height: 1.6em; margin-top: 14px; }
+  #status { font-size: 12px; color: #4d5c6b; min-height: 1.6em; margin-top: 14px;
+            max-width: 32em; line-height: 1.5; overflow-wrap: anywhere; }
   #play {
     margin-top: 10px; padding: 16px 54px; background: transparent; color: #cfe2f2;
     border: 1px solid #35485c; font: inherit; font-size: 15px; letter-spacing: 0.35em;
@@ -141,37 +152,66 @@ const html = `<!DOCTYPE html>
 <div id="stage"><canvas id="screen" width="640" height="480"></canvas></div>
 <div id="parts"></div>
 <div id="tap">i</div>
+${blocks.join('\n')}
 <script>
+// Anything that goes wrong from here on has to end up on screen — there
+// is no console to look at on a phone, and a silent throw is
+// indistinguishable from a slow load.
+(() => {
+  const say = (what) => {
+    const el = document.getElementById('status');
+    if (el) el.textContent = what;
+  };
+  window.addEventListener('error', (e) =>
+    say('error: ' + (e.message || e.error) + (e.lineno ? ' @' + e.lineno : '')));
+  window.addEventListener('unhandledrejection', (e) =>
+    say('error: ' + ((e.reason && e.reason.message) || e.reason)));
+})();
+
 const G = {};
 ${engine}
 
 const EMBED = ${JSON.stringify(embed)};
 
-// Serve the embedded tree to the runtime: fetch(), Image and Audio all go
-// through data: URIs, so nothing touches the network.
+// Serve the embedded tree to the runtime. Assets become blob: URLs, not
+// data: URLs — Safari on iOS is unreliable about playing media from a
+// multi-megabyte data URI, and a blob keeps the bytes out of the string
+// heap either way.
 (() => {
-  const realFetch = window.fetch.bind(window);
-  window.fetch = (url, opts) => {
-    const key = String(url).replace(/^data\\//, '');
-    const e = EMBED[key];
-    if (!e) return realFetch(url, opts);
-    const bin = atob(e.b64);
+  const urls = {};
+  const bytesOf = (e) => {
+    const b64 = document.getElementById(e.id).textContent;
+    const bin = atob(b64);
     const buf = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-    return Promise.resolve(new Response(buf, { headers: { 'Content-Type': e.mime } }));
+    return buf;
+  };
+  const urlOf = (e) => {
+    if (!urls[e.id]) {
+      urls[e.id] = URL.createObjectURL(new Blob([bytesOf(e)], { type: e.mime }));
+      // the base64 is no longer needed once the blob exists
+      const el = document.getElementById(e.id);
+      if (el) el.textContent = '';
+    }
+    return urls[e.id];
+  };
+  const lookup = (v) => EMBED[String(v || '').replace(/^data\\//, '')];
+
+  const realFetch = window.fetch.bind(window);
+  window.fetch = (url, opts) => {
+    const e = lookup(url);
+    if (!e) return realFetch(url, opts);
+    return Promise.resolve(new Response(bytesOf(e), { headers: { 'Content-Type': e.mime } }));
   };
   const desc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
   Object.defineProperty(HTMLImageElement.prototype, 'src', {
-    set(v) {
-      const e = EMBED[String(v).replace(/^data\\//, '')];
-      desc.set.call(this, e ? 'data:' + e.mime + ';base64,' + e.b64 : v);
-    },
+    set(v) { const e = lookup(v); desc.set.call(this, e ? urlOf(e) : v); },
     get() { return desc.get.call(this); },
   });
   const RealAudio = window.Audio;
   window.Audio = function (src) {
-    const e = EMBED[String(src || '').replace(/^data\\//, '')];
-    return new RealAudio(e ? 'data:' + e.mime + ';base64,' + e.b64 : src);
+    const e = lookup(src);
+    return new RealAudio(e ? urlOf(e) : src);
   };
 })();
 

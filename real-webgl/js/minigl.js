@@ -205,13 +205,13 @@ export class MiniGL {
 
   // ----- texture management -----
 
-  createTextureFromImage(image, mipmap = false) {
+  createTextureFromImage(image, mipmap = false, clamp = false) {
     const gl = this.gl;
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    this._setTexParams(mipmap);
+    this._setTexParams(mipmap, clamp);
     this.boundTex = tex;
     return tex;
   }
