@@ -197,28 +197,46 @@ const SEG = 12;         // [esi+0x40] — segments around
 const PER_RING = 13;    // [esi+0x44] — the closing vertex repeats the first
 const PERIOD = 30.0;    // [esi+0x3c]
 
+// The bare tube both showTunnel and showCylinder build. Their inits set
+// the same state fields to the same constants and allocate the same six
+// buffers; only showTunnel goes on to bake a warp into the vertices.
+function buildTube() {
+  // The ring, straight from the init loop at 0x403b1f. The closing vertex
+  // takes its angle from [0x40c3b0], which is 0.0 — so it lands exactly on
+  // top of vertex 0 and seals the tube.
+  const n = RINGS * PER_RING;
+  const pos = new Float32Array(n * 3);
+  const uv = new Float32Array(n * 2);
+  for (let r = 0; r < RINGS; r++) {
+    for (let i = 0; i < PER_RING; i++) {
+      const ang = i === SEG ? 0 : (i * TAU) / SEG;
+      const k = (r * PER_RING + i) * 3;
+      pos[k] = Math.cos(ang);
+      pos[k + 1] = Math.sin(ang);
+      pos[k + 2] = -r;
+      const u = (r * PER_RING + i) * 2;
+      uv[u] = (i * 2) / SEG;          // two texture repeats around
+      uv[u + 1] = (r * 20) / RINGS;   // twenty along
+    }
+  }
+  const idx = new Uint32Array((RINGS - 1) * SEG * 6);
+  let o = 0;
+  for (let r = 0; r < RINGS - 1; r++) {
+    for (let i = 0; i < SEG; i++) {
+      const a = r * PER_RING + i, b = (r + 1) * PER_RING + i;
+      idx[o++] = a;     idx[o++] = a + 1; idx[o++] = b;
+      idx[o++] = a + 1; idx[o++] = b + 1; idx[o++] = b;
+    }
+  }
+  return { pos, uv, idx };
+}
+
 export class ShowTunnel {
   static kind = 2;
 
   constructor() {
-    // The ring, straight from the init loop at 0x403b1f. The closing
-    // vertex takes its angle from [0x40c3b0], which is 0.0 — so it lands
-    // exactly on top of vertex 0 and seals the tube.
-    const n = RINGS * PER_RING;
-    const pos = new Float32Array(n * 3);
-    const uv = new Float32Array(n * 2);
-    for (let r = 0; r < RINGS; r++) {
-      for (let i = 0; i < PER_RING; i++) {
-        const ang = i === SEG ? 0 : (i * TAU) / SEG;
-        const k = (r * PER_RING + i) * 3;
-        pos[k] = Math.cos(ang);
-        pos[k + 1] = Math.sin(ang);
-        pos[k + 2] = -r;
-        const u = (r * PER_RING + i) * 2;
-        uv[u] = (i * 2) / SEG;          // two texture repeats around
-        uv[u + 1] = (r * 20) / RINGS;   // twenty along
-      }
-    }
+    const tube = buildTube();
+    const pos = tube.pos, uv = tube.uv, n = RINGS * PER_RING;
     // The static half of the warp (0x403d03), in place.
     for (let v = 0; v < n; v++) {
       const k = v * 3, z = pos[k + 2];
@@ -229,17 +247,7 @@ export class ShowTunnel {
     }
     this.pos = pos;
     this.uv = uv;
-
-    const idx = new Uint32Array((RINGS - 1) * SEG * 6);
-    let o = 0;
-    for (let r = 0; r < RINGS - 1; r++) {
-      for (let i = 0; i < SEG; i++) {
-        const a = r * PER_RING + i, b = (r + 1) * PER_RING + i;
-        idx[o++] = a;     idx[o++] = a + 1; idx[o++] = b;
-        idx[o++] = a + 1; idx[o++] = b + 1; idx[o++] = b;
-      }
-    }
-    this.idx = idx;
+    const idx = this.idx = tube.idx;
     this.out = new Float32Array(idx.length * 3);
     this.outUV = new Float32Array(idx.length * 2);
   }
@@ -571,6 +579,87 @@ export class ShowPlanes {
   }
 }
 
+// showCylinder — 0x402350 (init) and 0x4026a0 (run).
+//
+// The same 13x128 tube as showTunnel — the two inits set the same state
+// fields to the same constants and allocate the same six buffers — but
+// this one leaves the vertices unwarped, and draws the whole thing as
+// wireframe.
+//
+// Three details worth knowing, all of them things the code does rather
+// than things it means to:
+//
+//   The init binds eeeeeeeenv.tga and then the run disables GL_TEXTURE_2D
+//   before drawing anything, so the texture is loaded, bound and never
+//   sampled. The glTexCoord2f calls per vertex go nowhere either.
+//
+//   Each triangle gets its own glBegin(GL_LINES) / glEnd with *three*
+//   vertices inside it. GL_LINES consumes vertices in pairs, so the third
+//   is dropped: every triangle contributes exactly one edge, v0 to v1, not
+//   three. That is what makes it read as a loose net rather than a solid
+//   mesh — reproduced, because drawing all three edges looks quite
+//   different.
+//
+//   The whole tube is drawn twice, the second pass with pi/2 added to the
+//   radial phase and a dimmer scale, so two interleaved cylinders breathe
+//   in quadrature.
+export class ShowCylinder {
+  static kind = 2;
+
+  constructor() {
+    const tube = buildTube();
+    this.pos = tube.pos;
+    this.idx = tube.idx;
+    // one line per triangle: two vertices
+    this.out = new Float32Array((tube.idx.length / 3) * 2 * 3);
+  }
+
+  draw(mgl, ms, p, demo) {
+    const gl = mgl.gl;
+    mgl.enableTexture(false);
+    mgl.enableLighting(false);
+    mgl.enableCullFace(false);
+    mgl.enableDepthTest(false);
+    mgl.depthMask(false);
+    mgl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_COLOR);
+    mgl.enableBlend(true);
+
+    // The same depth ride showTunnel uses, off the same state field.
+    const D = 50 * Math.sin(ms * 5.265399886411615e-05) - 64;
+
+    mgl.matrixMode(mgl.MODELVIEW);
+    mgl.pushMatrix();
+    mgl.loadIdentity();
+    mgl.rotate(90, 0, 0, 1);
+    mgl.multMatrix(lookAt([10, 10, D], [0, 0, D], [0, 1, 0]));
+
+    const src = this.pos, idx = this.idx, out = this.out;
+    for (let pass = 0; pass < 2; pass++) {
+      const c = pass === 0 ? 0.800000011920929 : 0.5;
+      const phase = pass === 0 ? 0 : 1.57079632675;
+      const g = (Math.sin(c * ms * 0.0008563464) + 1.0) * c * 0.5;
+      mgl.color4(g, g, g, 1);
+
+      let o = 0;
+      for (let f = 0; f < idx.length; f += 3) {
+        // only v0 and v1 survive the odd vertex count
+        for (let e = 0; e < 2; e++) {
+          const k = idx[f + e] * 3;
+          const z = src[k + 2];
+          const s = Math.sin(z * 0.3 + ms * 0.002348623852 + phase) + 1.5;
+          out[o++] = src[k] * s;
+          out[o++] = src[k + 1] * s;
+          out[o++] = z;
+        }
+      }
+      mgl.drawArraysLines(out);
+    }
+
+    mgl.popMatrix();
+    mgl.enableBlend(false);
+  }
+}
+
 // Named in Real.exe's string table and loaded by the effects themselves,
 // so they never pass through the script's `loadImage`.
 export const EFFECT_TEXTURES = [
@@ -585,4 +674,5 @@ export const EFFECTS = {
   showbol: ShowBol,
   showpartiekels: ShowPartiekels,
   showplanes: ShowPlanes,
+  showcylinder: ShowCylinder,
 };

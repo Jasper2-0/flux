@@ -130,7 +130,12 @@ def compile_script(path):
         })
 
     preload = [p for p in preload if p]
-    cues.sort(key=lambda c: c['time'])
+    # Deliberately *not* sorted by time. Red binds layers to tasks as it
+    # parses, top to bottom, so a cue's position in the file is what decides
+    # which task its keyframes land on — see build_instances. `@origin`
+    # means file order and clock order are not the same thing: a section can
+    # animate towards a value it only reaches after the next section has
+    # already claimed the layer.
     return preload, cues
 
 
@@ -140,17 +145,33 @@ def build_instances(cues):
     An instance begins at a draw/show command and runs until the layer is
     cleared by `stopAll` or replaced by another command. Every animate on
     that layer in between becomes a keyframe on the instance.
+
+    The subtlety is what "in between" means. Red binds a layer to a task
+    once, at *parse* time — `load_script` walks the file top to bottom and
+    keeps the current task for each of its 64 slots — while `stopAll` is an
+    ordinary runtime message that only stops the task running. So an
+    animate cue attaches to whichever task holds the slot at that point in
+    the *file*, even when its own timestamp falls after the stopAll that
+    ended it, and even when the section it belongs to is long over.
+
+    That is not a curiosity. Sections routinely animate towards a value
+    they never reach: part 6's ten text columns are written to scroll from
+    -2048 to 480 over sixteen seconds, but part 7's stopAll cuts them off
+    at eleven, so they are caught two thirds of the way down. Dropping the
+    late key leaves a single-key track, which holds at -2048 — off screen
+    for the whole section, and the columns never appear at all.
     """
     live, done = {}, []
 
     def close(layer, t):
-        inst = live.pop(layer, None)
-        if inst:
+        inst = live.get(layer)
+        if inst and 'end' not in inst:
             inst['end'] = t
             done.append(inst)
 
     for c in cues:
         if c['command'] == 'stopall':
+            # ends the tasks, but leaves each layer bound to its instance
             for layer in list(live):
                 close(layer, c['time'])
             continue

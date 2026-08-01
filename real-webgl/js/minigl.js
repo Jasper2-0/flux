@@ -484,6 +484,27 @@ export class MiniGL {
     gl.drawArrays(gl.TRIANGLES, 0, positions.length / 3);
   }
 
+  // An unindexed line list, for showCylinder — which emits its wireframe
+  // through glBegin(GL_LINES) a triangle at a time.
+  drawArraysLines(positions) {
+    const gl = this.gl;
+    this._applyCommonUniforms();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.posVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STREAM_DRAW);
+    gl.enableVertexAttribArray(this.aPos);
+    gl.vertexAttribPointer(this.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.disableVertexAttribArray(this.aUV);
+    gl.vertexAttrib2f(this.aUV, 0, 0);
+    gl.disableVertexAttribArray(this.aColor);
+    gl.uniform1i(this.uUseVertexColor, 0);
+    gl.uniform4fv(this.uColor, this.curColor);
+    if (this.aNormal >= 0) {
+      gl.disableVertexAttribArray(this.aNormal);
+      gl.vertexAttrib3f(this.aNormal, 0, 0, 1);
+    }
+    gl.drawArrays(gl.LINES, 0, positions.length / 3);
+  }
+
   drawElements(positions, uvs, indices, colors = null, normals = null, mode = null) {
     const gl = this.gl;
     this._applyCommonUniforms();
