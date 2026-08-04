@@ -19,13 +19,21 @@ Original credits (from `data/tesla.txt`):
 Serve this directory over HTTP and open it in a browser (WebGL2 required):
 
 ```sh
-cd tesla-webgl
 python3 -m http.server 8000
 # then open http://localhost:8000/
 ```
 
 Press **play** (a user gesture is required for audio), **Esc** stops,
 **←/→** seek ±5 seconds. The demo runs 254 seconds.
+
+Two bundlers, for handing the demo to someone as a single file:
+
+```sh
+node build-single.mjs                # -> tesla-single.html, the demo with
+                                     #    data.pak and the mp3 inlined
+node writeup/build-writeup.mjs       # -> the interactive "making of":
+                                     #    prose, live effect viewers, no audio
+```
 
 ## What's in the port
 
@@ -39,6 +47,7 @@ The port follows the structure of the publicly released original source:
 | `js/t3ds.js` | 3DS mesh parser with the original loader's semantics (Y/Z swap, UV v-flip, averaged vertex normals, pivot-space transform) |
 | `js/effects/` | the eleven timeline effects |
 | `js/demo.js` | effect timeline (identical timing to the original) and soundtrack sync |
+| `writeup/` | the interactive "making of": prose, a maths primer, and live viewers that run each effect on its own |
 
 Timeline (seconds): SpinZoom 0–24.5 · ShadeBall 24.5–48.5 · Splines
 48.5–67.7 · FFDEnv 67.7–87 · Bands 69–85 · EnergyStream 87–145 · Tubes
