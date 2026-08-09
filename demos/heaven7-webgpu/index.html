@@ -1,0 +1,372 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Heaven 7 — WebGPU raytracer</title>
+<style>
+  /* Single-theme by design: this page is a demo screen, committed dark. */
+  html, body { margin: 0; min-height: 100%; background: #060913; color: #a9b6cf;
+    font: 13px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    -webkit-text-size-adjust: 100%; }
+  #wrap { display: flex; flex-direction: column; align-items: center; gap: 12px;
+    padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+  h1 { font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: #5c6a85; margin: 4px 0 0; }
+  h1 b { color: #8fd0ff; font-weight: 600; }
+  canvas { width: min(100vw - 24px, 960px); aspect-ratio: 16 / 9; display: block;
+    border: 1px solid #1a2338; border-radius: 8px; background: #000; touch-action: none; }
+  #bar { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: center;
+    justify-content: center; max-width: 960px; }
+  .stat { color: #5c6a85; }
+  .stat b { color: #8fd0ff; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .seg { display: flex; border: 1px solid #1a2338; border-radius: 8px; overflow: hidden; }
+  .seg button { appearance: none; border: 0; background: #0e1424; color: #a9b6cf;
+    font: inherit; padding: 9px 14px; min-height: 40px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid #1a2338; }
+  .seg button[aria-pressed="true"] { background: #16233f; color: #cfe6ff; }
+  .seg button:focus-visible, .tog:focus-visible-within { outline: 2px solid #8fd0ff; outline-offset: -2px; }
+  label.tog { display: inline-flex; gap: 7px; align-items: center; min-height: 40px;
+    padding: 0 4px; user-select: none; -webkit-user-select: none; cursor: pointer; }
+  input[type="checkbox"] { width: 17px; height: 17px; accent-color: #8fd0ff; }
+  #err { color: #ffa3a3; max-width: 640px; text-align: center; white-space: pre-wrap; }
+  #note { color: #5c6a85; max-width: 640px; text-align: center; }
+  a { color: #8fd0ff; }
+</style>
+<div id="wrap">
+  <h1>heaven <b>7</b> · exceed 2000 · webgpu compute raytracer study</h1>
+  <canvas id="c"></canvas>
+  <div id="bar">
+    <div class="seg" id="quality" role="group" aria-label="Quality">
+      <button data-s="1" aria-pressed="true">High 1×1</button>
+      <button data-s="2" aria-pressed="false">Average 2×2</button>
+      <button data-s="4" aria-pressed="false">Low 4×4</button>
+    </div>
+    <label class="tog"><input type="checkbox" id="reflect" checked> reflections</label>
+    <label class="tog"><input type="checkbox" id="spin" checked> camera path</label>
+    <span class="stat"><b id="fps">–</b> fps</span>
+    <span class="stat"><b id="res">–</b></span>
+  </div>
+  <div id="err"></div>
+  <div id="note">The quality control mirrors the original release's settings dialog —
+    in 2000 those were adaptive CPU subsampling levels; here they set GPU render scale.</div>
+</div>
+
+<script type="module">
+// Heaven 7 (Exceed, 2000) rendered with a per-pixel software raytracer:
+// analytic ray/sphere + ray/plane intersection, Phong shading and mirror
+// reflections, with adaptive 1x1/2x2/4x4 subsampling to stay realtime on a
+// Pentium-era CPU. This study runs the same math as a WebGPU compute shader,
+// one thread per pixel. Representative scene, not a pixel-faithful port.
+
+const errEl = document.getElementById('err');
+function fail(m) { errEl.textContent = m; throw new Error(m); }
+
+if (!('gpu' in navigator)) {
+  fail('WebGPU is not available in this browser.\n' +
+    'iOS: Safari on iOS 18+ (enable Settings > Apps > Safari > Advanced > Feature Flags > WebGPU if off). ' +
+    'Desktop: Chrome/Edge 113+, Safari 18+.');
+}
+
+const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' })
+  .catch(() => null);
+if (!adapter) fail('No WebGPU adapter found. Try enabling hardware acceleration, then reload.');
+const device = await adapter.requestDevice();
+device.addEventListener('uncapturederror', (e) => { errEl.textContent = 'GPU error: ' + e.error.message; });
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('webgpu');
+const format = navigator.gpu.getPreferredCanvasFormat();
+ctx.configure({ device, format, alphaMode: 'opaque' });
+
+const WORKGROUP = 8;
+
+const computeWGSL = /* wgsl */`
+struct Params {
+  resolution : vec2<f32>,
+  time       : f32,
+  bounces    : f32,
+  camPos     : vec3<f32>,
+  _pad0      : f32,
+  camTarget  : vec3<f32>,
+  reflectOn  : f32,
+};
+
+@group(0) @binding(0) var<uniform> P : Params;
+@group(0) @binding(1) var outTex : texture_storage_2d<rgba8unorm, write>;
+
+const PI = 3.14159265;
+const MAXF = 1e30;
+
+struct Sphere { c : vec3<f32>, r : f32, albedo : vec3<f32>, refl : f32 };
+
+fn sceneSphere(i : i32) -> Sphere {
+  var s : Sphere;
+  let t = P.time;
+  if (i == 0) {
+    s.c = vec3<f32>(0.0, 1.1, 0.0);
+    s.r = 1.1;
+    s.albedo = vec3<f32>(0.9, 0.9, 0.95);
+    s.refl = 0.85;
+    return s;
+  }
+  let k = f32(i - 1);
+  let a = k * (2.0 * PI / 6.0) + t * 0.35;
+  let rad = 3.1;
+  s.c = vec3<f32>(cos(a) * rad, 0.65 + 0.25 * sin(t * 1.3 + k), sin(a) * rad);
+  s.r = 0.65;
+  let hue = fract(k * 0.17 + 0.05);
+  s.albedo = 0.5 + 0.5 * cos(6.2831 * (hue + vec3<f32>(0.0, 0.33, 0.66)));
+  s.refl = 0.35;
+  return s;
+}
+const NSPHERES : i32 = 7;
+
+fn intersectSphere(ro : vec3<f32>, rd : vec3<f32>, s : Sphere) -> f32 {
+  let oc = ro - s.c;
+  let b = dot(oc, rd);
+  let c = dot(oc, oc) - s.r * s.r;
+  let h = b * b - c;
+  if (h < 0.0) { return -1.0; }
+  let sq = sqrt(h);
+  let t0 = -b - sq;
+  if (t0 > 1e-3) { return t0; }
+  let t1 = -b + sq;
+  if (t1 > 1e-3) { return t1; }
+  return -1.0;
+}
+
+fn intersectPlane(ro : vec3<f32>, rd : vec3<f32>) -> f32 {
+  if (abs(rd.y) < 1e-4) { return -1.0; }
+  let t = -ro.y / rd.y;
+  return select(-1.0, t, t > 1e-3);
+}
+
+struct Hit { t : f32, n : vec3<f32>, albedo : vec3<f32>, refl : f32, sky : bool };
+
+fn skyColor(rd : vec3<f32>) -> vec3<f32> {
+  let up = clamp(rd.y * 0.5 + 0.5, 0.0, 1.0);
+  let horizon = pow(1.0 - abs(rd.y), 8.0);
+  return mix(vec3<f32>(0.02, 0.03, 0.07), vec3<f32>(0.35, 0.45, 0.7), up)
+       + vec3<f32>(0.5, 0.35, 0.2) * horizon;
+}
+
+fn trace(ro : vec3<f32>, rd : vec3<f32>) -> Hit {
+  var best : Hit;
+  best.t = MAXF; best.sky = true;
+  for (var i = 0; i < NSPHERES; i = i + 1) {
+    let s = sceneSphere(i);
+    let t = intersectSphere(ro, rd, s);
+    if (t > 0.0 && t < best.t) {
+      best.t = t; best.sky = false;
+      let p = ro + rd * t;
+      best.n = normalize(p - s.c);
+      best.albedo = s.albedo;
+      best.refl = s.refl;
+    }
+  }
+  let tp = intersectPlane(ro, rd);
+  if (tp > 0.0 && tp < best.t) {
+    let p = ro + rd * tp;
+    best.t = tp; best.sky = false;
+    best.n = vec3<f32>(0.0, 1.0, 0.0);
+    let chk = (floor(p.x) + floor(p.z));
+    let c = select(0.18, 0.75, (chk - 2.0 * floor(chk * 0.5)) < 0.5);
+    best.albedo = vec3<f32>(c, c, c * 1.02);
+    best.refl = 0.25;
+  }
+  return best;
+}
+
+fn shadow(p : vec3<f32>, ldir : vec3<f32>) -> f32 {
+  for (var i = 0; i < NSPHERES; i = i + 1) {
+    if (intersectSphere(p, ldir, sceneSphere(i)) > 0.0) { return 0.25; }
+  }
+  return 1.0;
+}
+
+fn shade(ro : vec3<f32>, rd : vec3<f32>) -> vec3<f32> {
+  var col = vec3<f32>(0.0);
+  var att = vec3<f32>(1.0);
+  var o = ro;
+  var d = rd;
+  let lightDir = normalize(vec3<f32>(0.5, 0.9, -0.4));
+  let maxB = i32(P.bounces + 0.5) * i32(P.reflectOn + 0.5) + 1;
+
+  for (var bounce = 0; bounce < maxB; bounce = bounce + 1) {
+    let h = trace(o, d);
+    if (h.sky) { col = col + att * skyColor(d); break; }
+    let p = o + d * h.t;
+    let n = h.n;
+    let sh = shadow(p + n * 2e-3, lightDir);
+    let diff = max(dot(n, lightDir), 0.0) * sh;
+    let hv = normalize(lightDir - d);
+    let spec = pow(max(dot(n, hv), 0.0), 48.0) * sh;
+    let local = h.albedo * (0.12 + 0.88 * diff) + vec3<f32>(spec);
+    col = col + att * local * (1.0 - h.refl);
+    if (h.refl <= 0.0) { break; }
+    att = att * h.refl * mix(vec3<f32>(1.0), h.albedo, 0.15);
+    d = reflect(d, n);
+    o = p + n * 2e-3;
+  }
+  return col;
+}
+
+@compute @workgroup_size(${WORKGROUP}, ${WORKGROUP})
+fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
+  let dim = vec2<u32>(u32(P.resolution.x), u32(P.resolution.y));
+  if (gid.x >= dim.x || gid.y >= dim.y) { return; }
+
+  let fwd = normalize(P.camTarget - P.camPos);
+  let right = normalize(cross(fwd, vec3<f32>(0.0, 1.0, 0.0)));
+  let up = cross(right, fwd);
+
+  let uv = (vec2<f32>(f32(gid.x), f32(gid.y)) + 0.5) / P.resolution;
+  var ndc = uv * 2.0 - 1.0;
+  ndc.y = -ndc.y;
+  let aspect = P.resolution.x / P.resolution.y;
+  let fov = 1.15;
+  let rd = normalize(fwd + right * ndc.x * aspect * fov + up * ndc.y * fov);
+
+  var col = shade(P.camPos, rd);
+
+  col = col / (col + vec3<f32>(1.0));
+  let v = 1.0 - 0.25 * dot(ndc, ndc);
+  col = pow(col * v, vec3<f32>(1.0 / 2.2));
+
+  textureStore(outTex, vec2<i32>(gid.xy), vec4<f32>(col, 1.0));
+}
+`;
+
+const blitWGSL = /* wgsl */`
+@group(0) @binding(0) var tex : texture_2d<f32>;
+@group(0) @binding(1) var smp : sampler;
+struct VOut { @builtin(position) pos : vec4<f32>, @location(0) uv : vec2<f32> };
+@vertex fn vs(@builtin(vertex_index) i : u32) -> VOut {
+  var p = array<vec2<f32>, 3>(vec2<f32>(-1.0,-3.0), vec2<f32>(-1.0,1.0), vec2<f32>(3.0,1.0));
+  var o : VOut;
+  o.pos = vec4<f32>(p[i], 0.0, 1.0);
+  o.uv = 0.5 * (p[i] * vec2<f32>(1.0, -1.0) + 1.0);
+  return o;
+}
+@fragment fn fs(v : VOut) -> @location(0) vec4<f32> {
+  return textureSampleLevel(tex, smp, v.uv, 0.0);
+}
+`;
+
+const computePipe = device.createComputePipeline({
+  layout: 'auto',
+  compute: { module: device.createShaderModule({ code: computeWGSL }), entryPoint: 'main' },
+});
+const blitModule = device.createShaderModule({ code: blitWGSL });
+const blitPipe = device.createRenderPipeline({
+  layout: 'auto',
+  vertex: { module: blitModule, entryPoint: 'vs' },
+  fragment: { module: blitModule, entryPoint: 'fs', targets: [{ format }] },
+  primitive: { topology: 'triangle-list' },
+});
+const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
+
+const paramsBuf = device.createBuffer({
+  size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+});
+
+// --- Render-target management (canvas size / quality changes) ---------------
+let renderScale = 1;             // 1, 2 or 4 — the homage to the original dialog
+let W = 0, H = 0;                // compute resolution
+let storageTex = null, computeBind = null, blitBind = null;
+
+function rebuildTargets() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cssW = canvas.clientWidth || 640;
+  const pxW = Math.min(Math.round(cssW * dpr), 1600);
+  const pxH = Math.round(pxW * 9 / 16);
+  canvas.width = pxW; canvas.height = pxH;
+  W = Math.max(64, Math.round(pxW / renderScale));
+  H = Math.max(36, Math.round(pxH / renderScale));
+  if (storageTex) storageTex.destroy();
+  storageTex = device.createTexture({
+    size: [W, H], format: 'rgba8unorm',
+    usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
+  });
+  computeBind = device.createBindGroup({
+    layout: computePipe.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: { buffer: paramsBuf } },
+      { binding: 1, resource: storageTex.createView() },
+    ],
+  });
+  blitBind = device.createBindGroup({
+    layout: blitPipe.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: storageTex.createView() },
+      { binding: 1, resource: sampler },
+    ],
+  });
+  document.getElementById('res').textContent =
+    `${W}×${H}` + (renderScale > 1 ? ` → ${pxW}×${pxH}` : '');
+}
+rebuildTargets();
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(rebuildTargets, 150);
+});
+
+// --- Controls ----------------------------------------------------------------
+const ui = {
+  reflect: document.getElementById('reflect'),
+  spin: document.getElementById('spin'),
+};
+const qual = document.getElementById('quality');
+qual.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  for (const x of qual.querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
+  renderScale = parseInt(b.dataset.s, 10);
+  rebuildTargets();
+});
+
+// --- Frame loop --------------------------------------------------------------
+const fpsEl = document.getElementById('fps');
+const t0 = performance.now();
+let frames = 0, lastFps = t0;
+const paramData = new ArrayBuffer(64);
+const pf = new Float32Array(paramData);
+
+function frame() {
+  const now = performance.now();
+  const time = (now - t0) / 1000;
+
+  const a = ui.spin.checked ? time * 0.25 : 1.0;
+  const R = 8.5 + Math.sin(time * 0.4) * 1.5;
+  pf[0] = W; pf[1] = H; pf[2] = time; pf[3] = 3; // bounces
+  pf[4] = Math.cos(a) * R; pf[5] = 2.6 + Math.sin(time * 0.5) * 1.2; pf[6] = Math.sin(a) * R; pf[7] = 0;
+  pf[8] = 0; pf[9] = 1; pf[10] = 0; pf[11] = ui.reflect.checked ? 1 : 0;
+  device.queue.writeBuffer(paramsBuf, 0, paramData);
+
+  const enc = device.createCommandEncoder();
+  const cp = enc.beginComputePass();
+  cp.setPipeline(computePipe);
+  cp.setBindGroup(0, computeBind);
+  cp.dispatchWorkgroups(Math.ceil(W / WORKGROUP), Math.ceil(H / WORKGROUP));
+  cp.end();
+
+  const rp = enc.beginRenderPass({
+    colorAttachments: [{
+      view: ctx.getCurrentTexture().createView(),
+      clearValue: { r: 0, g: 0, b: 0, a: 1 }, loadOp: 'clear', storeOp: 'store',
+    }],
+  });
+  rp.setPipeline(blitPipe);
+  rp.setBindGroup(0, blitBind);
+  rp.draw(3);
+  rp.end();
+  device.queue.submit([enc.finish()]);
+
+  frames++;
+  if (now - lastFps > 500) {
+    fpsEl.textContent = (frames * 1000 / (now - lastFps)).toFixed(0);
+    frames = 0; lastFps = now;
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
