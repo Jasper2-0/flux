@@ -38,10 +38,12 @@
       <button data-s="1" aria-pressed="true">High 1×1</button>
       <button data-s="2" aria-pressed="false">Average 2×2</button>
       <button data-s="4" aria-pressed="false">Low 4×4</button>
+      <button data-s="auto" aria-pressed="false">Auto</button>
     </div>
     <label class="tog"><input type="checkbox" id="reflect" checked> reflections</label>
     <label class="tog"><input type="checkbox" id="spin" checked> camera path</label>
     <span class="stat"><b id="fps">–</b> fps</span>
+    <span class="stat"><b id="ms">–</b> ms</span>
     <span class="stat"><b id="res">–</b></span>
   </div>
   <div id="err"></div>
@@ -269,7 +271,13 @@ const paramsBuf = device.createBuffer({
 });
 
 // --- Render-target management (canvas size / quality changes) ---------------
-let renderScale = 1;             // 1, 2 or 4 — the homage to the original dialog
+// Ray budget: at scale 1 the compute resolution is capped so one frame stays
+// well inside a 60Hz vsync even at cold GPU clocks. Safari quantizes rAF to
+// display divisors (60/30/20), so a borderline frame time reads as a hard 30.
+const RAY_BUDGET = 820_000;      // ~1210x680 max at 1x1
+let renderScale = 1;             // 1, 2, 4, or adaptive when autoQuality
+let autoQuality = false;
+let autoScale = 1.5;             // adaptive scale, continuous in [1, 4]
 let W = 0, H = 0;                // compute resolution
 let storageTex = null, computeBind = null, blitBind = null;
 
@@ -278,9 +286,17 @@ function rebuildTargets() {
   const cssW = canvas.clientWidth || 640;
   const pxW = Math.min(Math.round(cssW * dpr), 1600);
   const pxH = Math.round(pxW * 9 / 16);
-  canvas.width = pxW; canvas.height = pxH;
-  W = Math.max(64, Math.round(pxW / renderScale));
-  H = Math.max(36, Math.round(pxH / renderScale));
+  if (canvas.width !== pxW || canvas.height !== pxH) {
+    canvas.width = pxW; canvas.height = pxH;
+  }
+  const scale = autoQuality ? autoScale : renderScale;
+  let w = Math.round(pxW / scale), h = Math.round(pxH / scale);
+  if (w * h > RAY_BUDGET) {
+    const f = Math.sqrt(RAY_BUDGET / (w * h));
+    w = Math.round(w * f); h = Math.round(h * f);
+  }
+  W = Math.max(64, w);
+  H = Math.max(36, h);
   if (storageTex) storageTex.destroy();
   storageTex = device.createTexture({
     size: [W, H], format: 'rgba8unorm',
@@ -301,7 +317,7 @@ function rebuildTargets() {
     ],
   });
   document.getElementById('res').textContent =
-    `${W}×${H}` + (renderScale > 1 ? ` → ${pxW}×${pxH}` : '');
+    `${W}×${H}` + (W < pxW ? ` → ${pxW}×${pxH}` : '');
 }
 rebuildTargets();
 let resizeTimer = 0;
@@ -320,20 +336,47 @@ qual.addEventListener('click', (e) => {
   const b = e.target.closest('button');
   if (!b) return;
   for (const x of qual.querySelectorAll('button')) x.setAttribute('aria-pressed', String(x === b));
-  renderScale = parseInt(b.dataset.s, 10);
+  autoQuality = b.dataset.s === 'auto';
+  if (!autoQuality) renderScale = parseInt(b.dataset.s, 10);
   rebuildTargets();
 });
 
 // --- Frame loop --------------------------------------------------------------
 const fpsEl = document.getElementById('fps');
+const msEl = document.getElementById('ms');
 const t0 = performance.now();
-let frames = 0, lastFps = t0;
+let frames = 0, lastFps = t0, lastNow = t0;
+let emaMs = 16.7;                // smoothed frame time
+let lastGovern = t0, lastProbe = t0;
 const paramData = new ArrayBuffer(64);
 const pf = new Float32Array(paramData);
+
+// Adaptive quality, in the spirit of the original's adaptive subsampling:
+// coarsen fast when frames miss vsync; once stable at 60, periodically probe
+// a finer scale (rAF deltas can't reveal headroom while vsync-locked).
+function govern(now) {
+  if (!autoQuality || now - lastGovern < 700) return;
+  lastGovern = now;
+  let s = autoScale;
+  if (emaMs > 18.5) {            // missing 60 → coarsen ~sqrt(overshoot)
+    s = Math.min(4, s * Math.min(1.6, Math.sqrt(emaMs / 16.7)));
+    lastProbe = now;
+  } else if (s > 1 && now - lastProbe > 3000) {
+    s = Math.max(1, s * 0.85);   // stable at 60 → try finer
+    lastProbe = now;
+  }
+  if (Math.abs(s - autoScale) / autoScale > 0.05) {
+    autoScale = s;
+    rebuildTargets();
+  }
+}
 
 function frame() {
   const now = performance.now();
   const time = (now - t0) / 1000;
+  emaMs += (Math.min(now - lastNow, 100) - emaMs) * 0.1;
+  lastNow = now;
+  govern(now);
 
   const a = ui.spin.checked ? time * 0.25 : 1.0;
   const R = 8.5 + Math.sin(time * 0.4) * 1.5;
@@ -364,6 +407,7 @@ function frame() {
   frames++;
   if (now - lastFps > 500) {
     fpsEl.textContent = (frames * 1000 / (now - lastFps)).toFixed(0);
+    msEl.textContent = emaMs.toFixed(1);
     frames = 0; lastFps = now;
   }
   requestAnimationFrame(frame);
