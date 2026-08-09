@@ -170,11 +170,83 @@ segmentation requires execution.
 
 ---
 
-## 3. The texture / material system (characterized)
+## 3. The texture / material system
 
-Heaven 7 has two texture-related layers, both found:
+Three layers, all located. **Two corrections to earlier drafts of this
+document are folded in below** — see §3.4.
 
-### Runtime shade-tree — `.text:0x4023b7`
+### 3.1 The texture generator is a second bytecode VM (in `.data`)
+
+`.data` contains a **static library of x86/MMX code** — not just data — and the
+texture generator lives there as its own little interpreter, independent of the
+scene-script VM in §2:
+
+| Piece | Address | Notes |
+|---|---|---|
+| Interpreter | `.data:0x44189f` | `lodsb` fetches an operator id, then linear-searches the table |
+| Operator table | `.data:0x4429b8` | 8-byte entries `{u32 id, u32 handler}`, zero-terminated |
+| Operator count | — | **26** |
+| MMX channel masks | `.data:0x441840` | `0x1f`, `0x7e0`, `0xf800`, `0x3e0` → RGB 565/555 |
+| Work-buffer pointer | `.data:0x44292c` | buffer zeroed `0x50000` dwords (1.25 MB) per run |
+
+Entry is by `jmp 0x44189f` from `.text:0x4089e4`, with the program pointer in
+`EDI` and the destination texture buffer in `EAX`.
+
+The 26 operator ids fall into clean families, which is what a texture-generator
+operator set looks like (sources, filters, combiners, colour ops):
+
+| Ids | Count | Handlers |
+|---|---|---|
+| `0x01`–`0x04` | 4 | all share `0x4418ea` (one routine, variant selected by id) |
+| `0x10`–`0x15` | 6 | `0x441d20`, `0x441d57`, `0x441e67`, `0x441f0c`, `0x441fb1`, `0x442050` |
+| `0x20`–`0x22`, `0x24` | 4 | `0x4420db`, `0x44211a`, `0x442207`, `0x4422f6` |
+| `0x30`–`0x37` | 8 | `0x44237d` … `0x44263b` |
+| `0x40`–`0x41` | 2 | `0x442698`, `0x442789` |
+| `0x50`–`0x51` | 2 | `0x44281a`, `0x442899` |
+
+A full reference disassembly of the interpreter and all 26 handlers is checked
+in as [`texture-ops.txt`](texture-ops.txt) (~1600 lines), produced by
+`tools/texture_ops.py`.
+
+Emulation confirms these really do generate the textures: the handler region
+for operator `0x14` executed **14.6 million times** in one run — a per-pixel
+inner loop over several 256×256 buffers.
+
+### 3.2 Texture objects are resolution-parameterised — the key to a remaster
+
+The allocator at `.text:0x4088c9` is called with **width in `EAX`, height in
+`EDX`**, and builds:
+
+```
+tex[0x18] = width
+tex[0x1c] = height
+tex[0x20] = stride = ((width + 7) & ~7) * 4     ; 4 bytes per pixel
+tex[0x24] = buffer  = alloc(stride * (height+1) + 4)   ; zero-filled, 1 guard row
+```
+
+At the call site (`.text:0x4089d5`) the size is a plain immediate:
+
+```asm
+004089d5  mov eax, 0x100        ; width  = 256
+004089da  mov edx, eax          ; height = 256
+004089dc  call 0x4088c9         ; allocate
+004089e1  mov eax, [esi+0x24]   ; buffer
+004089e4  jmp 0x44189f          ; run the texture program
+```
+
+For `width = 256` the stride is exactly **1024 bytes**, which is precisely what
+the shade-tree sampler assumes — so the pieces cross-check.
+
+**Implication for the 4× remaster:** the generator side is parameterised, so
+regenerating at 1024×1024 is a matter of the size argument, not a rewrite. The
+*sampler* is the hardcoded part: `.text:0x4023b7` bakes 256×256/stride-1024
+into its masks (`0x3fc00`, `0x3fc`) and shifts (`>>5`, `>>0xd`). In a WGSL port
+we write our own sampler anyway, so that hardcoding is irrelevant — we need the
+operator *math*, at which point any resolution is free. This is exactly why
+dumped texture pixels are not sufficient for a remaster and the operators must
+be reimplemented.
+
+### 3.3 Runtime shade-tree — `.text:0x4023b7`
 
 A **recursive evaluator over 32-byte nodes** (`ESI` = node). It is the material
 system the raytracer calls at each hit. Per node:
@@ -198,15 +270,26 @@ Samples the texture as **signed 16-bit** values (two adjacent texels,
 surface normal — i.e. textures are stored both as 32-bit RGBA (colour) and
 signed-16 height/normal maps, and the shading does bump mapping from them.
 
-### Offline generator — `.text:0x40cb14` (called once from init `0x401238`)
+### 3.4 Corrections to earlier analysis
 
-The buffer-filling generator: an MMX integer routine using a constant table at
-`.data:0x441840` with shift-heavy lattice arithmetic (`pslld 7` / `psrld 0xD`)
-— a hash/value-noise synthesizer that writes the texture buffers the shade-tree
-later samples. Reversing its exact noise math is the remaining piece if you
-want to regenerate textures procedurally rather than dumping them; dumping them
-at runtime (the Frida script) gives you the exact pixels immediately, and the
-generator can be re-derived later against those as ground truth.
+Two claims in earlier drafts of this document were wrong and are retracted:
+
+- **`.text:0x40cb14` is *not* the texture generator.** It is a teardown
+  routine: it fetches the engine context, destroys the graphics objects, and
+  frees the context. The MMX routine near it actually begins at
+  **`0x40cb28`** and has no direct callers (it is reached through the `.data`
+  code library). The real generator is the VM in §3.1.
+- **There is no runtime code generation.** An earlier reading of the profile
+  suggested `.data` code was JIT-emitted, because instructions inside the
+  `.data` band wrote into that band 1.5 M times. Those writes target two fixed
+  *variables* (`0x442930`, `0x442b2c`) that simply live among the code. `.data`
+  is a static code+data library, which is simpler and better news for porting.
+
+One scope caveat on §2 as well: the 201-opcode dump was taken with a frozen
+clock. With the clock advancing, **5495** decoder tokens are seen rather than
+1735, because later scenes are parsed as the intro progresses. `scene-script.txt`
+is therefore the *opening* of the timeline, not the whole of it; re-running with
+`emulate_texture_vm.py`'s advancing clock and a raised token cap yields the rest.
 
 ---
 
@@ -257,6 +340,52 @@ Wine), attach Frida and let it observe the live decode:
 5. Index scene events by the XM row clock (already wired in the demo) to restore
    music sync.
 
+## 5. Roadmap to a complete port + 4× remaster
+
+What a *complete* port needs from the binary, and where each piece stands:
+
+| Piece | Status | Where |
+|---|---|---|
+| Stream decoders (`varint`, `float`) | **done**, tested port | `tools/decoders.py` |
+| Scene-script VM + dispatch table | **done** | §2 |
+| Scene timeline (opening) | **extracted** | `scene-script.txt` |
+| Scene timeline (full, clock advancing) | needs one longer run | §3.4 caveat |
+| Texture generator VM + operator table | **located, 26 ops disassembled** | §3.1, `texture-ops.txt` |
+| Texture operator *semantics* | **not yet reversed** — the main remaining work | 26 handlers |
+| Texture programs (per-texture byte streams) | traceable; hook `0x4418b7` | `tools/emulate_texture_vm.py` |
+| Shade-tree / material evaluator | characterized | §3.3 |
+| Bump mapping | characterized | §3.3 |
+| Music | **solved** — XM module + JS replayer | `demos/heaven7-webgpu` |
+| Raytracer | **reimplemented** in WGSL | `demos/heaven7-webgpu` |
+
+### The remaining work, honestly scoped
+
+The generative machinery is now *mapped* but not yet *understood*: knowing that
+operator `0x32` lives at `0x4423ee` is not the same as knowing it is (say) a
+directional blur. Turning the map into a port means reading 26 short MMX
+routines and writing each as a WGSL compute pass. They are small (typically
+30–120 instructions, mostly packed-integer arithmetic over a scanline), and
+they are all in `texture-ops.txt`, but 26 × careful reading is the bulk of the
+work left. Budget that as the real task, not as a detail.
+
+The recommended order:
+
+1. **Trace the texture programs first** (`emulate_texture_vm.py`). Knowing
+   *which* operators the intro actually uses, and with what arguments, prunes
+   the set — the scene script uses only 9 of ~30 script opcodes, so the texture
+   programs likely lean on a similar subset. Reverse those first.
+2. **Reimplement operator-by-operator**, validating each against the emulator:
+   run the original operator on a known input buffer, dump the result, and
+   diff it against the WGSL pass. This gives per-operator ground truth instead
+   of a whole-image guess at the end.
+3. **Then scale.** Because the generator is size-parameterised (§3.2) and the
+   WGSL sampler is ours, 1024×1024 costs only a uniform change. Keep the
+   original 256×256 path as the "authentic" mode and 1024×1024 as the
+   remaster; both then come from the *same* operator code, which is the whole
+   reason to port the generator rather than ship baked pixels.
+4. **Re-derive the sampler in WGSL** with 12-bit UV instead of the original's
+   hardcoded 8-bit masks, and keep bump mapping reading the signed-16 layer.
+
 ## Files
 
 - **`scene-script.txt`** — the extracted timeline: 201 opcodes with decoded
@@ -268,6 +397,12 @@ Wine), attach Frida and let it observe the live decode:
 - `tools/decoders.py` — tested ports of `read_varint` / `read_float`.
 - `tools/analib.py` — PE loader + capstone disassembler (needs `H7_EXE`).
 - `tools/annotate.py` — prints annotated disassembly of the key routines.
+- **`texture-ops.txt`** — reference disassembly of the texture VM: interpreter
+  plus all 26 operator handlers.
+- `tools/texture_ops.py` — regenerates `texture-ops.txt` from the binary.
+- `tools/emulate_texture_vm.py` — emulator variant with an advancing clock that
+  traces the texture VM (program pointers + operator stream) and reaches the
+  later scenes.
 - `tools/extract_scene.js` — Frida dynamic extractor (scene tokens + textures).
 - `disasm-key-routines.txt` — checked-in annotated disassembly of the four
   routines above, so the analysis is readable without the binary.
