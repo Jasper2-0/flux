@@ -4,12 +4,19 @@ Findings from statically reversing the unpacked `heaven7w.exe` (Exceed, 2000),
 targeting the two things a faithful port needs out of the binary: the **scene
 script** (the animation timeline) and the **texture/material system**.
 
-**Status in one line:** the *formats* and the *architecture* are recovered and
-documented here, with a tested Python port of the stream decoders; a complete
-semantic dump of the scene script is best finished by a short dynamic capture
-(Frida script included), because the script is depacked into a heap buffer and
-walked by a pointer-driven interpreter that static analysis can characterize
-but not cleanly evaluate offline.
+**Status: the scene script is extracted.** A headless CPU-emulation harness
+(`tools/emulate_extract.py`, no Windows/Wine/GPU needed) runs the real binary
+far enough to interpret the timeline and dumps it: **201 opcodes / 1735
+decoded values**, checked in as
+[`scene-script.txt`](scene-script.txt) (readable listing) and
+[`scene-script-dump.json`](scene-script-dump.json) (raw). The stream format,
+the interpreter, and the opcode dispatch table are all recovered and
+documented below.
+
+An earlier draft of this document guessed that the script was depacked into a
+heap buffer; emulation disproved that — **the script is cleartext in `.data`
+at `0x418dca`**, and the emulator's opcode fetches match the raw file bytes
+exactly.
 
 All addresses are RVAs in the UPX-unpacked image based at `0x00400000`. The
 original binary is **not** redistributed here; point the tools at your own
@@ -54,9 +61,64 @@ decoding to scene-scale values (e.g. `8.015625`, `130.0`).
 
 ---
 
-## 2. The parser architecture (recovered; drives the dynamic capture)
+## 2. The scene-script VM (recovered and dumped)
 
-The scene is built by a **data-driven interpreter**, not a flat table:
+The timeline is a **bytecode interpreted by a VM at `.text:0x40a60e`**. Its
+main loop is eight instructions:
+
+```asm
+0040a624  movzx eax, byte ptr [edi]              ; fetch opcode
+0040a627  inc   edi
+0040a628  or    eax, eax
+0040a62a  je    0x40a63b                         ; opcode 0 = end of script
+0040a62c  movzx eax, word ptr [eax*2 + 0x440f67] ; dispatch table lookup
+0040a634  add   eax, dword ptr [ebp]             ; + image base (0x400000)
+0040a637  call  eax                              ; run handler (consumes args from EDI)
+0040a639  jmp   0x40a617                         ; loop
+```
+
+- **Script data:** `.data:0x418dca`, cleartext, spanning to ~`0x41b6f4`.
+- **Dispatch table:** `.data:0x440f67`, an array of 16-bit offsets;
+  `handler = 0x400000 + table[opcode]`. Roughly 30 live opcodes; entries past
+  ~30 decay into unrelated data.
+- Handlers pull their arguments from the same `EDI` cursor using the two
+  decoders from §1, so the script is self-describing: argument counts and
+  types are implied by the handler, not stored.
+
+### Opcodes actually used by the intro
+
+| Opcode | Count | Handler | Notes |
+|---|---|---|---|
+| 1 | 96 | `0x404057` | object/keyframe definition — the bulk of the script |
+| 2 | 95 | `0x404154` | commit/terminate the preceding definition (pairs with op 1) |
+| 23 | 3 | `0x404236` | |
+| 20 | 2 | `0x4023d3` | shade-tree op (adjacent to the material evaluator) |
+| 4 | 1 | `0x40303b` | bulk loader — consumes ~5.4 KB of inline data at script start |
+| 7 | 1 | `0x4023bf` | shade-tree op |
+| 11 | 1 | `0x4040af` | one of a family (ops 8–16 all share this handler) |
+| 25 | 1 | `0x404701` | |
+| 29 | 1 | `0x40402b` | |
+
+The near-equal counts of opcodes 1 and 2 reveal the structure: 96
+`define … commit` pairs, i.e. **96 scene objects/animation blocks**, preceded
+by a single bulk-data load.
+
+### Sample of the decoded values
+
+The extracted values are unmistakably scene data — `scene-script.txt` opens
+with entries like:
+
+```
+0x41a340  op1   f:0 f:0 f:0 f:0.5771 f:0.5771 f:-0.5771 f:2.094 i:0
+0x41a2ee  op1   f:1 f:0 f:0 f:140 i:0 f:10 i:1000 f:1000 i:255
+```
+
+`0.5771, 0.5771, -0.5771` is a **normalised direction vector** (1/√3 ≈ 0.5774)
+— a light direction — and `2.094` is **2π/3**, the ring-symmetry angle that
+also appears in the animation constant pool below. That cross-check is strong
+evidence the decoders and the grammar segmentation are correct.
+
+### The original static-analysis view of the handlers
 
 - A per-object-type handler is looked up (`.text:0x40d70a`) and invoked
   indirectly (`call edi` at `.text:0x406a33`) once per object. The scene-build
@@ -97,17 +159,14 @@ The scene-build driver feeds these into curve/keyframe setup
 The `2π/3` and `2π/5` constants are the symmetry angles for the rings of
 spheres; `1000.0` converts `timeGetTime` milliseconds to seconds.
 
-### Why the full dump is a dynamic step
+### Why extraction is dynamic rather than a pure static decode
 
-The stream `EDI` points into a runtime buffer (allocated through the zero-fill
-`GlobalAlloc` wrapper at `.text:0x4015c7`), and which handler runs next depends
-on values already read — a classic self-describing bytecode. Reproducing it
-offline means re-implementing the whole interpreter *and* locating the buffer's
-contents at the right moment. Observing the running program is far cheaper and
-exact. That is what [`tools/extract_scene.js`](tools/extract_scene.js) does:
-it hooks the two decoders (logging `cursor → value` in stream order), captures
-one full object struct, and dumps every texture buffer the shader touches.
-Output is `scene_dump.json` + `object_record.bin` + `tex_*.rgba`.
+The bytecode is self-describing: each handler decides how many values to pull
+and of which type, so you cannot segment the stream without running the
+handlers. Rather than reimplement ~30 handlers to find out, the emulator runs
+the *original* ones and records what they consume — which is why the listing's
+argument grouping can be trusted. `.data` itself needs no depacking; only the
+segmentation requires execution.
 
 ---
 
@@ -151,24 +210,38 @@ generator can be re-derived later against those as ground truth.
 
 ---
 
-## 4. Recommended path to a complete extraction
+## 4. Extraction: how to reproduce
 
-Two routes, depending on what you can run. Neither needs the values decoded by
-hand — both dump the real stream.
+### A. No Windows: headless CPU emulation (`tools/emulate_extract.py`) — works
 
-### A. No Windows: headless CPU emulation (`tools/emulate_extract.py`)
+```bash
+pip install unicorn pefile capstone
+upx -d heaven7w.exe -o h7w_unpacked.exe
+python3 emulate_extract.py     # -> script_dump.json  (201 opcodes, 1735 values)
+python3 script_listing.py      # -> scene-script.txt  (readable listing)
+```
 
-The scene parser is pure computation — it never touches the GPU or sound — so
-it can run inside a CPU emulator with the OS calls stubbed. `emulate_extract.py`
-loads the unpacked PE into [Unicorn](https://www.unicorn-engine.org/)
-(`pip install unicorn`), stubs the imports, and hooks the two decoders to dump
-the stream. It runs anywhere Python does — Mac, Linux, no Wine. **Status:** the
-harness loads and executes the real code (CPU/MMX/x87, import stubs, bump-heap,
-command-line parser all work); reaching the parser still needs faithful stubs
-for the DirectDraw COM vtable, the settings dialog callback, and the worker
-thread. That's the remaining work to make it a one-command dump.
+Runs anywhere Python does — macOS, Linux, CI. No Wine, no GPU, no display.
+Three details were necessary to get the real code this far, and are worth
+knowing if you extend the harness:
+
+- **DirectDraw v1 vtable arg counts must be exact.** Counting pushes at the
+  call site fails: before `SetDisplayMode` the code pushes an extra register
+  and pops it afterwards, so a push-counting stub over-pops, corrupts `ESP`,
+  and the function returns to address 0. `VT_ARGS` in the script has the real
+  per-slot counts.
+- **`GetSurfaceDesc` must report a real pixel format.** The blitter path is
+  selected from `dwRGBBitCount` and the RGB masks; zeros there send it down a
+  branch that dies. The harness reports 16-bit 565.
+- **The render/mixer thread is never started** (`CreateThread` returns a fake
+  handle) and `timeGetTime` returns 0, so once the script is parsed the main
+  loop spins — the harness stops at that point, which is exactly after the
+  timeline is fully decoded.
 
 ### B. Frida on the running program (`tools/extract_scene.js`)
+
+Still the route to take if you want the **generated texture pixels**, which
+the emulator does not yet dump (it stops before texture generation completes).
 
 If you can run the intro (native Windows, or **HEAVEN7L on Linux/macOS**, or
 Wine), attach Frida and let it observe the live decode:
@@ -186,6 +259,12 @@ Wine), attach Frida and let it observe the live decode:
 
 ## Files
 
+- **`scene-script.txt`** — the extracted timeline: 201 opcodes with decoded
+  arguments. The primary artifact.
+- **`scene-script-dump.json`** — the same data raw (opcode stream + token
+  stream with stream offsets), for programmatic use by the port.
+- **`tools/emulate_extract.py`** — the headless emulator that produces it.
+- `tools/script_listing.py` — turns the JSON dump into the readable listing.
 - `tools/decoders.py` — tested ports of `read_varint` / `read_float`.
 - `tools/analib.py` — PE loader + capstone disassembler (needs `H7_EXE`).
 - `tools/annotate.py` — prints annotated disassembly of the key routines.
