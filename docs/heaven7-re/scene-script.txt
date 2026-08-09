@@ -1,17 +1,30 @@
 Heaven 7 scene script  (stream base .data:0x418dca, VM at .text:0x40a60e)
 dispatch: handler = 0x400000 + word[0x440f67 + opcode*2]
-201 opcodes executed, 1735 decoder tokens
+970 opcodes executed, 5495 decoder tokens
 
 opcode histogram (op: count -> handler):
-   op 1   x96   handler 0x00404057
-   op 2   x95   handler 0x00404154
+   op 1   x336  handler 0x00404057
+   op 2   x335  handler 0x00404154
+   op 11  x160  handler 0x004040af
+   op 10  x66   handler 0x004040af
+   op 15  x25   handler 0x004040af
+   op 8   x15   handler 0x004040af
+   op 7   x8    handler 0x004023bf
+   op 3   x4    handler 0x004041e7
+   op 20  x3    handler 0x004023d3
    op 23  x3    handler 0x00404236
-   op 20  x2    handler 0x004023d3
+   op 6   x2    handler 0x004023ff
+   op 17  x2    handler 0x0040376b
+   op 27  x2    handler 0x00404a24
    op 4   x1    handler 0x0040303b
    op 29  x1    handler 0x0040402b
-   op 11  x1    handler 0x004040af
-   op 7   x1    handler 0x004023bf
    op 25  x1    handler 0x00404701
+   op 24  x1    handler 0x004042a3
+   op 26  x1    handler 0x00404aca
+   op 28  x1    handler 0x00404b31
+   op 5   x1    handler 0x00402471
+   op 19  x1    handler 0x0040032a
+   op 0   x1    handler 0x00400000
 
 listing (offset  opcode  consumed-bytes  decoded args):
   0x418dca  op1   h=0x404057 span=14     i:0 i:0 i:5300 i:0 i:1
@@ -214,4 +227,773 @@ listing (offset  opcode  consumed-bytes  decoded args):
   0x41b6ce  op7   h=0x4023bf span=34     
   0x41b6f0  op2   h=0x404154 span=1      
   0x41b6f1  op1   h=0x404057 span=3      
-  0x41b6f4  op25  h=0x404701 span=0      i:865
+  0x41b6f4  op25  h=0x404701 span=3      i:865
+  0x41b6f7  op2   h=0x404154 span=1      
+  0x41b6f8  op1   h=0x404057 span=3      
+  0x41b6fb  op6   h=0x4023ff span=723    i:72 i:80
+  0x41b9ce  op24  h=0x4042a3 span=1      
+  0x41b9cf  op17  h=0x40376b span=2      
+  0x41b9d1  op2   h=0x404154 span=1      
+  0x41b9d2  op1   h=0x404057 span=3      
+  0x41b9d5  op20  h=0x4023d3 span=24     
+  0x41b9ed  op2   h=0x404154 span=1      
+  0x41b9ee  op1   h=0x404057 span=3      
+  0x41b9f1  op6   h=0x4023ff span=25125  i:160 i:1256
+  0x421c16  op27  h=0x404a24 span=5      i:200 i:1570
+  0x421c1b  op17  h=0x40376b span=2      
+  0x421c1d  op26  h=0x404aca span=3      i:868
+  0x421c20  op28  h=0x404b31 span=3      i:868
+  0x421c23  op27  h=0x404a24 span=5      i:-1 i:-1
+  0x421c28  op2   h=0x404154 span=1      
+  0x421c29  op1   h=0x404057 span=3      
+  0x421c2c  op5   h=0x402471 span=18749  i:48 i:44 i:142
+  0x426569  op2   h=0x404154 span=1      
+  0x42656a  op1   h=0x404057 span=16     i:872 i:2000 i:128
+  0x42657a  op15  h=0x4040af span=6      
+  0x426580  op10  h=0x4040af span=4      i:30
+  0x426584  op15  h=0x4040af span=6      
+  0x42658a  op1   h=0x404057 span=3      
+  0x42658d  op1   h=0x404057 span=31     f:6520 f:990 f:-2480 f:0 f:0 f:1 f:0 i:0 f:395 f:307 f:229 i:256 f:69248
+  0x4265ac  op2   h=0x404154 span=1      
+  0x4265ad  op1   h=0x404057 span=35     f:1066 f:-749 f:-1910 f:0 f:0 f:0 f:6.2812 i:2196 i:0 f:2 i:42
+  0x4265d0  op11  h=0x4040af span=33     i:0 f:0 i:88 f:-0.049988 i:30 f:0.049988 i:48 f:-0.049988 i:128 f:0.049988 i:338 f:-0.049988 i:255 f:0.049988
+  0x4265f1  op8   h=0x4040af span=5      i:866
+  0x4265f6  op11  h=0x4040af span=5      f:4000
+  0x4265fb  op11  h=0x4040af span=5      f:4000
+  0x426600  op11  h=0x4040af span=15     i:0 f:0 i:1066 f:3.2768e+05 i:0 f:6.5536e+06
+  0x42660f  op11  h=0x4040af span=11     i:0 f:0 i:1066 f:1.3107e+05
+  0x42661a  op2   h=0x404154 span=1      
+  0x42661b  op1   h=0x404057 span=37     f:3808 f:-1098 f:-4592 f:0 f:0 f:1 f:0 i:1 i:1260 f:1.7988 i:15 f:1508
+  0x426640  op11  h=0x4040af span=5      f:1.2583e+07
+  0x426645  op11  h=0x4040af span=5      f:1.2583e+07
+  0x42664a  op11  h=0x4040af span=5      f:1.3107e+05
+  0x42664f  op2   h=0x404154 span=1      
+  0x426650  op1   h=0x404057 span=71     i:0 f:-20896 f:0 f:-6736 i:365 f:-14992 f:0 f:-2860 i:213 f:-11120 f:1550 f:-9584 i:488 f:-9152 f:5232 f:-29216 i:434 f:22080 f:2756 f:-34816 i:500 f:27040 f:2756 f:5008 f:0 f:0 f:1 f:0 i:0 i:877 f:0.54883 f:0
+  0x426697  op2   h=0x404154 span=1      
+  0x426698  op1   h=0x404057 span=63     i:0 f:-15968 f:0 f:-4888 i:365 f:-10128 f:0 f:-4192 i:213 f:-6624 f:1062 f:-9344 i:488 f:-7232 f:3472 f:-23488 i:434 f:12640 f:998 f:-26880 i:500 f:17696 f:998 f:2228 f:0 f:0 f:1 f:0 i:0
+  0x4266d7  op2   h=0x404154 span=1      
+  0x4266d8  op1   h=0x404057 span=37     f:6336 f:-1058 f:-6864 f:0 f:0 f:1 f:0 i:1 i:1260 f:1.7988 i:15 f:3480
+  0x4266fd  op11  h=0x4040af span=5      f:1.2583e+07
+  0x426702  op11  h=0x4040af span=5      f:1.2583e+07
+  0x426707  op11  h=0x4040af span=5      f:1.3107e+05
+  0x42670c  op2   h=0x404154 span=1      
+  0x42670d  op1   h=0x404057 span=40     f:5920 f:-950 f:-7256 f:-1 f:0 f:0 f:0.45166 i:0 i:0 f:0.5 i:32 f:816 f:11648
+  0x426735  op10  h=0x4040af span=5      i:256
+  0x42673a  op15  h=0x4040af span=6      
+  0x426740  op10  h=0x4040af span=4      i:60
+  0x426744  op2   h=0x404154 span=1      
+  0x426745  op1   h=0x404057 span=42     f:4168 f:-1306 f:-4992 f:-0.95117 f:-0.29932 f:0.060425 f:0.38428 i:0 i:0 f:0.5 i:32 f:432.5 f:11648
+  0x42676f  op10  h=0x4040af span=5      i:256
+  0x426774  op15  h=0x4040af span=6      
+  0x42677a  op10  h=0x4040af span=4      i:60
+  0x42677e  op2   h=0x404154 span=1      
+  0x42677f  op1   h=0x404057 span=42     f:5920 f:-574 f:-993 f:-0.3999 f:0.89941 f:-0.17383 f:0.89941 i:0 i:0 f:0.5 i:32 f:1188 f:11648
+  0x4267a9  op10  h=0x4040af span=5      i:256
+  0x4267ae  op15  h=0x4040af span=6      
+  0x4267b4  op10  h=0x4040af span=4      i:30
+  0x4267b8  op2   h=0x404154 span=1      
+  0x4267b9  op1   h=0x404057 span=37     f:7784 f:-1098 f:-13136 f:0 f:0 f:1 f:0 i:1 i:1260 f:1.7988 i:15 f:2832
+  0x4267de  op11  h=0x4040af span=5      f:1.2583e+07
+  0x4267e3  op11  h=0x4040af span=5      f:1.2583e+07
+  0x4267e8  op11  h=0x4040af span=5      f:1.3107e+05
+  0x4267ed  op2   h=0x404154 span=1      
+  0x4267ee  op1   h=0x404057 span=37     f:3948 f:-1098 f:-11600 f:0 f:0 f:1 f:0 i:1 i:1260 f:1.7988 i:15 f:878
+  0x426813  op11  h=0x4040af span=5      f:1.2583e+07
+  0x426818  op11  h=0x4040af span=5      f:1.2583e+07
+  0x42681d  op11  h=0x4040af span=5      f:1.3107e+05
+  0x426822  op2   h=0x404154 span=1      
+  0x426823  op1   h=0x404057 span=40     f:10048 f:-1120 f:-17984 f:-1 f:0 f:0 f:0.73633 i:0 i:0 f:0.5 i:32 f:816 f:14208
+  0x42684b  op10  h=0x4040af span=5      i:256
+  0x426850  op15  h=0x4040af span=6      
+  0x426856  op10  h=0x4040af span=4      i:30
+  0x42685a  op2   h=0x404154 span=1      
+  0x42685b  op1   h=0x404057 span=37     f:6304 f:-1082 f:-17856 f:0 f:0 f:1 f:0 i:1 i:1260 f:1.7988 i:15 f:2012
+  0x426880  op11  h=0x4040af span=5      f:1.2583e+07
+  0x426885  op11  h=0x4040af span=5      f:1.2583e+07
+  0x42688a  op11  h=0x4040af span=5      f:1.3107e+05
+  0x42688f  op2   h=0x404154 span=1      
+  0x426890  op1   h=0x404057 span=40     f:-10896 f:-836 f:-1588 f:-0.86816 f:-0.4375 f:0.23267 f:1.0977 i:1 i:1261 f:0.7998 i:17 f:1528
+  0x4268b8  op10  h=0x4040af span=5      i:256
+  0x4268bd  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4268c2  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4268c7  op11  h=0x4040af span=5      f:1.3107e+05
+  0x4268cc  op2   h=0x404154 span=1      
+  0x4268cd  op1   h=0x404057 span=45     i:0 i:0 i:450 i:0 f:-10896 f:-836 f:-1588 f:0 f:0 f:1 f:0 i:0 i:0 f:0.5 i:32 f:1850
+  0x4268fa  op15  h=0x4040af span=6      
+  0x426900  op10  h=0x4040af span=4      i:30
+  0x426904  op2   h=0x404154 span=1      
+  0x426905  op1   h=0x404057 span=37     f:6336 f:-856 f:-6920 f:0 f:0 f:-1 f:1.3203 i:0 i:0 f:0.5 i:32 f:4040
+  0x42692a  op15  h=0x4040af span=6      
+  0x426930  op10  h=0x4040af span=4      i:10
+  0x426934  op2   h=0x404154 span=1      
+  0x426935  op1   h=0x404057 span=37     f:7960 f:-856 f:-13280 f:0 f:0 f:-1 f:1.3203 i:0 i:0 f:0.5 i:32 f:3436
+  0x42695a  op15  h=0x4040af span=6      
+  0x426960  op10  h=0x4040af span=4      i:5
+  0x426964  op2   h=0x404154 span=1      
+  0x426965  op2   h=0x404154 span=1      
+  0x426966  op2   h=0x404154 span=1      
+  0x426967  op1   h=0x404057 span=14     i:891 i:700 i:800
+  0x426975  op15  h=0x4040af span=6      
+  0x42697b  op10  h=0x4040af span=4      i:65
+  0x42697f  op1   h=0x404057 span=3      
+  0x426982  op1   h=0x404057 span=60     i:0 f:13.406 f:-123 f:56.5 i:52 f:1 f:1 f:13.406 f:-84.25 f:56.5 f:0 f:0 f:1 f:0 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1272 f:199.5
+  0x4269be  op11  h=0x4040af span=5      f:2.0972e+07
+  0x4269c3  op11  h=0x4040af span=5      f:2.0972e+07
+  0x4269c8  op1   h=0x404057 span=41     f:-13.906 f:187 f:-1.9414 f:0 f:1 f:0 f:3.1406 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16
+  0x4269f1  op11  h=0x4040af span=5      f:5000
+  0x4269f6  op11  h=0x4040af span=5      f:5000
+  0x4269fb  op1   h=0x404057 span=38     f:0 f:0 f:0 f:0 f:0 f:0 f:0 i:0 i:0 f:5 i:32 i:893 i:892 f:2200 i:0
+  0x426a21  op11  h=0x4040af span=14     i:0 f:0 i:180 i:0 f:8.5e+05
+  0x426a2f  op2   h=0x404154 span=1      
+  0x426a30  op2   h=0x404154 span=1      
+  0x426a31  op2   h=0x404154 span=1      
+  0x426a32  op1   h=0x404057 span=60     i:44 f:13.406 f:-194.75 f:58.75 i:99 f:1 f:1 f:13.406 f:82.375 f:58.75 f:0 f:0 f:1 f:0 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1070 f:260.5
+  0x426a6e  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426a73  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426a78  op1   h=0x404057 span=41     f:-13.906 f:245.75 f:12.406 f:0 f:1 f:0 f:3.1406 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16
+  0x426aa1  op11  h=0x4040af span=5      f:5000
+  0x426aa6  op11  h=0x4040af span=5      f:5000
+  0x426aab  op1   h=0x404057 span=38     f:0 f:0 f:0 f:0 f:0 f:0 f:0 i:0 i:0 f:5 i:32 i:896 i:895 f:2200 i:0
+  0x426ad1  op2   h=0x404154 span=1      
+  0x426ad2  op2   h=0x404154 span=1      
+  0x426ad3  op2   h=0x404154 span=1      
+  0x426ad4  op1   h=0x404057 span=57     i:0 f:-1.4492 f:-396.5 f:64.75 i:62 f:-1.4492 f:-468.5 f:64.75 i:118 f:-1.4492 f:394 f:64.75 f:0 f:0 f:1 f:0 i:149 i:1263 f:1.3984 i:20 f:458.5
+  0x426b0d  op10  h=0x4040af span=5      i:256
+  0x426b12  op10  h=0x4040af span=4      i:1
+  0x426b16  op11  h=0x4040af span=5      f:4.1943e+06
+  0x426b1b  op11  h=0x4040af span=5      f:4.1943e+06
+  0x426b20  op2   h=0x404154 span=1      
+  0x426b21  op1   h=0x404057 span=40     f:20.906 f:-9168 f:107.25 f:0.57715 f:0.57715 f:0.57715 f:2.0938 i:1 i:1260 f:0.59961 i:16 f:9216
+  0x426b49  op10  h=0x4040af span=5      i:256
+  0x426b4e  op11  h=0x4040af span=5      f:1.6777e+07
+  0x426b53  op11  h=0x4040af span=5      f:1.6777e+07
+  0x426b58  op11  h=0x4040af span=6      f:9e+05
+  0x426b5e  op2   h=0x404154 span=1      
+  0x426b5f  op1   h=0x404057 span=75     i:0 i:0 i:380 i:0 i:0 f:2352 f:2864 f:4936 i:222 f:-534 f:2864 f:4824 i:190 f:-2272 f:2864 f:2038 i:236 f:-2108 f:2864 f:-1098 i:52 f:-657 f:2864 f:-2252 f:0.57715 f:0.57715 f:0.57715 f:2.0938 i:0 i:901 f:0.67188 f:0
+  0x426baa  op2   h=0x404154 span=1      
+  0x426bab  op1   h=0x404057 span=19     f:-106.75 f:1046 f:-419 f:0 f:0 f:-1 f:1.5703 i:0
+  0x426bbe  op2   h=0x404154 span=1      
+  0x426bbf  op1   h=0x404057 span=65     i:15 f:22.688 f:-206.25 f:1024 i:180 f:22.688 f:327 f:1024 f:0 f:0 f:1 f:0 i:1 i:1262 f:2 i:32 f:105.75 i:15 f:100 i:55 f:110 i:53 f:1 f:1 f:1670
+  0x426c00  op11  h=0x4040af span=6      f:2.936e+06
+  0x426c06  op11  h=0x4040af span=6      f:8.3886e+05
+  0x426c0c  op2   h=0x404154 span=1      
+  0x426c0d  op1   h=0x404057 span=65     i:15 f:-875 f:-206.25 f:312 i:180 f:-875 f:327 f:312 f:0 f:0 f:1 f:0 i:1 i:1262 f:2 i:32 f:105.75 i:15 f:100 i:62 f:110 i:54 f:1 f:1 f:1670
+  0x426c4e  op11  h=0x4040af span=6      f:2.936e+06
+  0x426c54  op11  h=0x4040af span=6      f:8.3886e+05
+  0x426c5a  op2   h=0x404154 span=1      
+  0x426c5b  op1   h=0x404057 span=65     i:15 f:-492.5 f:-206.25 f:-755 i:180 f:-492.5 f:327 f:-755 f:0 f:0 f:1 f:0 i:1 i:1262 f:2 i:32 f:105.75 i:15 f:100 i:70 f:110 i:54 f:1 f:1 f:1670
+  0x426c9c  op11  h=0x4040af span=6      f:2.936e+06
+  0x426ca2  op11  h=0x4040af span=6      f:8.3886e+05
+  0x426ca8  op2   h=0x404154 span=1      
+  0x426ca9  op1   h=0x404057 span=65     i:15 f:626 f:-206.25 f:-688 i:180 f:626 f:327 f:-688 f:0 f:0 f:1 f:0 i:1 i:1262 f:2 i:32 f:105.75 i:15 f:100 i:78 f:110 i:54 f:1 f:1 f:1670
+  0x426cea  op11  h=0x4040af span=6      f:2.936e+06
+  0x426cf0  op11  h=0x4040af span=6      f:8.3886e+05
+  0x426cf6  op2   h=0x404154 span=1      
+  0x426cf7  op1   h=0x404057 span=65     i:15 f:850 f:-206.25 f:483 i:180 f:850 f:327 f:483 f:0 f:0 f:1 f:0 i:1 i:1262 f:2 i:32 f:105.75 i:15 f:100 i:86 f:110 i:54 f:1 f:1 f:1670
+  0x426d38  op11  h=0x4040af span=6      f:2.936e+06
+  0x426d3e  op11  h=0x4040af span=6      f:8.3886e+05
+  0x426d44  op2   h=0x404154 span=1      
+  0x426d45  op1   h=0x404057 span=51     i:-15 i:170 i:0 f:18.438 f:1990 f:61.312 f:0 f:0 f:1 f:0 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1406
+  0x426d78  op10  h=0x4040af span=5      i:256
+  0x426d7d  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426d82  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426d87  op1   h=0x404057 span=70     i:0 f:-1026 f:1704 f:1088 i:154 f:-1026 f:3004 f:1088 i:157 f:1 f:1 f:-1026 f:1706 f:1088 f:0.73633 f:-0.046143 f:-0.67383 f:1.5723 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1700
+  0x426dcd  op10  h=0x4040af span=5      i:256
+  0x426dd2  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426dd7  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426ddc  op2   h=0x404154 span=1      
+  0x426ddd  op1   h=0x404057 span=70     i:0 f:849 f:1704 f:1218 i:141 f:849 f:3004 f:1218 i:170 f:1 f:1 f:849 f:1706 f:1218 f:-0.19873 f:-0.51367 f:0.83398 f:1.9375 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1700
+  0x426e23  op10  h=0x4040af span=5      i:256
+  0x426e28  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426e2d  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426e32  op2   h=0x404154 span=1      
+  0x426e33  op1   h=0x404057 span=70     i:0 f:1438 f:1704 f:-352.5 i:129 f:1438 f:3004 f:-352.5 i:182 f:1 f:1 f:1438 f:1706 f:-352.5 f:-0.87109 f:0.22339 f:0.43555 f:1.623 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1700
+  0x426e79  op10  h=0x4040af span=5      i:256
+  0x426e7e  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426e83  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426e88  op2   h=0x404154 span=1      
+  0x426e89  op1   h=0x404057 span=69     i:0 f:91.5 f:1704 f:-1446 i:121 f:91.5 f:3004 f:-1446 i:190 f:1 f:1 f:91.5 f:1706 f:-1446 f:-0.65039 f:0.67773 f:-0.34033 f:2.5898 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1700
+  0x426ece  op10  h=0x4040af span=5      i:256
+  0x426ed3  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426ed8  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426edd  op2   h=0x404154 span=1      
+  0x426ede  op1   h=0x404057 span=69     i:0 f:-1384 f:1704 f:-458 i:127 f:-1384 f:3004 f:-458 i:184 f:1 f:1 f:-1384 f:1706 f:-458 f:-0.86816 f:0.48633 f:0.090454 f:1.8848 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16 f:1700
+  0x426f23  op10  h=0x4040af span=5      i:256
+  0x426f28  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426f2d  op11  h=0x4040af span=5      f:2.0972e+07
+  0x426f32  op2   h=0x404154 span=1      
+  0x426f33  op1   h=0x404057 span=36     f:0 f:0 f:0 f:0 f:0 f:0 f:0 i:0 i:0 f:5 i:32 i:914 i:908 f:2100
+  0x426f57  op10  h=0x4040af span=5      i:256
+  0x426f5c  op10  h=0x4040af span=5      i:256
+  0x426f61  op8   h=0x4040af span=5      i:909
+  0x426f66  op8   h=0x4040af span=5      i:910
+  0x426f6b  op8   h=0x4040af span=5      i:911
+  0x426f70  op8   h=0x4040af span=5      i:912
+  0x426f75  op8   h=0x4040af span=5      i:907
+  0x426f7a  op2   h=0x404154 span=1      
+  0x426f7b  op2   h=0x404154 span=1      
+  0x426f7c  op1   h=0x404057 span=57     i:155 f:-37.188 f:3316 f:114.38 i:156 f:1 f:1 f:-37.188 f:1986 f:114.38 f:1 f:0 f:0 f:3.1406 i:33 i:1262 f:1.7988 i:0 i:17 i:700 i:16
+  0x426fb5  op11  h=0x4040af span=5      f:5000
+  0x426fba  op11  h=0x4040af span=5      f:5000
+  0x426fbf  op2   h=0x404154 span=1      
+  0x426fc0  op1   h=0x404057 span=63     i:-28 i:198 i:0 f:-11.734 f:-214.5 f:40.375 f:0 f:0 f:1 f:0 i:0 i:0 f:0.5 i:32 i:0 f:465.5 i:170 f:1 i:130 f:1 f:1 f:465.5 f:2216
+  0x426fff  op10  h=0x4040af span=5      i:256
+  0x427004  op10  h=0x4040af span=4      i:1
+  0x427008  op15  h=0x4040af span=6      
+  0x42700e  op10  h=0x4040af span=4      i:100
+  0x427012  op2   h=0x404154 span=1      
+  0x427013  op1   h=0x404057 span=44     f:19.625 f:5112 f:-41.5 f:0 f:0 f:1 f:0 i:0 i:0 f:2500 i:114 f:1 f:1 f:100 i:860 f:8480 i:5
+  0x42703f  op2   h=0x404154 span=1      
+  0x427040  op1   h=0x404057 span=80     i:0 i:0 i:285 i:0 i:15 f:22.688 f:-206.25 f:1024 i:180 f:22.688 f:327 f:1024 f:0 f:0 f:1 f:0 i:0 i:0 f:0.5 i:32 i:15 f:100 i:250 f:101 i:20 f:1 i:15 f:100 i:31 f:110 i:39 f:3636
+  0x427090  op15  h=0x4040af span=6      
+  0x427096  op10  h=0x4040af span=5      i:150
+  0x42709b  op2   h=0x404154 span=1      
+  0x42709c  op1   h=0x404057 span=82     i:0 i:0 i:290 i:0 i:15 f:-875 f:-206.25 f:312 i:180 f:-875 f:327 f:312 f:0 f:0 f:1 f:0 i:129 i:1262 f:2 i:32 i:15 f:100 i:255 f:101 i:20 f:1 i:15 f:100 i:39 f:110 i:39 f:3808
+  0x4270ee  op11  h=0x4040af span=6      f:2.936e+06
+  0x4270f4  op11  h=0x4040af span=6      f:8.3886e+05
+  0x4270fa  op15  h=0x4040af span=6      
+  0x427100  op10  h=0x4040af span=5      i:150
+  0x427105  op2   h=0x404154 span=1      
+  0x427106  op1   h=0x404057 span=82     i:0 i:0 i:295 i:0 i:15 f:-492.5 f:-206.25 f:-755 i:180 f:-492.5 f:327 f:-755 f:0 f:0 f:1 f:0 i:129 i:1262 f:2 i:32 i:15 f:100 i:260 f:101 i:20 f:1 i:15 f:100 i:47 f:110 i:39 f:3500
+  0x427158  op11  h=0x4040af span=6      f:2.936e+06
+  0x42715e  op11  h=0x4040af span=6      f:8.3886e+05
+  0x427164  op15  h=0x4040af span=6      
+  0x42716a  op10  h=0x4040af span=5      i:150
+  0x42716f  op2   h=0x404154 span=1      
+  0x427170  op1   h=0x404057 span=82     i:0 i:0 i:300 i:0 i:15 f:626 f:-206.25 f:-688 i:180 f:626 f:327 f:-688 f:0 f:0 f:1 f:0 i:129 i:1262 f:2 i:32 i:15 f:100 i:265 f:101 i:20 f:1 i:15 f:100 i:55 f:110 i:38 f:3980
+  0x4271c2  op11  h=0x4040af span=6      f:2.936e+06
+  0x4271c8  op11  h=0x4040af span=6      f:8.3886e+05
+  0x4271ce  op15  h=0x4040af span=6      
+  0x4271d4  op10  h=0x4040af span=5      i:150
+  0x4271d9  op2   h=0x404154 span=1      
+  0x4271da  op1   h=0x404057 span=82     i:0 i:0 i:305 i:0 i:15 f:850 f:-206.25 f:483 i:180 f:850 f:327 f:483 f:0 f:0 f:1 f:0 i:129 i:1262 f:2 i:32 i:15 f:100 i:270 f:101 i:20 f:1 i:15 f:100 i:62 f:110 i:39 f:3768
+  0x42722c  op11  h=0x4040af span=6      f:2.936e+06
+  0x427232  op11  h=0x4040af span=6      f:8.3886e+05
+  0x427238  op15  h=0x4040af span=6      
+  0x42723e  op10  h=0x4040af span=5      i:150
+  0x427243  op2   h=0x404154 span=1      
+  0x427244  op1   h=0x404057 span=95     i:0 f:3380 f:2448 f:-512 i:50 f:2812 f:2448 f:2240 i:57 f:96.875 f:1650 f:-80.625 i:120 f:1704 f:2068 f:-2240 i:96 f:1828 f:3248 f:1402 i:147 f:2660 f:2200 f:-1890 i:230 f:2568 f:1250 f:4960 f:0 f:0 f:-1 f:1.5703 i:0 i:0 f:280.5 f:280.5 f:280.5 i:700 f:304 f:291.5 f:225.75 i:256 f:99968
+  0x4272a3  op2   h=0x404154 span=1      
+  0x4272a4  op1   h=0x404057 span=64     i:0 f:710 f:1836 f:1700 i:358 f:20.906 f:530 f:-21.906 f:0.70605 f:0 f:0.70605 f:3.0859 i:1 i:1264 i:0 i:358 f:1.7988 i:0 i:17 i:700 i:16 f:4608
+  0x4272e4  op10  h=0x4040af span=5      i:256
+  0x4272e9  op10  h=0x4040af span=5      i:256
+  0x4272ee  op10  h=0x4040af span=4      i:1
+  0x4272f2  op11  h=0x4040af span=5      f:1.6777e+07
+  0x4272f7  op11  h=0x4040af span=5      f:1.6777e+07
+  0x4272fc  op11  h=0x4040af span=6      f:1e+06
+  0x427302  op2   h=0x404154 span=1      
+  0x427303  op1   h=0x404057 span=78     i:-40 i:420 i:0 i:0 f:-2136 f:670 f:-242 i:357 f:-2600 f:1392 f:878 i:110 f:-1334 f:1058 f:-232 i:63 f:-703 f:836 f:-242 i:170 f:0.70605 f:0 f:0.70605 f:3.0859 i:0 i:925 f:0.67188 i:0 f:0 i:357 f:-0.50586 i:343 f:0.81934
+  0x427351  op2   h=0x404154 span=1      
+  0x427352  op1   h=0x404057 span=18     f:60.75 f:728 f:-115.5 f:0 f:0 f:1 f:0 i:0
+  0x427364  op2   h=0x404154 span=1      
+  0x427365  op2   h=0x404154 span=1      
+  0x427366  op2   h=0x404154 span=1      
+  0x427367  op1   h=0x404057 span=16     i:927 i:1024 i:400
+  0x427377  op15  h=0x4040af span=6      
+  0x42737d  op1   h=0x404057 span=3      
+  0x427380  op1   h=0x404057 span=130    i:0 f:2004 f:2876 f:-2976 i:317 f:1274 f:3172 f:2136 i:266 f:-495 f:2188 f:2136 i:118 f:-12512 f:11488 f:1196 i:200 f:-3784 f:5744 f:-12736 i:123 f:1880 f:3492 f:-2964 f:0 f:0 f:1 f:0 i:0 i:0 f:332.5 f:326 f:354.5 i:200 f:332.5 f:326 f:189.75 i:219 f:261.5 f:161.5 f:354.5 i:90 f:332.5 f:326 f:354.5 i:254 f:332.5 f:326 f:268 i:256 i:0 f:14992 i:200 f:8000 i:350 f:8000 i:440 f:14992
+  0x427402  op2   h=0x404154 span=1      
+  0x427403  op1   h=0x404057 span=143    i:-133 f:-4168 f:5688 f:1454 i:31 f:-1550 f:4944 f:2892 i:52 f:1344 f:2564 f:298.5 i:62 f:95.875 f:3060 f:-2060 i:70 f:-3336 f:2488 f:-1136 i:52 f:-2952 f:2800 f:2100 i:62 f:53.062 f:3520 f:1582 i:63 f:1350 f:4760 f:-1180 i:58 f:-1972 f:5688 f:-3244 i:76 f:-4264 f:5936 f:127.5 i:84 f:-1900 f:5880 f:1814 i:62 f:593 f:5464 f:2026 i:65 f:1424 f:4792 f:399.5 i:157 f:-1104 f:2272 f:-1946 i:130 f:-3732 f:5688 f:-2536 f:0 f:0 f:1 f:0 i:0 i:930 f:0.39258 f:0
+  0x427492  op2   h=0x404154 span=1      
+  0x427493  op1   h=0x404057 span=45     i:-133 f:0 f:0 f:0 i:249 f:846 f:477 f:137.75 i:407 f:-156.5 f:-201.5 f:-501.5 i:212 f:-31.938 f:-199 f:132 f:0 f:0 f:1 f:0 i:0
+  0x4274c0  op2   h=0x404154 span=1      
+  0x4274c1  op1   h=0x404057 span=35     f:96.375 f:0 f:0 f:0 f:0 f:1 f:-0.69922 i:129 i:1265 f:5 i:32 f:1000
+  0x4274e4  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4274e9  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4274ee  op19  h=0x40032a span=1      
+  0x4274ef  op2   h=0x404154 span=1      
+  0x4274f0  op2   h=0x404154 span=1      
+  0x4274f1  op1   h=0x404057 span=16     i:1013 i:10000 i:400
+  0x427501  op1   h=0x404057 span=3      
+  0x427504  op1   h=0x404057 span=27     f:-16000 f:0 f:0 f:0.57715 f:0.57715 f:-0.57715 f:2.0938 i:0 i:1015 f:0.78516 f:0
+  0x42751f  op2   h=0x404154 span=1      
+  0x427520  op1   h=0x404057 span=15     f:0 f:0 f:0 f:0 f:0 f:1 f:0 i:0
+  0x42752f  op2   h=0x404154 span=1      
+  0x427530  op1   h=0x404057 span=29     f:0 f:0 f:0 f:-0.70703 f:0.70703 f:0 f:3.1406 i:1 i:1266 f:0.5 i:32
+  0x42754d  op11  h=0x4040af span=5      f:1000
+  0x427552  op11  h=0x4040af span=5      f:1000
+  0x427557  op2   h=0x404154 span=1      
+  0x427558  op2   h=0x404154 span=1      
+  0x427559  op2   h=0x404154 span=1      
+  0x42755a  op1   h=0x404057 span=14     i:1018 i:1024 i:768
+  0x427568  op1   h=0x404057 span=3      
+  0x42756b  op1   h=0x404057 span=69     i:0 f:1988 f:1424 f:1124 i:255 f:987 f:1424 f:2012 i:296 f:1996 f:1424 f:3036 i:286 f:2960 f:1424 f:2014 i:187 f:2016 f:1424 f:1070 f:0 f:0 f:1 f:0 i:0 f:400 f:400 f:400 i:256 f:7000
+  0x4275b0  op2   h=0x404154 span=1      
+  0x4275b1  op1   h=0x404057 span=94     i:0 f:3032 f:1820 f:1152 i:213 f:1078 f:993 f:697 i:99 f:421.5 f:1222 f:2096 i:57 f:706 f:1112 f:3216 i:59 f:2000 f:1382 f:3696 i:98 f:3372 f:1884 f:2412 i:129 f:3408 f:1876 f:1124 i:43 f:2176 f:1580 f:466 i:101 f:1080 f:1382 f:768 f:0 f:0 f:1 f:0 i:0 i:1021 f:0.69238 f:0
+  0x42760f  op2   h=0x404154 span=1      
+  0x427610  op1   h=0x404057 span=18     f:1998 f:323 f:2016 f:0 f:0 f:1 f:0 i:0
+  0x427622  op2   h=0x404154 span=1      
+  0x427623  op1   h=0x404057 span=38     f:2500 f:450 f:2500 f:0 f:1 f:0 f:2.7891 i:148 i:0 f:0 i:32 f:450
+  0x427649  op2   h=0x404154 span=1      
+  0x42764a  op1   h=0x404057 span=32     f:0 f:0 f:0 f:0 f:0 f:1 f:0 i:21 i:1265 f:4 i:32 f:5000
+  0x42766a  op10  h=0x4040af span=5      i:256
+  0x42766f  op10  h=0x4040af span=4      i:65
+  0x427673  op11  h=0x4040af span=5      f:4.1943e+06
+  0x427678  op11  h=0x4040af span=5      f:4.1943e+06
+  0x42767d  op2   h=0x404154 span=1      
+  0x42767e  op2   h=0x404154 span=1      
+  0x42767f  op2   h=0x404154 span=1      
+  0x427680  op1   h=0x404057 span=16     i:1025 i:1200 i:400
+  0x427690  op15  h=0x4040af span=6      
+  0x427696  op10  h=0x4040af span=4      i:4
+  0x42769a  op15  h=0x4040af span=6      
+  0x4276a0  op1   h=0x404057 span=3      
+  0x4276a3  op1   h=0x404057 span=19     f:972 f:-15920 f:13104 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4276b6  op2   h=0x404154 span=1      
+  0x4276b7  op1   h=0x404057 span=18     f:1.1571e+05 f:0 f:27968 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4276c9  op2   h=0x404154 span=1      
+  0x4276ca  op1   h=0x404057 span=19     f:1.3824e+05 f:19072 f:-45504 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4276dd  op2   h=0x404154 span=1      
+  0x4276de  op1   h=0x404057 span=19     f:27200 f:-11328 f:-33984 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4276f1  op2   h=0x404154 span=1      
+  0x4276f2  op1   h=0x404057 span=19     f:1.4259e+05 f:16176 f:7336 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427705  op2   h=0x404154 span=1      
+  0x427706  op1   h=0x404057 span=19     f:1.0701e+05 f:-3360 f:-41664 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427719  op2   h=0x404154 span=1      
+  0x42771a  op1   h=0x404057 span=30     i:0 f:39744 f:3160 f:-38656 i:300 f:40704 f:3160 f:-40192 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427738  op2   h=0x404154 span=1      
+  0x427739  op1   h=0x404057 span=19     f:12784 f:-13008 f:-18048 f:0 f:0 f:0 f:0 i:0 i:0
+  0x42774c  op2   h=0x404154 span=1      
+  0x42774d  op1   h=0x404057 span=19     f:1.2826e+05 f:14496 f:23296 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427760  op2   h=0x404154 span=1      
+  0x427761  op1   h=0x404057 span=19     f:1.5539e+05 f:19072 f:-16080 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427774  op2   h=0x404154 span=1      
+  0x427775  op1   h=0x404057 span=19     f:17216 f:-15904 f:34752 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427788  op2   h=0x404154 span=1      
+  0x427789  op1   h=0x404057 span=19     f:84352 f:-29920 f:-39488 f:0 f:0 f:0 f:0 i:0 i:0
+  0x42779c  op2   h=0x404154 span=1      
+  0x42779d  op1   h=0x404057 span=19     f:71936 f:39232 f:-38528 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4277b0  op2   h=0x404154 span=1      
+  0x4277b1  op1   h=0x404057 span=19     f:59904 f:-32736 f:-69248 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4277c4  op2   h=0x404154 span=1      
+  0x4277c5  op1   h=0x404057 span=19     f:98304 f:-31200 f:39808 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4277d8  op2   h=0x404154 span=1      
+  0x4277d9  op1   h=0x404057 span=19     f:56064 f:20192 f:-66816 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4277ec  op2   h=0x404154 span=1      
+  0x4277ed  op1   h=0x404057 span=19     f:99328 f:-17024 f:56064 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427800  op2   h=0x404154 span=1      
+  0x427801  op1   h=0x404057 span=19     f:57088 f:34304 f:-50560 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427814  op2   h=0x404154 span=1      
+  0x427815  op1   h=0x404057 span=19     f:54912 f:-1650 f:-82304 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427828  op2   h=0x404154 span=1      
+  0x427829  op1   h=0x404057 span=19     f:95488 f:35840 f:58560 f:0 f:0 f:0 f:0 i:0 i:0
+  0x42783c  op2   h=0x404154 span=1      
+  0x42783d  op1   h=0x404057 span=19     f:1.0048e+05 f:4808 f:71552 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427850  op2   h=0x404154 span=1      
+  0x427851  op1   h=0x404057 span=19     f:1.0534e+05 f:-1.0458e+05 f:-26496 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427864  op2   h=0x404154 span=1      
+  0x427865  op1   h=0x404057 span=19     f:31712 f:-68096 f:2596 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427878  op2   h=0x404154 span=1      
+  0x427879  op1   h=0x404057 span=19     f:84096 f:-74624 f:44800 f:0 f:0 f:0 f:0 i:0 i:0
+  0x42788c  op2   h=0x404154 span=1      
+  0x42788d  op1   h=0x404057 span=19     f:1.495e+05 f:-39552 f:4576 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4278a0  op2   h=0x404154 span=1      
+  0x4278a1  op1   h=0x404057 span=19     f:58752 f:-85888 f:-60224 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4278b4  op2   h=0x404154 span=1      
+  0x4278b5  op1   h=0x404057 span=19     f:1.1802e+05 f:-58432 f:47168 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4278c8  op2   h=0x404154 span=1      
+  0x4278c9  op1   h=0x404057 span=19     f:1.2365e+05 f:-77952 f:-13200 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4278dc  op2   h=0x404154 span=1      
+  0x4278dd  op1   h=0x404057 span=19     f:69888 f:-9344 f:-66432 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4278f0  op2   h=0x404154 span=1      
+  0x4278f1  op1   h=0x404057 span=19     f:71296 f:-71424 f:-55424 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427904  op2   h=0x404154 span=1      
+  0x427905  op1   h=0x404057 span=19     f:37376 f:-87552 f:-57728 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427918  op2   h=0x404154 span=1      
+  0x427919  op1   h=0x404057 span=19     f:96640 f:-60160 f:49600 f:0 f:0 f:0 f:0 i:0 i:0
+  0x42792c  op2   h=0x404154 span=1      
+  0x42792d  op1   h=0x404057 span=19     f:1.0214e+05 f:-54464 f:-65664 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427940  op2   h=0x404154 span=1      
+  0x427941  op1   h=0x404057 span=19     f:5792 f:-90496 f:-15184 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427954  op2   h=0x404154 span=1      
+  0x427955  op1   h=0x404057 span=19     f:12368 f:-90496 f:-48640 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427968  op2   h=0x404154 span=1      
+  0x427969  op1   h=0x404057 span=19     f:95360 f:-35328 f:-33984 f:0 f:0 f:0 f:0 i:0 i:0
+  0x42797c  op2   h=0x404154 span=1      
+  0x42797d  op1   h=0x404057 span=19     f:1.0662e+05 f:-1.0739e+05 f:-65024 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427990  op2   h=0x404154 span=1      
+  0x427991  op1   h=0x404057 span=19     f:63296 f:-1.0586e+05 f:42240 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4279a4  op2   h=0x404154 span=1      
+  0x4279a5  op1   h=0x404057 span=19     f:53312 f:-91648 f:55104 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4279b8  op2   h=0x404154 span=1      
+  0x4279b9  op1   h=0x404057 span=19     f:92160 f:-40256 f:-52864 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4279cc  op2   h=0x404154 span=1      
+  0x4279cd  op1   h=0x404057 span=19     f:1.1149e+05 f:-76288 f:-78080 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4279e0  op2   h=0x404154 span=1      
+  0x4279e1  op1   h=0x404057 span=19     f:48768 f:-38720 f:54400 f:0 f:0 f:0 f:0 i:0 i:0
+  0x4279f4  op2   h=0x404154 span=1      
+  0x4279f5  op1   h=0x404057 span=19     f:43904 f:-69760 f:67456 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a08  op2   h=0x404154 span=1      
+  0x427a09  op1   h=0x404057 span=19     f:1.431e+05 f:-55552 f:38016 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a1c  op2   h=0x404154 span=1      
+  0x427a1d  op1   h=0x404057 span=19     f:53696 f:62784 f:-51584 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a30  op2   h=0x404154 span=1      
+  0x427a31  op1   h=0x404057 span=19     f:1.3773e+05 f:18336 f:-5152 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a44  op2   h=0x404154 span=1      
+  0x427a45  op1   h=0x404057 span=19     f:90240 f:-24064 f:77696 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a58  op2   h=0x404154 span=1      
+  0x427a59  op1   h=0x404057 span=19     f:1.1187e+05 f:18336 f:-63296 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a6c  op2   h=0x404154 span=1      
+  0x427a6d  op1   h=0x404057 span=19     f:1.5206e+05 f:-53760 f:10000 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a80  op2   h=0x404154 span=1      
+  0x427a81  op1   h=0x404057 span=19     f:1.2083e+05 f:29312 f:23264 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427a94  op2   h=0x404154 span=1      
+  0x427a95  op1   h=0x404057 span=19     f:1.3363e+05 f:16608 f:-47360 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427aa8  op2   h=0x404154 span=1      
+  0x427aa9  op1   h=0x404057 span=19     f:90368 f:38464 f:-64576 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427abc  op2   h=0x404154 span=1      
+  0x427abd  op1   h=0x404057 span=19     f:1.12e+05 f:-25792 f:93696 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427ad0  op2   h=0x404154 span=1      
+  0x427ad1  op1   h=0x404057 span=19     f:1.6307e+05 f:-67200 f:89216 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427ae4  op2   h=0x404154 span=1      
+  0x427ae5  op1   h=0x404057 span=19     f:37824 f:58368 f:-18272 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427af8  op2   h=0x404154 span=1      
+  0x427af9  op1   h=0x404057 span=19     f:1.184e+05 f:-54208 f:-24096 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b0c  op2   h=0x404154 span=1      
+  0x427b0d  op1   h=0x404057 span=19     f:1.056e+05 f:46784 f:54464 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b20  op2   h=0x404154 span=1      
+  0x427b21  op1   h=0x404057 span=19     f:1.7664e+05 f:17408 f:3016 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b34  op2   h=0x404154 span=1      
+  0x427b35  op1   h=0x404057 span=19     f:1.3696e+05 f:-48576 f:-73344 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b48  op2   h=0x404154 span=1      
+  0x427b49  op1   h=0x404057 span=19     f:1.8176e+05 f:1758 f:-45824 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b5c  op2   h=0x404154 span=1      
+  0x427b5d  op1   h=0x404057 span=19     f:1.5002e+05 f:-6440 f:25792 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b70  op2   h=0x404154 span=1      
+  0x427b71  op1   h=0x404057 span=19     f:42240 f:-9200 f:76160 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b84  op2   h=0x404154 span=1      
+  0x427b85  op1   h=0x404057 span=19     f:1.792e+05 f:21120 f:-23648 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427b98  op2   h=0x404154 span=1      
+  0x427b99  op1   h=0x404057 span=19     f:1.7638e+05 f:-23680 f:-71808 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427bac  op2   h=0x404154 span=1      
+  0x427bad  op1   h=0x404057 span=19     f:47552 f:16224 f:1.0214e+05 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427bc0  op2   h=0x404154 span=1      
+  0x427bc1  op1   h=0x404057 span=19     f:44224 f:-1.3133e+05 f:-34624 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427bd4  op2   h=0x404154 span=1      
+  0x427bd5  op1   h=0x404057 span=19     f:26720 f:-98560 f:-23968 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427be8  op2   h=0x404154 span=1      
+  0x427be9  op1   h=0x404057 span=19     f:72960 f:-1.1558e+05 f:59840 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427bfc  op2   h=0x404154 span=1      
+  0x427bfd  op1   h=0x404057 span=19     f:79104 f:-88704 f:-96256 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c10  op2   h=0x404154 span=1      
+  0x427c11  op1   h=0x404057 span=19     f:60672 f:-37120 f:-27680 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c24  op2   h=0x404154 span=1      
+  0x427c25  op1   h=0x404057 span=19     f:8272 f:-46976 f:44608 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c38  op2   h=0x404154 span=1      
+  0x427c39  op1   h=0x404057 span=19     f:14464 f:-20128 f:-1.1149e+05 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c4c  op2   h=0x404154 span=1      
+  0x427c4d  op1   h=0x404057 span=19     f:48960 f:-43072 f:-1.3286e+05 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c60  op2   h=0x404154 span=1      
+  0x427c61  op1   h=0x404057 span=19     f:43008 f:-43264 f:-50944 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c74  op2   h=0x404154 span=1      
+  0x427c75  op1   h=0x404057 span=19     f:1.2429e+05 f:-77056 f:-33472 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c88  op2   h=0x404154 span=1      
+  0x427c89  op1   h=0x404057 span=19     f:8008 f:18848 f:15152 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427c9c  op2   h=0x404154 span=1      
+  0x427c9d  op1   h=0x404057 span=19     f:-1786 f:2260 f:-59072 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427cb0  op2   h=0x404154 span=1      
+  0x427cb1  op1   h=0x404057 span=19     f:21696 f:-22336 f:-70400 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427cc4  op2   h=0x404154 span=1      
+  0x427cc5  op1   h=0x404057 span=19     f:9056 f:15088 f:-18272 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427cd8  op2   h=0x404154 span=1      
+  0x427cd9  op1   h=0x404057 span=19     f:1.2531e+05 f:-46144 f:70144 f:0 f:0 f:0 f:0 i:0 i:0
+  0x427cec  op2   h=0x404154 span=1      
+  0x427ced  op1   h=0x404057 span=127    i:0 f:-660 f:59200 f:80512 i:100 f:3928 f:-16992 f:25376 i:100 f:32064 f:-40960 f:-32000 i:100 f:70784 f:-1.0419e+05 f:-80384 i:100 f:1.001e+05 f:-1.0419e+05 f:-72320 i:100 f:1.207e+05 f:-64384 f:-71424 i:100 f:1.4336e+05 f:-64384 f:-1682 i:100 f:1.3773e+05 f:-41920 f:66816 i:100 f:74368 f:-41920 f:98816 i:100 f:16128 f:-8064 f:45824 i:100 f:14240 f:-8064 f:-30944 i:100 f:38400 f:-59328 f:-59392 i:100 f:97280 f:-59328 f:-82688 f:-0.78027 f:0.61914 f:0.07666 f:5.1094 i:0 i:1187 f:0.39258 f:0
+  0x427d6c  op2   h=0x404154 span=1      
+  0x427d6d  op1   h=0x404057 span=116    i:0 f:6104 f:49408 f:51584 i:100 f:10688 f:-26816 f:-3588 i:100 f:46528 f:-50752 f:-49152 i:100 f:89472 f:-96128 f:-71680 i:100 f:1.0522e+05 f:-96128 f:-45376 i:100 f:1.2582e+05 f:-56256 f:-44416 i:100 f:1.2787e+05 f:-56256 f:30752 i:100 f:1.1507e+05 f:-36160 f:70528 i:100 f:63552 f:-36160 f:70400 i:100 f:24096 f:-2336 f:16704 i:100 f:36224 f:-2336 f:-45824 i:100 f:72064 f:-33024 f:-68736 i:100 f:1.2442e+05 f:-33024 f:-57472 f:0 f:0 f:1 f:0 i:0
+  0x427de1  op2   h=0x404154 span=1      
+  0x427de2  op1   h=0x404057 span=32     f:81152 f:1.4029e+05 f:3428 f:0 f:0 f:1 f:0 i:0 f:400 f:400 f:400 i:256 f:4.5e+05
+  0x427e02  op2   h=0x404154 span=1      
+  0x427e03  op3   h=0x4041e7 span=4      i:0 i:860
+  0x427e07  op2   h=0x404154 span=1      
+  0x427e08  op2   h=0x404154 span=1      
+  0x427e09  op1   h=0x404057 span=14     i:1190 i:1066 i:400
+  0x427e17  op15  h=0x4040af span=6      
+  0x427e1d  op10  h=0x4040af span=4      i:30
+  0x427e21  op1   h=0x404057 span=3      
+  0x427e24  op1   h=0x404057 span=37     f:1782 f:-4880 f:-1966 f:0 f:0 f:1 f:0 i:33 i:1260 f:0.59961 i:17 f:15904
+  0x427e49  op10  h=0x4040af span=5      i:256
+  0x427e4e  op11  h=0x4040af span=5      f:1.2583e+07
+  0x427e53  op11  h=0x4040af span=5      f:2.5166e+07
+  0x427e58  op1   h=0x404057 span=38     f:0 f:0 f:0 f:0 f:0 f:0 f:0 i:0 i:0 f:5 i:32 i:1191 i:1196 f:19872 i:0
+  0x427e7e  op8   h=0x4040af span=5      i:1197
+  0x427e83  op8   h=0x4040af span=5      i:1198
+  0x427e88  op8   h=0x4040af span=5      i:1199
+  0x427e8d  op8   h=0x4040af span=5      i:1200
+  0x427e92  op8   h=0x4040af span=5      i:1201
+  0x427e97  op8   h=0x4040af span=5      i:1202
+  0x427e9c  op8   h=0x4040af span=5      i:1203
+  0x427ea1  op2   h=0x404154 span=1      
+  0x427ea2  op2   h=0x404154 span=1      
+  0x427ea3  op1   h=0x404057 span=124    i:0 f:900 f:21920 f:-10336 i:82 f:3912 f:9856 f:7432 i:48 f:7216 f:12880 f:-2572 i:38 f:9152 f:10784 f:-10336 i:104 f:7528 f:15152 f:1914 i:187 f:967 f:13264 f:3380 i:138 f:-4144 f:11456 f:-6400 i:103 f:-5984 f:21824 f:-14064 i:98 f:1840 f:10096 f:-140 i:44 f:-2104 f:13456 f:5440 i:109 f:-4424 f:9888 f:-9728 i:115 f:3516 f:9888 f:-1674 f:0 f:0 f:-1 f:1.5703 i:0 f:42.312 f:357.5 f:26.656 i:256 f:66688
+  0x427f1f  op2   h=0x404154 span=1      
+  0x427f20  op1   h=0x404057 span=64     i:0 f:2348 f:16672 f:7256 i:214 f:-2292 f:16672 f:5376 i:466 f:-5824 f:16672 f:-2228 i:280 f:-2038 f:16672 f:-10640 i:106 f:1902 f:16672 f:-11600 f:0 f:0 f:-1 f:1.5703 i:0 i:1195 f:0.68066 f:0
+  0x427f60  op2   h=0x404154 span=1      
+  0x427f61  op1   h=0x404057 span=19     f:3436 f:10720 f:-1910 f:0 f:0 f:-1 f:1.5703 i:0
+  0x427f74  op2   h=0x404154 span=1      
+  0x427f75  op1   h=0x404057 span=39     f:3636 f:9328 f:-1620 f:0 f:0 f:1 f:1.5918 i:161 i:1260 f:0.59961 i:17 f:2788
+  0x427f9c  op11  h=0x4040af span=5      f:4.1943e+06
+  0x427fa1  op11  h=0x4040af span=5      f:4.1943e+06
+  0x427fa6  op2   h=0x404154 span=1      
+  0x427fa7  op1   h=0x404057 span=39     f:5336 f:7600 f:-6672 f:0 f:0 f:1 f:1.5918 i:161 i:1260 f:0.59961 i:17 f:3440
+  0x427fce  op11  h=0x4040af span=5      f:4.1943e+06
+  0x427fd3  op11  h=0x4040af span=5      f:4.1943e+06
+  0x427fd8  op2   h=0x404154 span=1      
+  0x427fd9  op1   h=0x404057 span=49     f:-3952 f:10144 f:-2960 i:0 f:0 f:0 f:1 f:1.5918 i:82 f:0 f:0 f:-1 f:0.4917 i:161 i:1260 f:0.59961 i:17 f:4784
+  0x42800a  op11  h=0x4040af span=5      f:4.1943e+06
+  0x42800f  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428014  op2   h=0x404154 span=1      
+  0x428015  op1   h=0x404057 span=39     f:2220 f:10912 f:-1924 f:0 f:0 f:1 f:1.5918 i:161 i:1260 f:0.59961 i:17 f:1600
+  0x42803c  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428041  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428046  op2   h=0x404154 span=1      
+  0x428047  op1   h=0x404057 span=39     f:1394 f:11312 f:4264 f:0 f:0 f:1 f:1.5918 i:161 i:1260 f:0.59961 i:17 f:2556
+  0x42806e  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428073  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428078  op2   h=0x404154 span=1      
+  0x428079  op1   h=0x404057 span=39     f:8136 f:6888 f:2352 f:0 f:0 f:1 f:1.5918 i:161 i:1260 f:0.59961 i:17 f:4320
+  0x4280a0  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4280a5  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4280aa  op2   h=0x404154 span=1      
+  0x4280ab  op1   h=0x404057 span=39     f:2372 f:12336 f:-5728 f:0 f:0 f:1 f:1.5918 i:161 i:1260 f:0.59961 i:17 f:2788
+  0x4280d2  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4280d7  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4280dc  op2   h=0x404154 span=1      
+  0x4280dd  op1   h=0x404057 span=39     f:1228 f:12320 f:822 f:0 f:0 f:1 f:1.5918 i:161 i:1260 f:0.59961 i:17 f:2788
+  0x428104  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428109  op11  h=0x4040af span=5      f:4.1943e+06
+  0x42810e  op2   h=0x404154 span=1      
+  0x42810f  op1   h=0x404057 span=64     f:1846 f:-6088 f:-2276 f:0 f:0 f:-1 f:1.5703 i:0 i:0 f:0 i:68 f:100 i:78 f:200 i:75 f:150 i:107 f:250 i:115 f:150 i:89 f:250 i:89 f:200 i:860 f:17952 i:5
+  0x42814f  op2   h=0x404154 span=1      
+  0x428150  op1   h=0x404057 span=55     f:7536 f:10144 f:-3460 i:-5 f:0.23022 f:0.30811 f:0.92285 f:0.20459 i:1079 f:-0.18896 f:-0.98047 f:0.040894 f:12.562 i:161 i:1260 f:0.59961 i:17 f:1400
+  0x428187  op11  h=0x4040af span=5      f:4.1943e+06
+  0x42818c  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428191  op1   h=0x404057 span=120    f:-417.5 f:372.5 f:69 i:0 f:0 f:0 f:-1 f:1.0039 i:76 f:0 f:0 f:-0.99902 f:0.2583 i:156 f:-0.1167 f:-0.20874 f:0.9707 f:0.33301 i:260 f:-0.060425 f:0.049072 f:-0.99609 f:0 i:56 f:-0.060425 f:0.049072 f:-0.99609 f:0.40479 i:143 f:0.060425 f:-0.049072 f:0.99609 f:0.099365 i:95 f:0 f:0 f:1 f:0 i:37 f:0.060425 f:-0.049072 f:0.99609 f:0.10999 i:189 f:-0.060425 f:0.049072 f:-0.99609 f:0 i:128 i:0 f:0.5 i:32 f:400 f:14000
+  0x428209  op10  h=0x4040af span=5      i:256
+  0x42820e  op15  h=0x4040af span=6      
+  0x428214  op10  h=0x4040af span=4      i:80
+  0x428218  op2   h=0x404154 span=1      
+  0x428219  op1   h=0x404057 span=52     f:-296.5 f:-255.5 f:42.25 i:0 f:0.58887 f:0.80762 f:0 f:3.1406 i:317 f:0 f:0 f:1 f:0 i:128 i:0 f:0.5 i:32 f:400 f:14000
+  0x42824d  op10  h=0x4040af span=5      i:256
+  0x428252  op15  h=0x4040af span=6      
+  0x428258  op10  h=0x4040af span=4      i:80
+  0x42825c  op2   h=0x404154 span=1      
+  0x42825d  op1   h=0x404057 span=51     f:1270 f:310.5 f:5.75 i:-5 f:0 f:1 f:0 f:0.058228 i:1079 f:0 f:-1 f:0 f:12.562 i:161 i:1260 f:0.59961 i:17 f:756
+  0x428290  op10  h=0x4040af span=5      i:256
+  0x428295  op11  h=0x4040af span=5      f:4.1943e+06
+  0x42829a  op11  h=0x4040af span=5      f:4.1943e+06
+  0x42829f  op2   h=0x404154 span=1      
+  0x4282a0  op1   h=0x404057 span=51     f:-1234 f:860 f:-12.406 i:-5 f:0 f:1 f:0 f:0.058228 i:1079 f:0 f:-1 f:0 f:12.562 i:161 i:1260 f:0.59961 i:17 f:756
+  0x4282d3  op10  h=0x4040af span=5      i:256
+  0x4282d8  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4282dd  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4282e2  op2   h=0x404154 span=1      
+  0x4282e3  op1   h=0x404057 span=51     f:975 f:253 f:7.5391 i:-5 f:0 f:1 f:0 f:0.058228 i:1079 f:0 f:-1 f:0 f:12.562 i:129 i:1260 f:0.59961 i:17 f:400
+  0x428316  op10  h=0x4040af span=5      i:256
+  0x42831b  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428320  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428325  op2   h=0x404154 span=1      
+  0x428326  op1   h=0x404057 span=51     f:-1006 f:765 f:-16.656 i:-5 f:0 f:1 f:0 f:0.058228 i:1079 f:0 f:-1 f:0 f:12.562 i:129 i:1260 f:0.59961 i:17 f:400
+  0x428359  op10  h=0x4040af span=5      i:256
+  0x42835e  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428363  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428368  op2   h=0x404154 span=1      
+  0x428369  op1   h=0x404057 span=59     f:-5392 f:1904 f:2740 i:-20 f:-0.21362 f:0 f:-0.97559 f:0.19458 i:1090 f:0 f:-1 f:0 f:30 i:1 i:1261 i:0 i:431 f:0.7998 i:7 f:1158
+  0x4283a4  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4283a9  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4283ae  op11  h=0x4040af span=5      f:65536
+  0x4283b3  op11  h=0x4040af span=6      f:5.8327e+05
+  0x4283b9  op2   h=0x404154 span=1      
+  0x4283ba  op1   h=0x404057 span=59     f:4096 f:710 f:-3520 i:-17 f:-0.21362 f:0 f:-0.97559 f:0.19458 i:1089 f:0 f:-1 f:0 f:26.156 i:1 i:1261 i:0 i:431 f:0.7998 i:7 f:695
+  0x4283f5  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4283fa  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4283ff  op11  h=0x4040af span=5      f:1.6384e+05
+  0x428404  op11  h=0x4040af span=6      f:5.7016e+05
+  0x42840a  op2   h=0x404154 span=1      
+  0x42840b  op1   h=0x404057 span=59     f:7040 f:-361 f:1878 i:-20 f:-0.21362 f:0 f:-0.97559 f:0.19458 i:1095 f:0 f:-1 f:0 f:26.156 i:1 i:1261 i:0 i:431 f:0.7998 i:7 f:549
+  0x428446  op11  h=0x4040af span=5      f:4.1943e+06
+  0x42844b  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428450  op11  h=0x4040af span=5      f:1.6384e+05
+  0x428455  op11  h=0x4040af span=6      f:5.7016e+05
+  0x42845b  op2   h=0x404154 span=1      
+  0x42845c  op1   h=0x404057 span=41     f:101 f:75 f:-34 f:0 f:0 f:0 f:0 i:0 i:0 f:5 i:32 i:1205 i:1209 f:2500 i:0
+  0x428485  op10  h=0x4040af span=5      i:256
+  0x42848a  op8   h=0x4040af span=5      i:1208
+  0x42848f  op2   h=0x404154 span=1      
+  0x428490  op2   h=0x404154 span=1      
+  0x428491  op1   h=0x404057 span=36     f:7568 f:0 f:-3580 f:0 f:0 f:1 f:0 i:0 i:0 f:5 i:32 f:2568 f:23360
+  0x4284b5  op15  h=0x4040af span=6      
+  0x4284bb  op10  h=0x4040af span=4      i:20
+  0x4284bf  op2   h=0x404154 span=1      
+  0x4284c0  op3   h=0x4041e7 span=4      i:0 i:860
+  0x4284c4  op2   h=0x404154 span=1      
+  0x4284c5  op2   h=0x404154 span=1      
+  0x4284c6  op1   h=0x404057 span=14     i:1218 i:1066 i:768
+  0x4284d4  op1   h=0x404057 span=3      
+  0x4284d7  op1   h=0x404057 span=88     i:0 i:0 i:220 i:160 i:110 i:460 i:0 i:0 f:-18720 f:8024 f:4296 i:417 f:-12128 f:8024 f:-10416 i:260 f:3748 f:8024 f:-10368 i:118 f:3568 f:6184 f:1180 i:105 f:3972 f:3420 f:10064 i:166 f:-3976 f:13456 f:12528 f:0 f:0 f:1 f:0 i:0 i:1220 f:0.76758 f:0
+  0x42852f  op2   h=0x404154 span=1      
+  0x428530  op1   h=0x404057 span=32     i:0 f:-3284 f:10032 f:-643 i:1066 f:-18.781 f:10032 f:-276 f:0.57715 f:0.57715 f:-0.57715 f:2.0938 i:0
+  0x428550  op2   h=0x404154 span=1      
+  0x428551  op1   h=0x404057 span=34     f:701 f:272.5 f:-1144 f:0 f:0 f:1 f:0 i:1 i:1265 f:0.59961 i:17
+  0x428573  op10  h=0x4040af span=5      i:256
+  0x428578  op11  h=0x4040af span=5      f:200
+  0x42857d  op11  h=0x4040af span=5      f:200
+  0x428582  op2   h=0x404154 span=1      
+  0x428583  op1   h=0x404057 span=50     f:1704 f:0 f:725 f:0 f:0 f:1 f:0 i:128 i:0 f:0.5 i:32 i:0 f:100 i:240 f:1 f:1 f:3000 f:48448
+  0x4285b5  op10  h=0x4040af span=5      i:256
+  0x4285ba  op15  h=0x4040af span=6      
+  0x4285c0  op10  h=0x4040af span=4      i:60
+  0x4285c4  op2   h=0x404154 span=1      
+  0x4285c5  op1   h=0x404057 span=39     f:754 f:0 f:-1174 f:0 f:0 f:1 f:0 i:1 i:1265 f:0.59961 i:17 f:23456 f:48960
+  0x4285ec  op10  h=0x4040af span=5      i:256
+  0x4285f1  op11  h=0x4040af span=5      f:1.0486e+07
+  0x4285f6  op11  h=0x4040af span=5      f:6.2915e+06
+  0x4285fb  op11  h=0x4040af span=5      f:-1
+  0x428600  op2   h=0x404154 span=1      
+  0x428601  op1   h=0x404057 span=42     f:556 f:25696 f:-1236 f:0.12793 f:0 f:-0.99121 f:3.1406 i:33 i:1265 f:2.5977 i:32 f:20928 f:27296
+  0x42862b  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428630  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428635  op11  h=0x4040af span=5      f:-1
+  0x42863a  op1   h=0x404057 span=38     f:0 f:0 f:0 f:0 f:0 f:0 f:0 i:0 i:0 f:5 i:32 i:1224 i:1227 f:21536 i:0
+  0x428660  op8   h=0x4040af span=5      i:1226
+  0x428665  op2   h=0x404154 span=1      
+  0x428666  op2   h=0x404154 span=1      
+  0x428667  op1   h=0x404057 span=52     f:26656 f:8464 f:-1270 f:0 f:0 f:-1 f:1.5703 i:33 i:1265 f:2.5977 i:32 i:0 f:29984 i:180 f:0.59961 f:0.59961 f:15696 f:51392
+  0x42869b  op10  h=0x4040af span=5      i:256
+  0x4286a0  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4286a5  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4286aa  op11  h=0x4040af span=5      f:-1
+  0x4286af  op2   h=0x404154 span=1      
+  0x4286b0  op1   h=0x404057 span=54     f:913 f:8464 f:-26784 f:-0.57715 f:-0.57715 f:-0.57715 f:2.0938 i:33 i:1265 f:2.5977 i:32 i:0 f:29984 i:180 f:1 f:1 f:15696 f:51392
+  0x4286e6  op10  h=0x4040af span=5      i:256
+  0x4286eb  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4286f0  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4286f5  op11  h=0x4040af span=5      f:-1
+  0x4286fa  op2   h=0x404154 span=1      
+  0x4286fb  op1   h=0x404057 span=46     i:0 i:0 i:490 i:0 f:15840 f:22016 f:-16048 f:0 f:0 f:1 f:0 i:1 i:1265 f:0.59961 i:17 f:3588
+  0x428729  op10  h=0x4040af span=5      i:256
+  0x42872e  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428733  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428738  op2   h=0x404154 span=1      
+  0x428739  op1   h=0x404057 span=46     i:0 i:0 i:490 i:0 f:-13456 f:22016 f:-15984 f:0 f:0 f:1 f:0 i:1 i:1265 f:0.59961 i:17 f:3588
+  0x428767  op10  h=0x4040af span=5      i:256
+  0x42876c  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428771  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428776  op2   h=0x404154 span=1      
+  0x428777  op1   h=0x404057 span=46     i:0 i:0 i:490 i:0 f:15696 f:22016 f:12928 f:0 f:0 f:1 f:0 i:1 i:1265 f:0.59961 i:17 f:3588
+  0x4287a5  op10  h=0x4040af span=5      i:256
+  0x4287aa  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4287af  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4287b4  op2   h=0x404154 span=1      
+  0x4287b5  op1   h=0x404057 span=46     i:0 i:0 i:490 i:0 f:-13600 f:22016 f:13360 f:0 f:0 f:1 f:0 i:1 i:1265 f:0.59961 i:17 f:3588
+  0x4287e3  op10  h=0x4040af span=5      i:256
+  0x4287e8  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4287ed  op11  h=0x4040af span=5      f:4.1943e+06
+  0x4287f2  op2   h=0x404154 span=1      
+  0x4287f3  op1   h=0x404057 span=77     i:0 f:17728 f:6904 f:-8224 i:266 f:16416 f:24032 f:6576 i:252 f:-1154 f:6904 f:15072 i:148 f:16192 f:6904 f:3492 i:277 f:7104 f:6904 f:-9152 i:119 f:16096 f:6904 f:3400 f:0 f:0 f:1 f:0 i:0 f:282 f:282 f:282 i:256 f:35456
+  0x428840  op2   h=0x404154 span=1      
+  0x428841  op1   h=0x404057 span=106    f:1704 f:0 f:725 f:0 f:0 f:1 f:0 i:0 i:0 f:200 i:200 f:199.75 i:300 f:400 i:0 i:175 i:141 i:43 i:860 i:0 f:21920 i:116 f:17984 i:263 f:5024 i:1 f:10000 i:116 f:1 f:1 f:3000 i:0 f:48448 i:417 f:48448 f:2 f:2 i:300
+  0x4288ab  op2   h=0x404154 span=1      
+  0x4288ac  op1   h=0x404057 span=76     i:0 i:0 i:220 i:160 i:110 i:0 i:0 f:1780 f:15152 f:907 i:889 i:11 i:26 f:1780 f:14896 f:878 i:140 f:1780 f:-7128 f:120 f:0 f:0 f:1 f:0 i:21 i:1265 f:0.5 i:0 f:3988
+  0x4288f8  op10  h=0x4040af span=5      i:256
+  0x4288fd  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428902  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428907  op2   h=0x404154 span=1      
+  0x428908  op1   h=0x404057 span=95     i:-13 i:233 i:160 i:110 i:597 i:0 i:220 f:-5.8516 f:43968 f:-1756 i:80 f:1624 f:42560 f:816 i:100 f:1624 f:34880 f:816 i:90 f:1624 f:29920 f:1220 i:110 f:1624 f:5168 f:-7056 i:300 f:1624 f:4448 f:-4936 i:166 f:1624 f:7664 f:2952 f:0 f:0 f:1 f:0 i:0 i:1236 f:0.85449 f:0
+  0x428967  op2   h=0x404154 span=1      
+  0x428968  op1   h=0x404057 span=47     i:0 f:2324 f:14512 f:2632 i:600 f:2324 f:13504 f:2892 i:300 f:2324 f:10384 f:3412 i:166 f:2324 f:14896 f:4456 f:0 f:0 f:1 f:0 i:0
+  0x428997  op2   h=0x404154 span=1      
+  0x428998  op1   h=0x404057 span=77     i:-20 i:970 i:0 i:0 f:-19072 f:3924 f:-6408 i:900 f:-3892 f:32576 f:-10416 i:166 f:1384 f:4240 f:1568 f:0 f:0 f:1 f:0 i:0 i:1238 i:0 f:1.0645 i:900 f:1.5254 i:166 f:1.0469 i:0 f:0 i:900 f:1.3945 i:166 f:0
+  0x4289e5  op2   h=0x404154 span=1      
+  0x4289e6  op1   h=0x404057 span=38     i:0 f:-4176 f:15040 f:1574 i:900 f:1434 f:15216 f:1576 i:166 f:-1398 f:189.5 f:1574 f:0 f:0 f:1 f:0 i:0
+  0x428a0c  op2   h=0x404154 span=1      
+  0x428a0d  op3   h=0x4041e7 span=4      i:0 i:860
+  0x428a11  op2   h=0x404154 span=1      
+  0x428a12  op2   h=0x404154 span=1      
+  0x428a13  op1   h=0x404057 span=16     i:1240 i:10000 i:400
+  0x428a23  op1   h=0x404057 span=3      
+  0x428a26  op1   h=0x404057 span=26     f:-16000 f:0 f:0 f:-0.70703 f:0.70703 f:0 f:3.1406 i:0 i:1242 f:0.78516 f:0
+  0x428a40  op2   h=0x404154 span=1      
+  0x428a41  op1   h=0x404057 span=15     f:0 f:0 f:0 f:0 f:0 f:1 f:0 i:0
+  0x428a50  op2   h=0x404154 span=1      
+  0x428a51  op1   h=0x404057 span=29     f:0 f:0 f:0 f:-0.70703 f:0.70703 f:0 f:3.1406 i:1 i:1265 f:0.5 i:32
+  0x428a6e  op11  h=0x4040af span=5      f:1000
+  0x428a73  op11  h=0x4040af span=5      f:1000
+  0x428a78  op2   h=0x404154 span=1      
+  0x428a79  op2   h=0x404154 span=1      
+  0x428a7a  op2   h=0x404154 span=1      
+  0x428a7b  op1   h=0x404057 span=13     i:1245 i:800 i:64
+  0x428a88  op15  h=0x4040af span=14     i:0 i:300
+  0x428a96  op10  h=0x4040af span=9      i:0 i:15 i:100 i:15
+  0x428a9f  op1   h=0x404057 span=3      
+  0x428aa2  op1   h=0x404057 span=39     f:3352 f:-12560 f:-2140 f:0 f:0 f:1 f:0 i:1 i:1262 i:0 i:95 f:0.5 i:0
+  0x428ac9  op10  h=0x4040af span=5      i:768
+  0x428ace  op11  h=0x4040af span=5      f:2000
+  0x428ad3  op11  h=0x4040af span=5      f:1000
+  0x428ad8  op2   h=0x404154 span=1      
+  0x428ad9  op1   h=0x404057 span=85     i:-28 i:0 i:0 f:-3620 f:-3120 f:290 i:148 f:-14688 f:-5536 f:-1808 i:291 f:-37696 f:-4496 f:930 i:361 f:-70016 f:-1982 f:-1798 i:263 f:-1.0944e+05 f:-1618 f:-1796 i:3 f:-1.0995e+05 f:-5936 f:-1796 f:0 f:0 f:1 f:0 i:0 i:1248 f:0.52344 i:0 f:0.26172 i:799 f:-0.73242
+  0x428b2e  op2   h=0x404154 span=1      
+  0x428b2f  op1   h=0x404057 span=38     i:0 f:12688 f:-4888 f:-2048 i:800 f:-54400 f:-6080 f:-247.75 i:266 f:-94208 f:-6480 f:351 f:0 f:0 f:1 f:0 i:0
+  0x428b55  op1   h=0x404057 span=95     i:0 f:-35648 f:554 f:894 i:65 f:-18656 f:5536 f:834 i:78 f:-1017 f:2456 f:-2212 i:63 f:1 f:1 f:30.312 f:3592 f:889 i:102 f:30.312 f:1314 f:645 i:106 f:30.312 f:-2488 f:-1444 i:71 f:30.312 f:2668 f:-3692 i:315 f:30.312 f:1270 f:-1446 f:0 f:0 f:-1 f:1.5703 i:0 f:282 f:282 f:282 i:256 f:14992
+  0x428bb4  op2   h=0x404154 span=1      
+  0x428bb5  op1   h=0x404057 span=47     i:0 f:98176 f:3772 f:43.562 i:387 f:1 f:1 f:22688 f:2648 f:43.562 f:0 f:0 f:-1 f:1.5703 i:0 f:282 f:282 f:282 i:512 f:14992
+  0x428be4  op2   h=0x404154 span=1      
+  0x428be5  op2   h=0x404154 span=1      
+  0x428be6  op1   h=0x404057 span=43     f:3036 f:-5928 f:-2100 f:1 f:0 f:0 f:1.5703 i:1 i:1262 i:0 i:95 f:0.5 i:0 f:3000
+  0x428c11  op10  h=0x4040af span=5      i:768
+  0x428c16  op11  h=0x4040af span=5      f:2000
+  0x428c1b  op11  h=0x4040af span=5      f:1000
+  0x428c20  op2   h=0x404154 span=1      
+  0x428c21  op1   h=0x404057 span=47     f:77824 f:-4624 f:-4720 f:0 f:0 f:-1 f:1.5703 i:129 i:1262 i:0 i:95 f:0.5 i:0 f:200 f:1.9994e+05
+  0x428c50  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428c55  op11  h=0x4040af span=5      f:4192
+  0x428c5a  op2   h=0x404154 span=1      
+  0x428c5b  op1   h=0x404057 span=47     f:77824 f:-5344 f:-4712 f:0 f:0 f:-1 f:1.5703 i:129 i:1262 i:0 i:95 f:0.5 i:0 f:200 f:1.9994e+05
+  0x428c8a  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428c8f  op11  h=0x4040af span=5      f:4192
+  0x428c94  op2   h=0x404154 span=1      
+  0x428c95  op1   h=0x404057 span=47     f:77824 f:-1506 f:307.5 f:0 f:0 f:-1 f:1.5703 i:129 i:1262 i:0 i:95 f:0.5 i:0 f:200 f:1.9994e+05
+  0x428cc4  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428cc9  op11  h=0x4040af span=5      f:4192
+  0x428cce  op2   h=0x404154 span=1      
+  0x428ccf  op1   h=0x404057 span=46     f:77696 f:-108.5 f:-2100 f:0 f:0 f:-1 f:1.5703 i:33 i:1262 i:0 i:95 f:0.5 i:0 f:3000 f:1.9994e+05
+  0x428cfd  op11  h=0x4040af span=5      f:8.3886e+06
+  0x428d02  op11  h=0x4040af span=5      f:4.1943e+06
+  0x428d07  op11  h=0x4040af span=5      f:-1
+  0x428d0c  op1   h=0x404057 span=38     f:0 f:0 f:0 f:0 f:0 f:0 f:0 i:0 i:0 f:5 i:32 i:1255 i:1257 f:54976 i:0
+  0x428d32  op2   h=0x404154 span=1      
+  0x428d33  op2   h=0x404154 span=1      
+  0x428d34  op1   h=0x404057 span=51     i:0 f:3352 f:-103.38 f:-1940 i:797 f:-14960 f:-103.38 f:-1940 f:-1 f:0 f:0 f:3.1406 i:33 i:1262 i:0 i:95 f:0.5 i:0
+  0x428d67  op10  h=0x4040af span=5      i:768
+  0x428d6c  op11  h=0x4040af span=5      f:2000
+  0x428d71  op11  h=0x4040af span=5      f:1000
+  0x428d76  op2   h=0x404154 span=1      
+  0x428d77  op1   h=0x404057 span=63     i:0 f:-3704 f:-152 f:-3580 i:800 f:-69632 f:-6352 f:-1798 i:263 f:-1.0893e+05 f:-5984 f:-1796 i:3 f:-1.0957e+05 f:-10304 f:-1796 f:-1 f:0 f:0 f:3.1406 i:0 i:1259 f:0.52344 i:0 f:0.26172 i:799 f:-0.73242
+  0x428db6  op2   h=0x404154 span=1      
+  0x428db7  op1   h=0x404057 span=38     i:0 f:12688 f:-4888 f:-2048 i:800 f:-54400 f:-6080 f:-247.75 i:266 f:-94208 f:-6480 f:351 f:0 f:0 f:1 f:0 i:0
+  0x428ddd  op2   h=0x404154 span=1      
+  0x428dde  op3   h=0x4041e7 span=4      i:0 i:860
+  0x428de2  op2   h=0x404154 span=1      
+  0x428de3  op2   h=0x404154 span=1      
+  0x428de4  op1   h=0x404057 span=3      
+  0x428de7  op7   h=0x4023bf span=136    
+  0x428e6f  op2   h=0x404154 span=1      
+  0x428e70  op1   h=0x404057 span=3      
+  0x428e73  op7   h=0x4023bf span=125    
+  0x428ef0  op2   h=0x404154 span=1      
+  0x428ef1  op1   h=0x404057 span=3      
+  0x428ef4  op7   h=0x4023bf span=158    
+  0x428f92  op2   h=0x404154 span=1      
+  0x428f93  op1   h=0x404057 span=3      
+  0x428f96  op7   h=0x4023bf span=39     
+  0x428fbd  op2   h=0x404154 span=1      
+  0x428fbe  op1   h=0x404057 span=3      
+  0x428fc1  op7   h=0x4023bf span=31     
+  0x428fe0  op2   h=0x404154 span=1      
+  0x428fe1  op1   h=0x404057 span=3      
+  0x428fe4  op7   h=0x4023bf span=334    
+  0x429132  op2   h=0x404154 span=1      
+  0x429133  op1   h=0x404057 span=3      
+  0x429136  op7   h=0x4023bf span=158    
+  0x4291d4  op2   h=0x404154 span=1      
+  0x4291d5  op0   h=0x400000 span=0      

@@ -15,8 +15,13 @@ documented below.
 
 An earlier draft of this document guessed that the script was depacked into a
 heap buffer; emulation disproved that — **the script is cleartext in `.data`
-at `0x418dca`**, and the emulator's opcode fetches match the raw file bytes
-exactly.
+at `0x418dca`**, spanning to `0x4291d5`, and the emulator's opcode fetches match
+the raw file bytes exactly.
+
+Two figures in earlier drafts were **too low because they came from runs that
+stopped early**, and are corrected throughout: the script is **970** opcodes
+(not 201), and the texture generator uses **23 of its 26 operators** across
+**11 programs** (not 7 across 3). See §3.1b.
 
 All addresses are RVAs in the UPX-unpacked image based at `0x00400000`. The
 original binary is **not** redistributed here; point the tools at your own
@@ -89,8 +94,8 @@ main loop is eight instructions:
 
 | Opcode | Count | Handler | Notes |
 |---|---|---|---|
-| 1 | 96 | `0x404057` | object/keyframe definition — the bulk of the script |
-| 2 | 95 | `0x404154` | commit/terminate the preceding definition (pairs with op 1) |
+| 1 | many | `0x404057` | object/keyframe definition — the bulk of the script |
+| 2 | many | `0x404154` | commit/terminate the preceding definition (pairs with op 1) |
 | 23 | 3 | `0x404236` | |
 | 20 | 2 | `0x4023d3` | shade-tree op (adjacent to the material evaluator) |
 | 4 | 1 | `0x40303b` | bulk loader — consumes ~5.4 KB of inline data at script start |
@@ -99,9 +104,9 @@ main loop is eight instructions:
 | 25 | 1 | `0x404701` | |
 | 29 | 1 | `0x40402b` | |
 
-The near-equal counts of opcodes 1 and 2 reveal the structure: 96
-`define … commit` pairs, i.e. **96 scene objects/animation blocks**, preceded
-by a single bulk-data load.
+The near-equal counts of opcodes 1 and 2 reveal the structure: a long run of
+`define … commit` pairs — one per scene object/animation block — preceded by a
+bulk-data load. Exact counts are in `scene-script.txt`.
 
 ### Sample of the decoded values
 
@@ -212,61 +217,61 @@ Emulation confirms these really do generate the textures: the handler region
 for operator `0x14` executed **14.6 million times** in one run — a per-pixel
 inner loop over several 256×256 buffers.
 
-### 3.1b The texture programs — extracted, and only 7 operators are used
+### 3.1b The texture programs — 11 programs, 23 of 26 operators used
 
-Emulation traced the interpreter's program pointer and opcode stream
-(`tools/emulate_texture_vm.py`). The texture programs turn out to sit in
-`.data` at **`0x41b6b1`**, cleartext, immediately after the scene script — and
-they are tiny:
+Emulation traced the interpreter's program pointer and opcode stream. The
+definitive measure was **counting calls to the texture allocator**
+(`.text:0x4088c9`, exactly one per texture object) — an independent check that
+does not depend on having found the programs. It reported **11**, which
+immediately falsified an earlier claim here of 3.
+
+Running to exhaustion then found all of them:
 
 ```
-program 0 @ 0x41b6b1 : op 0x15 (args 01 07 78)              ; then 0x01
-program 1 @ 0x41b6be : op 0x11 (args 01 07 00 00 00 00 00 10 00 00) ; then 0x01
-program 2 @ 0x41b6cf : op 0x12, op 0x13, op 0x41, op 0x21   ; then 0x01
+0x41b6b1  0x41b6be  0x41b6cf  0x41b9d6      (near the script's start region)
+0x428de8  0x428e74  0x428ef5  0x428f97
+0x428fc2  0x428fe5  0x429137                (a second pool, ~0x428xxx)
 ```
 
-**Only 7 of the 26 operators are used**, exactly as the scene script uses only
-9 of ~30 opcodes:
+The seven programs around `0x428xxx` sit in a region the first trace never
+reached. Allocations are 10 × `256×256` plus one `320×176` — that last one is the
+framebuffer sharing the same allocator, so **10 real textures**.
 
-| Op | Handler | Role |
-|---|---|---|
-| `0x01` | `0x4418ea` | terminator — ends every program (handler shared by ids `0x01`–`0x04`) |
-| `0x11` | `0x441d57` | |
-| `0x12` | `0x441e67` | |
-| `0x13` | `0x441f0c` | |
-| `0x15` | `0x442050` | |
-| `0x21` | `0x44211a` | |
-| `0x41` | `0x442789` | |
+The programs are substantial, not the 2–5 operator sketches first observed:
 
-Operator arguments commonly start `0x01`/`0x02` followed by `0x07`, which reads
-naturally as *(target layer, channel mask = RGB)* — a hypothesis to confirm when
-reversing each handler, not an established fact.
+| Program | Ops | Program | Ops |
+|---|---|---|---|
+| 0 `0x41b6b1` | 2 | 6 `0x428ef5` | 21 |
+| 1 `0x41b6be` | 2 | 7 `0x428f97` | 8 |
+| 2 `0x41b6cf` | 5 | 8 `0x428fc2` | 4 |
+| 3 `0x41b9d6` | 3 | 9 `0x428fe5` | **43** |
+| 4 `0x428de8` | 17 | 10 `0x429137` | 21 |
+| 5 `0x428e74` | 22 | | |
 
-[`texture-programs.txt`](texture-programs.txt) contains the programs plus a
-**focused disassembly of just these 7 handlers** — that file, not the 26-handler
-reference, is the actual port target. The raw trace is in
-`texture-programs-dump.json`.
+**148 operator invocations** in total, using **23 of the 26 operators**. Only
+`0x22`, `0x30` and `0x34` are never used. So the operator table is nearly fully
+exercised, and [`texture-ops.txt`](texture-ops.txt) — all 26 handlers — is the
+port target, not a narrow subset.
 
-**Completeness is NOT established — treat "3 programs / 7 operators" as a
-verified lower bound, not the full set.** Three concrete reasons to doubt it:
+Two structural facts fall out of the full trace:
 
-- The three programs total only **67 bytes** (`0x41b6b1`–`0x41b6f0`), which is
-  implausibly little for a three-minute intro known for its generated textures.
-- The script VM's cursor reached at most `0x41b6f4`, but non-zero data continues
-  to about **`0x421c31`** — roughly **26 KB beyond anything the script walked
-  sequentially**. That region must be reached by pointer rather than by the
-  sequential cursor, and it is a plausible home for further texture programs
-  (the three known program pointers are handed to the interpreter in `EDI` by a
-  caller, so programs are addressed indirectly).
-- The trace ran a limited instruction budget; later scenes may generate more.
+- **Every program ends on `0x01`–`0x04`**, which combined with the handler's
+  `index << 18` (§3.2c) reads as **"output to layer 1–4"** — the opcode *is* the
+  destination layer index. That confirms the five-layer bank.
+- **Operator `0x40` appears 14 times consecutively** in program 5, so it is a
+  per-element operation (placing a feature/blob repeatedly), not a whole-image
+  filter.
 
-A static scan for further programs was inconclusive: matching "generator opcode
-followed by a terminator within 24 bytes" yields 2097 candidates across the data
-region, i.e. mostly noise. The reliable test is dynamic — counting calls to the
-texture **allocator** (`.text:0x4088c9`), which is exactly one call per texture
-object created. `tools/emulate_count.py` does this with a fast-forwarded clock
-(250 ms per `timeGetTime`) so the intro advances through its scenes without
-emulating every frame.
+#### Retraction
+
+An earlier version of this section claimed "3 programs, 7 operators" and
+described the work as pruned from 26 to 7. That was wrong: it generalised from a
+single bounded run whose stopping point was mistaken for the end of the data.
+The true set is 11 programs and 23 operators, which is a **substantially larger
+port** than that section implied. The operator semantics documented in §3.2b–d
+(value noise, plasma, sine interference, radial rings, blend, PRNG, layer model)
+remain valid — they were read from the handlers themselves — but they cover
+roughly a quarter of what a complete port needs.
 
 ### 3.2 Texture objects are resolution-parameterised — the key to a remaster
 
@@ -541,11 +546,12 @@ Two claims in earlier drafts of this document were wrong and are retracted:
   *variables* (`0x442930`, `0x442b2c`) that simply live among the code. `.data`
   is a static code+data library, which is simpler and better news for porting.
 
-One scope caveat on §2 as well: the 201-opcode dump was taken with a frozen
-clock. With the clock advancing, **5495** decoder tokens are seen rather than
-1735, because later scenes are parsed as the intro progresses. `scene-script.txt`
-is therefore the *opening* of the timeline, not the whole of it; re-running with
-`emulate_texture_vm.py`'s advancing clock and a raised token cap yields the rest.
+Resolved: `scene-script.txt` now holds the **full** 970-opcode timeline
+(`0x418dca`–`0x4291d5`, 5495 values), from `tools/emulate_extract_full.py` with a
+raised instruction budget. The earlier 201-opcode figure came from a truncated
+run — and its apparent "script end" at `0x41b6f4` was an artifact of that
+truncation, not a real bound. Lesson applied below: completeness needs a
+run-to-exhaustion **plus an independent cross-measure**.
 
 ---
 
@@ -604,11 +610,11 @@ What a *complete* port needs from the binary, and where each piece stands:
 |---|---|---|
 | Stream decoders (`varint`, `float`) | **done**, tested port | `tools/decoders.py` |
 | Scene-script VM + dispatch table | **done** | §2 |
-| Scene timeline (opening) | **extracted** | `scene-script.txt` |
-| Scene timeline (full, clock advancing) | needs one longer run | §3.4 caveat |
+| Scene timeline | **fully extracted** (970 opcodes) | `scene-script.txt` |
+
 | Texture generator VM + operator table | **located, 26 ops disassembled** | §3.1, `texture-ops.txt` |
-| Texture programs | 3 extracted — **completeness unverified** (§3.1b) | `texture-programs.txt` |
-| Texture operator *semantics* | **all 7 identified**; exact arithmetic still to transcribe | §3.2b–d |
+| Texture programs | **all 11 extracted** (allocator-count verified) | `texture-programs.txt` |
+| Texture operator *semantics* | 7 of the **23** used operators identified | §3.2b–d |
 | Octave strategy for 4× | **decided** | §3.2b |
 | Shade-tree / material evaluator | characterized | §3.3 |
 | Bump mapping | characterized | §3.3 |
@@ -627,8 +633,9 @@ work left. Budget that as the real task, not as a detail.
 
 The recommended order:
 
-1. ~~Trace the texture programs first~~ — **done**: see §3.1b. The pruning paid
-   off, cutting the work from 26 operators to **7**, each a short MMX routine.
+1. ~~Trace the texture programs first~~ — **done**: see §3.1b. It did *not*
+   prune the way I hoped: 23 of 26 operators are used across 11 programs, so
+   plan for the full operator set (7 are already reversed in §3.2b–d).
 2. **Reimplement operator-by-operator**, validating each against the emulator:
    run the original operator on a known input buffer, dump the result, and
    diff it against the WGSL pass. This gives per-operator ground truth instead
