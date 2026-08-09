@@ -2,11 +2,13 @@
 
 Assessment of the original Mekka & Symposium 2000 release archive
 (`heaven7w.exe` / `heaven7d.exe`) for a restoration project: how hard is the
-binary to disassemble/decompile, and can the software raytracer be replaced
+binary to reverse-engineer, and can the software raytracer be replaced
 with a WebGPU compute-shader implementation in JS?
 
-**Short answer:** full decompilation is a serious but tractable RE project
-(hand-written, uncommented x86 assembly — the author's own description); a
+**Short answer:** this is a disassembly-and-annotation project, not a
+decompilation one — there was never any higher-level source to recover
+(hand-written, uncommented x86 assembly, per the author himself). Full
+engine annotation is serious but tractable; a
 *faithful reimplementation* is much cheaper than full RE, because the
 rendering algorithm is well understood, the soundtrack exists as a clean XM
 rip, and only the scene script / procedural textures genuinely require
@@ -76,19 +78,31 @@ sections indicate the mixer/replayer runs on a worker thread.
 
 ---
 
-## 2. How hard is decompilation / disassembly?
+## 2. How hard is the reverse engineering?
 
-**Disassembly: easy.** UPX unpacks in one command; Ghidra/IDA ingest the PE
-cleanly; the code is plain 32-bit x86 with x87+MMX.
+**Framing: this is a disassembly project, not a decompilation project.**
+There was never any C source — the intro is hand-written assembly, so the
+disassembly *is* the source, minus labels and comments. "Decompiling" it
+recovers nothing that ever existed; the real work product is an **annotated
+disassembly**: named routines, labeled data, reconstructed intent, verified
+by dynamic tracing.
 
-**Decompilation to readable source: hard — this is the expensive path.**
-Decompilers produce poor output for hand-scheduled x87 stack code (`fxch`
-juggling defeats stack-to-variable recovery) and MMX intrinsics; with no
-symbols, no CRT idioms, and no stack frames, every one of the ~130 routines
-must be understood by a human reading FPU stack states. Estimate: weeks of
-skilled RE for a full-engine lift, most of it spent on code we would *throw
-away anyway* (subsampling reconstruction, MMX post, DirectDraw plumbing,
-replayer).
+**Getting a disassembly: easy.** UPX unpacks in one command; Ghidra/IDA
+ingest the PE cleanly; the code is plain 32-bit x86 with x87+MMX.
+
+**Understanding it end-to-end: hard — this is the expensive path.**
+With no symbols, no CRT idioms, and no stack frames, every one of the ~130
+routines must be understood by a human. Decompiler views (Ghidra/Hex-Rays)
+remain useful as a *reading aid* for the integer/control-flow parts (window
+setup, the bit-stream decoder, the timeline dispatcher) — but they produce
+misleading garbage for exactly the interesting code: hand-scheduled x87
+stack juggling (`fxch` chains defeat stack-to-variable recovery) and MMX
+packed-integer pipelines. Those must be read as assembly, FPU stack state in
+hand, or traced live. Estimate: weeks of skilled RE for a full-engine
+annotation, most of it spent on code we would *throw away anyway*
+(subsampling reconstruction, MMX post, DirectDraw plumbing, replayer) —
+and the port target is WGSL/JS regardless, so reconstructed C source has no
+role as a deliverable.
 
 **The right target is data, not code.** For a faithful restoration the
 genuinely valuable things inside the binary are:
@@ -107,14 +121,15 @@ genuinely valuable things inside the binary are:
    recoverable by instrumenting `timeGetTime` usage + the replayer tick.
 
 Everything else — the raytracer, shading, post — is better *re-derived* than
-decompiled, because the algorithms are known and a video capture provides
-ground truth for side-by-side comparison.
+read out of the disassembly instruction by instruction, because the
+algorithms are known and a video capture provides ground truth for
+side-by-side comparison.
 
 **Difficulty verdict:**
 - Run-and-instrument to extract scene data: **moderate** (days–2 weeks).
 - Clean-room reimplementation of the renderer: **easy–moderate** (the
   prototype's core took an afternoon).
-- Full source-level decompilation of the whole intro: **hard** (weeks+), and
+- Fully annotated disassembly of the whole intro: **hard** (weeks+), and
   unnecessary for the goal.
 
 ---
