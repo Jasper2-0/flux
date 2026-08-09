@@ -212,6 +212,45 @@ Emulation confirms these really do generate the textures: the handler region
 for operator `0x14` executed **14.6 million times** in one run — a per-pixel
 inner loop over several 256×256 buffers.
 
+### 3.1b The texture programs — extracted, and only 7 operators are used
+
+Emulation traced the interpreter's program pointer and opcode stream
+(`tools/emulate_texture_vm.py`). The texture programs turn out to sit in
+`.data` at **`0x41b6b1`**, cleartext, immediately after the scene script — and
+they are tiny:
+
+```
+program 0 @ 0x41b6b1 : op 0x15 (args 01 07 78)              ; then 0x01
+program 1 @ 0x41b6be : op 0x11 (args 01 07 00 00 00 00 00 10 00 00) ; then 0x01
+program 2 @ 0x41b6cf : op 0x12, op 0x13, op 0x41, op 0x21   ; then 0x01
+```
+
+**Only 7 of the 26 operators are used**, exactly as the scene script uses only
+9 of ~30 opcodes:
+
+| Op | Handler | Role |
+|---|---|---|
+| `0x01` | `0x4418ea` | terminator — ends every program (handler shared by ids `0x01`–`0x04`) |
+| `0x11` | `0x441d57` | |
+| `0x12` | `0x441e67` | |
+| `0x13` | `0x441f0c` | |
+| `0x15` | `0x442050` | |
+| `0x21` | `0x44211a` | |
+| `0x41` | `0x442789` | |
+
+Operator arguments commonly start `0x01`/`0x02` followed by `0x07`, which reads
+naturally as *(target layer, channel mask = RGB)* — a hypothesis to confirm when
+reversing each handler, not an established fact.
+
+[`texture-programs.txt`](texture-programs.txt) contains the programs plus a
+**focused disassembly of just these 7 handlers** — that file, not the 26-handler
+reference, is the actual port target. The raw trace is in
+`texture-programs-dump.json`.
+
+Caveat: this trace covers the textures generated in the observed window (3
+programs). Later scenes may generate more; a longer run with the advancing
+clock will confirm whether the operator set grows beyond these 7.
+
 ### 3.2 Texture objects are resolution-parameterised — the key to a remaster
 
 The allocator at `.text:0x4088c9` is called with **width in `EAX`, height in
@@ -351,8 +390,8 @@ What a *complete* port needs from the binary, and where each piece stands:
 | Scene timeline (opening) | **extracted** | `scene-script.txt` |
 | Scene timeline (full, clock advancing) | needs one longer run | §3.4 caveat |
 | Texture generator VM + operator table | **located, 26 ops disassembled** | §3.1, `texture-ops.txt` |
-| Texture operator *semantics* | **not yet reversed** — the main remaining work | 26 handlers |
-| Texture programs (per-texture byte streams) | traceable; hook `0x4418b7` | `tools/emulate_texture_vm.py` |
+| Texture programs (per-texture byte streams) | **extracted** | `texture-programs.txt` |
+| Texture operator *semantics* | **not yet reversed** — the main remaining work | **7** handlers (not 26) |
 | Shade-tree / material evaluator | characterized | §3.3 |
 | Bump mapping | characterized | §3.3 |
 | Music | **solved** — XM module + JS replayer | `demos/heaven7-webgpu` |
@@ -370,10 +409,8 @@ work left. Budget that as the real task, not as a detail.
 
 The recommended order:
 
-1. **Trace the texture programs first** (`emulate_texture_vm.py`). Knowing
-   *which* operators the intro actually uses, and with what arguments, prunes
-   the set — the scene script uses only 9 of ~30 script opcodes, so the texture
-   programs likely lean on a similar subset. Reverse those first.
+1. ~~Trace the texture programs first~~ — **done**: see §3.1b. The pruning paid
+   off, cutting the work from 26 operators to **7**, each a short MMX routine.
 2. **Reimplement operator-by-operator**, validating each against the emulator:
    run the original operator on a known input buffer, dump the result, and
    diff it against the WGSL pass. This gives per-operator ground truth instead
@@ -399,7 +436,11 @@ The recommended order:
 - `tools/annotate.py` — prints annotated disassembly of the key routines.
 - **`texture-ops.txt`** — reference disassembly of the texture VM: interpreter
   plus all 26 operator handlers.
+- **`texture-programs.txt`** — the intro's actual texture programs plus a
+  focused disassembly of only the 7 operators they use. The port target.
+- `texture-programs-dump.json` — raw trace (program pointers + opcode stream).
 - `tools/texture_ops.py` — regenerates `texture-ops.txt` from the binary.
+- `tools/texture_programs.py` — regenerates `texture-programs.txt` from a trace.
 - `tools/emulate_texture_vm.py` — emulator variant with an advancing clock that
   traces the texture VM (program pointers + operator stream) and reaches the
   later scenes.
