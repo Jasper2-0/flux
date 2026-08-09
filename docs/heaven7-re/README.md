@@ -153,9 +153,29 @@ generator can be re-derived later against those as ground truth.
 
 ## 4. Recommended path to a complete extraction
 
+Two routes, depending on what you can run. Neither needs the values decoded by
+hand — both dump the real stream.
+
+### A. No Windows: headless CPU emulation (`tools/emulate_extract.py`)
+
+The scene parser is pure computation — it never touches the GPU or sound — so
+it can run inside a CPU emulator with the OS calls stubbed. `emulate_extract.py`
+loads the unpacked PE into [Unicorn](https://www.unicorn-engine.org/)
+(`pip install unicorn`), stubs the imports, and hooks the two decoders to dump
+the stream. It runs anywhere Python does — Mac, Linux, no Wine. **Status:** the
+harness loads and executes the real code (CPU/MMX/x87, import stubs, bump-heap,
+command-line parser all work); reaching the parser still needs faithful stubs
+for the DirectDraw COM vtable, the settings dialog callback, and the worker
+thread. That's the remaining work to make it a one-command dump.
+
+### B. Frida on the running program (`tools/extract_scene.js`)
+
+If you can run the intro (native Windows, or **HEAVEN7L on Linux/macOS**, or
+Wine), attach Frida and let it observe the live decode:
+
 1. `upx -d heaven7w.exe`
 2. `frida -f heaven7w.exe -l tools/extract_scene.js --no-pause`, let the intro
-   play through once (Wine works).
+   play through once.
 3. `scene_dump.json` is the timeline as an ordered `varint/float` token stream;
    segment it using the handler schema in §2 to get per-object keyframes.
 4. `tex_*.rgba` are the generated textures — usable as assets in the WebGPU
