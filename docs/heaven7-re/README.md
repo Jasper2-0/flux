@@ -247,9 +247,26 @@ reversing each handler, not an established fact.
 reference, is the actual port target. The raw trace is in
 `texture-programs-dump.json`.
 
-Caveat: this trace covers the textures generated in the observed window (3
-programs). Later scenes may generate more; a longer run with the advancing
-clock will confirm whether the operator set grows beyond these 7.
+**Completeness is NOT established — treat "3 programs / 7 operators" as a
+verified lower bound, not the full set.** Three concrete reasons to doubt it:
+
+- The three programs total only **67 bytes** (`0x41b6b1`–`0x41b6f0`), which is
+  implausibly little for a three-minute intro known for its generated textures.
+- The script VM's cursor reached at most `0x41b6f4`, but non-zero data continues
+  to about **`0x421c31`** — roughly **26 KB beyond anything the script walked
+  sequentially**. That region must be reached by pointer rather than by the
+  sequential cursor, and it is a plausible home for further texture programs
+  (the three known program pointers are handed to the interpreter in `EDI` by a
+  caller, so programs are addressed indirectly).
+- The trace ran a limited instruction budget; later scenes may generate more.
+
+A static scan for further programs was inconclusive: matching "generator opcode
+followed by a terminator within 24 bytes" yields 2097 candidates across the data
+region, i.e. mostly noise. The reliable test is dynamic — counting calls to the
+texture **allocator** (`.text:0x4088c9`), which is exactly one call per texture
+object created. `tools/emulate_count.py` does this with a fast-forwarded clock
+(250 ms per `timeGetTime`) so the intro advances through its scenes without
+emulating every frame.
 
 ### 3.2 Texture objects are resolution-parameterised — the key to a remaster
 
@@ -590,7 +607,7 @@ What a *complete* port needs from the binary, and where each piece stands:
 | Scene timeline (opening) | **extracted** | `scene-script.txt` |
 | Scene timeline (full, clock advancing) | needs one longer run | §3.4 caveat |
 | Texture generator VM + operator table | **located, 26 ops disassembled** | §3.1, `texture-ops.txt` |
-| Texture programs (per-texture byte streams) | **extracted** | `texture-programs.txt` |
+| Texture programs | 3 extracted — **completeness unverified** (§3.1b) | `texture-programs.txt` |
 | Texture operator *semantics* | **all 7 identified**; exact arithmetic still to transcribe | §3.2b–d |
 | Octave strategy for 4× | **decided** | §3.2b |
 | Shade-tree / material evaluator | characterized | §3.3 |
