@@ -350,6 +350,89 @@ Keeping the hash exact while extending octaves is what makes the remaster the
 *same* image with more detail: octaves 7…2 reproduce the original's shapes,
 octaves 1…0 are new information the 256×256 original never had room for.
 
+### 3.2c The shared machinery: PRNG, layer model, and the plasma generator
+
+Reversing the helpers turned the operator set into a coherent system.
+
+#### The PRNG — `.data:0x4418f8` (must be bit-exact)
+
+```asm
+mov  ecx, [0x442930]          ; state
+imul ecx, ecx, 0xfacedead
+rcr  ecx, 3                   ; rotate RIGHT THROUGH CARRY by 3
+xchg ch, cl                   ; swap the low two bytes
+inc  ecx
+mov  [0x442930], ecx          ; new state ; low byte CL is the random value
+```
+
+Both noise operators seed this by copying **4 bytes straight from the program
+stream** into the state (`mov edi, 0x442930` / `movsd`) — so each texture's
+randomness is fully determined by its program, which is what makes the textures
+reproducible and a faithful port possible.
+
+One porting hazard: `rcr` is rotate-*through-carry*, so the incoming CF acts as
+a 33rd bit. A naive `ror` is **not** equivalent and will desynchronise the
+sequence. The CF state at entry must be modelled to reproduce the original
+stream bit-exactly.
+
+#### The layer model — operators `0x01`–`0x04` (`.data:0x4418ea`)
+
+```asm
+movzx esi, al                 ; al = layer index
+shl   esi, 0x12               ; * 0x40000 = 262144 = 256*256*4
+add   esi, [0x44292c]         ; + work-buffer base
+stc                           ; set carry
+```
+
+`0x40000` bytes per layer is exactly **256×256 RGBA**, and the interpreter
+zeroes `0x50000` dwords = `0x140000` bytes = **5 layers**. So the texture VM
+operates on a fixed bank of five 256×256 RGBA scratch layers, addressed by
+index — and these ids are the program's *"output layer N"* instruction, not a
+generic terminator as an earlier note here assumed.
+
+The **carry flag is the interpreter's continue/stop signal**: operator `0x12`
+ends with `clc` (continue) while `0x4418ea` ends with `stc` (stop), which is why
+every traced program ended on an `0x01`.
+
+#### Operator `0x11` (`.data:0x441d57`) — plasma / diamond-square
+
+Not a stacked-octave generator but **midpoint displacement**:
+
+```asm
+mov edx, 0x80                 ; step = 128
+movzx eax, [edi+ebx*4]        ; corner 1
+add bl, dh   / add al,[..] / adc ah,0     ; corner 2
+add bh, dh   / add al,[..] / adc ah,0     ; corner 3
+sub bl, dh   / add al,[..] / adc ah,0     ; corner 4  -> 16-bit sum in AX
+call 0x4418f8                 ; random
+lea  ecx, [ecx+ecx*2]         ; * 3   (roughness scale)
+call 0x441e3f                 ; average of 4 corners + scaled displacement
+```
+
+It averages four neighbours, adds a scaled random displacement, and halves the
+step each pass — so its scale hierarchy is *intrinsic* to the recursion rather
+than composed from separate calls.
+
+#### What this means for the 4× remaster
+
+Your octave point applies to both generators, in the form each one takes:
+
+| Generator | Native behaviour | 4× remaster |
+|---|---|---|
+| `0x12` value noise | one octave per call, `step = 1<<n`, `amp = 0x1000>>n` | shift exponents by +2, **append 2 finer octaves** (`n = 1, 0`) |
+| `0x11` plasma | recursive subdivision from `step = 128` | **start at `step = 512`** and run **2 extra subdivision levels** down to `step = 1` |
+
+Both then need renormalising (§3.2b) so added detail sharpens rather than
+alters the image.
+
+There is a useful guarantee here: because coarse levels are generated **before**
+fine ones and consume PRNG draws in traversal order, starting the plasma at
+`step = 512` reproduces the original's coarse draws in the identical order, and
+the new fine levels merely consume additional draws *afterwards*. So the
+remaster's large-scale structure is bit-identical to the original, with the new
+octaves adding only detail the 256×256 version had no room to express. That is
+the precise sense in which this is a remaster rather than a reinterpretation.
+
 ### 3.3 Runtime shade-tree — `.text:0x4023b7`
 
 A **recursive evaluator over 32-byte nodes** (`ESI` = node). It is the material
@@ -456,7 +539,7 @@ What a *complete* port needs from the binary, and where each piece stands:
 | Scene timeline (full, clock advancing) | needs one longer run | §3.4 caveat |
 | Texture generator VM + operator table | **located, 26 ops disassembled** | §3.1, `texture-ops.txt` |
 | Texture programs (per-texture byte streams) | **extracted** | `texture-programs.txt` |
-| Texture operator *semantics* | `0x12` reversed (value noise); 6 to go | **7** handlers (not 26) |
+| Texture operator *semantics* | `0x01`–`0x04`, `0x11`, `0x12` + PRNG reversed; 4 to go (`0x13`, `0x15`, `0x21`, `0x41`) | §3.2b–c |
 | Octave strategy for 4× | **decided** | §3.2b |
 | Shade-tree / material evaluator | characterized | §3.3 |
 | Bump mapping | characterized | §3.3 |
