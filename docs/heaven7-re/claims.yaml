@@ -1,0 +1,395 @@
+# Claim ledger for the Heaven 7 reverse engineering.
+#
+# Every factual claim made in README.md appears here with its provenance class
+# (see METHODOLOGY.md). BYTES claims carry a `check` block and are re-verified
+# against the binary by tools/verify_claims.py. Everything else is listed as
+# unchecked, with a locator, so the unverified surface is always visible.
+#
+# Classes: BYTES | DISASM | TRACE | CROSS | INFER
+# INFER = hypothesis, NOT evidence.
+
+# ---------------------------------------------------------------- stream format
+- id: decoder.varint.addr
+  statement: "read_varint is at .text:0x4086b8 and begins movzx eax,[edi] / inc edi / shr eax,1."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4086b8
+    expect: "0fb607 47 d1e8"
+
+- id: decoder.float.addr
+  statement: "read_float is at .text:0x4086c8 and begins push ecx / xor eax,eax / test byte [edi],1."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4086c8
+    expect: "51 33c0 f60701"
+
+- id: decoder.float.semantics
+  statement: "read_float has three encodings (1-byte zero, 2-byte compact, 3-byte extended) and reconstructs the exponent as (((stored+0xE0)&0x1F)+0x7A)<<23."
+  evidence: DISASM
+  locator: "disasm-key-routines.txt, .text:0x4086c8..0x40871e"
+
+- id: decoder.float.selftest
+  statement: "The Python port of both decoders reproduces the documented encodings; a single 0x00 byte decodes to 0.0 consuming one byte."
+  evidence: CROSS
+  locator: "tools/decoders.py self-tests (transcription vs. disassembly)"
+
+# ------------------------------------------------------------- scene-script VM
+- id: scriptvm.loop.addr
+  statement: "The scene-script VM fetches its opcode at .text:0x40a624 with movzx eax,byte [edi]."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x40a624
+    expect: "0fb607 47"
+
+- id: scriptvm.dispatch.table.addr
+  statement: "Opcode dispatch reads a 16-bit offset from .data:0x440f67 indexed by opcode*2."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x40a62c
+    expect: "0fb70445670f4400"
+
+- id: scriptvm.dispatch.op1
+  statement: "Script opcode 1 dispatches to 0x404057."
+  evidence: BYTES
+  check:
+    kind: dispatch16
+    addr: 0x440f67
+    op: 1
+    expect: 0x404057
+
+- id: scriptvm.dispatch.op2
+  statement: "Script opcode 2 dispatches to 0x404154."
+  evidence: BYTES
+  check:
+    kind: dispatch16
+    addr: 0x440f67
+    op: 2
+    expect: 0x404154
+
+- id: script.start.addr
+  statement: "The scene script begins at .data:0x418dca and its first opcode byte is 0x01."
+  evidence: BYTES
+  check:
+    kind: u8
+    addr: 0x418dca
+    expect: 0x01
+
+- id: script.extent
+  statement: "The script spans 0x418dca..0x4291d5 and comprises 970 opcodes / 5495 decoded values."
+  evidence: TRACE
+  locator: "tools/emulate_extract_full.py, 3e9 instruction budget; stop reason: emulation fault at 0x40de23 in the sound path AFTER the script was fully walked. NOTE: this run did not terminate cleanly, so per METHODOLOGY.md rule 1 the extent is a LOWER BOUND, not proven complete."
+
+- id: script.objects.structure
+  statement: "Opcodes 1 and 2 occur in near-equal numbers, reading as define/commit pairs, one per scene object or animation block."
+  evidence: INFER
+  locator: "scene-script.txt opcode histogram; the pairing is a pattern, the 'object' meaning is not established"
+
+- id: script.op4.blob
+  statement: "Script opcode 4 consumes ~5.4KB of inline data that is 64% 0xff bytes, so it is bitmap/image data rather than a texture program."
+  evidence: TRACE
+  locator: "byte histogram of 0x418ddc..0x41a2dc; the 'bitmap' reading is INFER on top of the measured histogram"
+
+- id: script.handler.0x406a39.schema
+  statement: "Handler .text:0x406a39 reads 3 varints into object+0x174/+0x178/+0x19c then N*6 floats at object+0x1a0 (40-byte stride) then 4 floats at object+0x17c."
+  evidence: DISASM
+  locator: "disasm-key-routines.txt, .text:0x406a39"
+
+- id: script.handlers.primitive.names
+  statement: "The other script handlers correspond to sphere, plane, light, camera path and text primitives."
+  evidence: INFER
+  locator: "NOT ESTABLISHED — these names were assigned by analogy and no handler has been read to confirm any of them."
+
+- id: script.values.lightdir
+  statement: "The decoded stream contains 0.5771,0.5771,-0.5771, a unit vector (1/sqrt3)."
+  evidence: TRACE
+  locator: "scene-script.txt, offset 0x41a340. That the vector IS a light direction is INFER."
+
+# ------------------------------------------------------- animation constants
+- id: const.2pi3
+  statement: ".data:0x441025 holds 2*pi/3 (2.0943951)."
+  evidence: BYTES
+  check:
+    kind: f32
+    addr: 0x441025
+    expect: 2.0943951
+    tol: 1e-5
+
+- id: const.2pi5
+  statement: ".data:0x441005 holds 2*pi/5 (1.2566370)."
+  evidence: BYTES
+  check:
+    kind: f32
+    addr: 0x441005
+    expect: 1.2566370
+    tol: 1e-5
+
+- id: const.mstos
+  statement: ".data:0x441035 holds 1000.0."
+  evidence: BYTES
+  check:
+    kind: f32
+    addr: 0x441035
+    expect: 1000.0
+
+- id: const.meaning.symmetry
+  statement: "The 2pi/3 and 2pi/5 constants are the symmetry angles of the sphere rings, and 1000.0 converts timeGetTime ms to seconds."
+  evidence: INFER
+  locator: "values are BYTES-verified above; their PURPOSE is inferred and unconfirmed"
+
+# ------------------------------------------------------------- texture VM
+- id: texvm.interp.addr
+  statement: "The texture-generator interpreter is at .data:0x44189f and fetches operator ids with lodsb at 0x4418b7."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4418b7
+    expect: "ac"
+
+- id: texvm.optable.addr
+  statement: "The interpreter searches an operator table at .data:0x4429b8 with 8-byte entries."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4418ba
+    expect: "8b8bb8294400"
+
+- id: texvm.optable.count
+  statement: "The operator table has 26 zero-terminated 8-byte entries."
+  evidence: BYTES
+  check:
+    kind: table_count
+    addr: 0x4429b8
+    entry_size: 8
+    expect: 26
+
+- id: texvm.optable.entry.0x11
+  statement: "Operator id 0x11 maps to handler 0x441d57."
+  evidence: BYTES
+  check:
+    kind: table_entry
+    addr: 0x4429b8
+    entry_size: 8
+    index: 5
+    expect_key: 0x11
+    expect_value: 0x441d57
+
+- id: texvm.optable.entry.0x12
+  statement: "Operator id 0x12 maps to handler 0x441e67."
+  evidence: BYTES
+  check:
+    kind: table_entry
+    addr: 0x4429b8
+    entry_size: 8
+    index: 6
+    expect_key: 0x12
+    expect_value: 0x441e67
+
+- id: texvm.optable.entry.0x41
+  statement: "Operator id 0x41 maps to handler 0x442789."
+  evidence: BYTES
+  check:
+    kind: table_entry
+    addr: 0x4429b8
+    entry_size: 8
+    index: 23
+    expect_key: 0x41
+    expect_value: 0x442789
+
+- id: texvm.prng.constant
+  statement: "The PRNG at .data:0x4418f8 multiplies its state by 0xFACEDEAD then rcr 3, xchg ch,cl, inc."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4418fe
+    expect: "69c9addecefa c1d903 86cd 41"
+
+- id: texvm.prng.rcr.hazard
+  statement: "rcr is rotate-through-carry, so the incoming carry flag participates; a plain ror is not equivalent and desynchronises the sequence."
+  evidence: DISASM
+  locator: ".data:0x441904 (x86 semantics of rcr)"
+
+- id: texvm.layer.shift
+  statement: "Operators 0x01-0x04 resolve a layer address as (index << 0x12) + [0x44292c], i.e. 0x40000 bytes per layer."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4418ea
+    expect: "0fb6f0 c1e612 03352c294400"
+
+- id: texvm.layer.size.meaning
+  statement: "0x40000 bytes per layer equals 256*256*4, and the interpreter zeroes 0x50000 dwords = 5 layers."
+  evidence: DISASM
+  locator: ".data:0x4418a9 (mov ecx,0x50000) plus the shift above; arithmetic is exact, the 'five-layer bank' framing follows from it"
+
+- id: texvm.carry.protocol
+  statement: "The carry flag signals continue/stop to the interpreter: operator 0x12 ends with clc, the layer/output handler ends with stc."
+  evidence: DISASM
+  locator: ".data:0x441f0a (clc), .data:0x4418f6 (stc)"
+
+- id: texvm.masks
+  statement: ".data:0x441840 holds MMX channel masks 0x1f / 0x7e0-style values consistent with RGB 565/555."
+  evidence: BYTES
+  check:
+    kind: u32
+    addr: 0x441840
+    expect: 0x0000001f
+
+# ------------------------------------------------- texture operator semantics
+- id: texop.0x12.valuenoise
+  statement: "Operator 0x12 (0x441e67) is one octave of value noise: its last argument byte n sets lattice step 1<<n and amplitude 0x1000>>n, and output is replicated to greyscale via imul eax,eax,0x10101."
+  evidence: DISASM
+  locator: "texture-ops.txt, .data:0x441e67..0x441f0a"
+
+- id: texop.0x12.amp.const
+  statement: "Operator 0x12 loads base amplitude 0x1000 before shifting it right by n."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x441e7e
+    expect: "bd00100000"
+
+- id: texop.0x12.lattice8bit
+  statement: "Operator 0x12 walks its lattice in 8-bit registers (add bl,dl / add bh,dl) and terminates on 8-bit wraparound, so 256x256 is hardwired into the operator."
+  evidence: DISASM
+  locator: "texture-ops.txt, .data:0x441e96..0x441e9c"
+
+- id: texop.0x11.plasma
+  statement: "Operator 0x11 (0x441d57) is plasma / diamond-square: it sums four neighbours, adds a scaled random displacement, and halves the step from 0x80."
+  evidence: DISASM
+  locator: "texture-ops.txt, .data:0x441d57..0x441dbc"
+
+- id: texop.0x13.sine
+  statement: "Operator 0x13 (0x441f0c) computes two sines (two fsin instructions) from (freq,phase) argument pairs, freq doubled and phase scaled by 1/128."
+  evidence: DISASM
+  locator: "texture-ops.txt, .data:0x441f0c..0x441f80"
+
+- id: texop.0x15.radial
+  statement: "Operator 0x15 (0x442050) forms (x-128)^2+(y-128)^2, takes fsqrt then fsin, giving concentric radial rings; its third argument (0x78=120) scales the radius."
+  evidence: DISASM
+  locator: "texture-ops.txt, .data:0x442050..0x4420b0"
+
+- id: texop.0x41.blend
+  statement: "Operator 0x41 (0x442789) resolves two layer addresses then combines them with punpcklbw/pmulhw/paddw/packuswb, i.e. a weighted blend of two layers."
+  evidence: DISASM
+  locator: "texture-ops.txt, .data:0x442789..0x442818"
+
+- id: texop.0x21.spiral
+  statement: "Operator 0x21 (0x44211a) is a radial/angular (spiral-family) pattern."
+  evidence: INFER
+  locator: "NOT ESTABLISHED — based only on an instruction census (2x fsin + fsqrt, no MMX) and its 9 argument bytes. The routine has not been read through."
+
+- id: texop.0x40.perelement
+  statement: "Operator 0x40 is a per-element operation (placing a feature repeatedly) rather than a whole-image filter."
+  evidence: INFER
+  locator: "based only on it appearing 14 times consecutively in program 5; the handler has not been read"
+
+- id: texop.argconvention
+  statement: "Operator arguments beginning 0x01/0x02 then 0x07 mean (target layer, channel mask = RGB)."
+  evidence: INFER
+  locator: "pattern across traced programs only; no handler has been read to confirm the field meanings"
+
+- id: texop.families
+  statement: "The operator id ranges correspond to sources, filters, combiners and colour operations."
+  evidence: INFER
+  locator: "grouping of ids is BYTES; the category names are guesses"
+
+- id: texop.unreversed
+  statement: "16 of the 23 used operators have not been read at all: 0x02-0x04 (variants), 0x10, 0x14, 0x20, 0x24, 0x31, 0x32, 0x33, 0x35, 0x36, 0x37, 0x40, 0x50, 0x51."
+  evidence: TRACE
+  locator: "complement of the DISASM claims above; recorded so the gap is explicit"
+
+# --------------------------------------------------------- texture allocation
+- id: texalloc.addr
+  statement: "The texture allocator .text:0x4088c9 stores width from EAX at tex+0x18 and computes stride as ((w+7)&~7)*4."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4088ca
+    expect: "894618 83c007 83e0f8 c1e002"
+
+- id: texalloc.callsite.256
+  statement: "The call site .text:0x4089d5 passes width 0x100 (256) in EAX with EDX copied from it."
+  evidence: BYTES
+  check:
+    kind: bytes
+    addr: 0x4089d5
+    expect: "b800010000 8bd0"
+
+- id: texalloc.count
+  statement: "The intro performs 11 texture allocations: ten 256x256 plus one 320x176."
+  evidence: CROSS
+  locator: "independent allocator hook (tools/emulate_count.py) counting .text:0x4088c9 calls, agreeing with 11 interpreter invocations traced separately. This is the measure that falsified the earlier claim of 3."
+
+- id: texalloc.framebuffer
+  statement: "The 320x176 allocation is the framebuffer sharing the texture allocator, leaving ten real textures."
+  evidence: INFER
+  locator: "the size matches the command-line render resolution; not otherwise confirmed"
+
+# ----------------------------------------------------------- texture programs
+- id: texprog.addresses
+  statement: "There are 11 texture programs, at 0x41b6b1, 0x41b6be, 0x41b6cf, 0x41b9d6, 0x428de8, 0x428e74, 0x428ef5, 0x428f97, 0x428fc2, 0x428fe5, 0x429137."
+  evidence: CROSS
+  locator: "interpreter-entry trace (tools/emulate_extract_full.py) cross-checked against the independent allocator count of 11"
+
+- id: texprog.first.byte
+  statement: "The first texture program at 0x41b6b1 starts with operator id 0x15."
+  evidence: BYTES
+  check:
+    kind: u8
+    addr: 0x41b6b1
+    expect: 0x15
+
+- id: texprog.pool2.first.byte
+  statement: "The second program pool begins at 0x428de8 with operator id 0x11."
+  evidence: BYTES
+  check:
+    kind: u8
+    addr: 0x428de8
+    expect: 0x11
+
+- id: texprog.operators.used
+  statement: "23 of the 26 operators are used across 148 invocations; 0x22, 0x30 and 0x34 are never used."
+  evidence: TRACE
+  locator: "tools/emulate_extract_full.py. Stop reason was an emulation fault in the sound path, NOT clean program exit, so per METHODOLOGY.md this remains a lower bound on operator usage."
+
+- id: texprog.terminators
+  statement: "Every program ends on an operator in 0x01-0x04, which combined with the index<<18 layer resolver means the terminating opcode is itself the destination layer index."
+  evidence: TRACE
+  locator: "all 11 programs in texture-programs.txt; the layer-index reading is DISASM (texvm.layer.shift)"
+
+# ------------------------------------------------------------- shade tree
+- id: shadetree.addr
+  statement: "The material/shade-tree evaluator is at .text:0x4023b7, recursing over 32-byte nodes and sampling a texture via node+0x04 with UV masks 0x3fc00/0x3fc."
+  evidence: DISASM
+  locator: "disasm-key-routines.txt, .text:0x4023b7"
+
+- id: shadetree.hardcoded256
+  statement: "The sampler's masks and shifts hardwire 256x256 with a 1024-byte stride, matching the allocator's stride for w=256."
+  evidence: DISASM
+  locator: ".text:0x4023d8..0x4023ef combined with texalloc.addr"
+
+- id: bumpmap.addr
+  statement: "Bump-mapped shading at .text:0x40ae01 samples signed 16-bit texels (fimul word[...]) to perturb the normal."
+  evidence: DISASM
+  locator: "disasm-key-routines.txt, .text:0x40ae01"
+
+# ----------------------------------------------------------------- remaster
+- id: remaster.octave.rule
+  statement: "At 4x, lattice-based generators (0x11, 0x12) need +2 octaves / 2 extra subdivision levels and renormalisation, while analytic generators (0x13, 0x15) only need their normalisation constants changed."
+  evidence: DISASM
+  locator: "follows from texop.0x11.plasma, texop.0x12.valuenoise, texop.0x13.sine, texop.0x15.radial. Applies only to the four operators actually read; the other 19 used operators have unknown scaling behaviour."
+
+- id: remaster.prng.ordering
+  statement: "Because coarse levels consume PRNG draws before fine ones, starting plasma at a 4x-larger step reproduces the original's coarse draws in identical order, so large-scale structure stays bit-identical."
+  evidence: INFER
+  locator: "reasoned from the traversal order in texop.0x11.plasma; NOT empirically verified by diffing a re-run against the original buffers"
+
+# --------------------------------------------------------------------- audio
+- id: audio.module
+  statement: "The soundtrack is a FastTracker 2 XM module (heaven7.xm by Shaman), not a softsynth."
+  evidence: INFER
+  locator: "external sources (Mod Archive 150033, Demozoo) plus the binary importing only DirectSound; the binary's replayer has not been identified in the disassembly"

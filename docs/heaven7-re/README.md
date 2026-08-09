@@ -4,6 +4,20 @@ Findings from statically reversing the unpacked `heaven7w.exe` (Exceed, 2000),
 targeting the two things a faithful port needs out of the binary: the **scene
 script** (the animation timeline) and the **texture/material system**.
 
+> **Evidence discipline.** Every claim in this document is registered in
+> [`claims.yaml`](claims.yaml) with a provenance class — `BYTES` (read from the
+> binary, machine-verified), `DISASM` (read from instruction semantics), `TRACE`
+> (observed in emulation, with stop reason), `CROSS` (two independent measures),
+> or `INFER` (**hypothesis, not evidence**). Re-check the factual base with:
+>
+> ```bash
+> H7_EXE=h7w_unpacked.exe python3 tools/verify_claims.py claims.yaml
+> ```
+>
+> 24 `BYTES` claims currently pass; **10 claims are `INFER`** and are flagged as
+> such wherever they appear. See [`METHODOLOGY.md`](METHODOLOGY.md) for the
+> classes, the completeness rule, and the retraction log.
+
 **Status: the scene script is extracted.** A headless CPU-emulation harness
 (`tools/emulate_extract.py`, no Windows/Wine/GPU needed) runs the real binary
 far enough to interpret the timeline and dumps it: **201 opcodes / 1735
@@ -650,6 +664,9 @@ The recommended order:
 
 ## Files
 
+- **`claims.yaml`** — every claim with its provenance class; the machine-checkable
+  ones are re-verified against the binary by `tools/verify_claims.py`.
+- **`METHODOLOGY.md`** — provenance classes, the completeness rule, retraction log.
 - **`scene-script.txt`** — the extracted timeline: 201 opcodes with decoded
   arguments. The primary artifact.
 - **`scene-script-dump.json`** — the same data raw (opcode stream + token
