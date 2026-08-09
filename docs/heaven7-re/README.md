@@ -433,6 +433,58 @@ remaster's large-scale structure is bit-identical to the original, with the new
 octaves adding only detail the 256×256 version had no room to express. That is
 the precise sense in which this is a remaster rather than a reinterpretation.
 
+### 3.2d All seven operators identified
+
+The remaining operators are analytic (x87 float) rather than lattice-based, and
+one is a combiner. The float constant pool the texture VM uses decodes cleanly,
+which is what made these readable:
+
+| Address | Value | Role |
+|---|---|---|
+| `0x44293c` | `1.5707964` | **π/2** |
+| `0x442948` | `0.0078125` | **1/128** — coordinate normalisation |
+| `0x442944` | `0.00390625` | **1/256** |
+| `0x44294c` | `128.0` | half-extent (image centre) |
+
+Complete operator table for the set the intro actually uses:
+
+| Op | Handler | What it is | Evidence |
+|---|---|---|---|
+| `0x01`–`0x04` | `0x4418ea` | **layer address / output** — `index<<18` + base, `stc` ends the program | §3.2c |
+| `0x11` | `0x441d57` | **plasma** (diamond-square midpoint displacement) | 4-corner average + scaled random, step halves from 128 |
+| `0x12` | `0x441e67` | **value noise**, one octave | `step=1<<n`, `amp=0x1000>>n`, lattice + interpolation |
+| `0x13` | `0x441f0c` | **sine interference** — two sine waves in x and y | 2× `fsin`; args are (freq, phase) pairs, freq doubled, phase × 1/128 |
+| `0x15` | `0x442050` | **radial rings** — `sin` of distance from centre | `fsqrt` + `fsin` over `(x-128)² + (y-128)²`, arg `0x78`=120 scales the radius |
+| `0x21` | `0x44211a` | **radial/angular pattern** (spiral-family) — richest generator, 9 args | 2× `fsin` + `fsqrt`, no MMX |
+| `0x41` | `0x442789` | **weighted blend of two layers** | calls the layer resolver **twice**, then `punpcklbw`/`pmulhw`/`paddw`/`packuswb` |
+
+So the pipeline in program 2 reads as: generate noise → overlay a sine pattern →
+blend two layers → apply a radial/angular pattern → output. Exactly the shape of
+a hand-built procedural material.
+
+#### This sharpens the 4× strategy considerably
+
+Only **two of the six generators are lattice-based**. That splits the remaster
+work cleanly:
+
+| Operator | Scaling behaviour at 4× |
+|---|---|
+| `0x11` plasma, `0x12` value noise | **lattice-bound** — need the octave/subdivision treatment of §3.2b–c, else they upscale smoothly |
+| `0x13`, `0x15`, `0x21` | **analytic** — continuous functions of coordinates; they get sharper *for free*. Only the normalisation constants change (`1/128 → 1/512`, `128.0 → 512.0`) |
+| `0x41` blend | per-pixel, resolution-agnostic |
+
+That is a much smaller job than "port a texture generator": three operators need
+only a constant swap, one is a blend, and the octave work applies to exactly two.
+
+#### Honest status on these seven
+
+What is established is *what each operator is* — the conceptually hard part, and
+enough to plan the port and the remaster. What still needs care is transcribing
+the **exact arithmetic** for bit-exactness: the interpolation kernels in `0x11`
+and `0x12`, the fixed-point rounding in `0x41`'s `pmulhw` path, and the precise
+argument-to-parameter mapping for `0x21`'s nine bytes. Those are transcription
+tasks against `texture-programs.txt`, not open questions.
+
 ### 3.3 Runtime shade-tree — `.text:0x4023b7`
 
 A **recursive evaluator over 32-byte nodes** (`ESI` = node). It is the material
@@ -539,7 +591,7 @@ What a *complete* port needs from the binary, and where each piece stands:
 | Scene timeline (full, clock advancing) | needs one longer run | §3.4 caveat |
 | Texture generator VM + operator table | **located, 26 ops disassembled** | §3.1, `texture-ops.txt` |
 | Texture programs (per-texture byte streams) | **extracted** | `texture-programs.txt` |
-| Texture operator *semantics* | `0x01`–`0x04`, `0x11`, `0x12` + PRNG reversed; 4 to go (`0x13`, `0x15`, `0x21`, `0x41`) | §3.2b–c |
+| Texture operator *semantics* | **all 7 identified**; exact arithmetic still to transcribe | §3.2b–d |
 | Octave strategy for 4× | **decided** | §3.2b |
 | Shade-tree / material evaluator | characterized | §3.3 |
 | Bump mapping | characterized | §3.3 |
