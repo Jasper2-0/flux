@@ -285,6 +285,71 @@ operator *math*, at which point any resolution is free. This is exactly why
 dumped texture pixels are not sufficient for a remaster and the operators must
 be reimplemented.
 
+### 3.2b The noise operators, octaves, and what 4× actually requires
+
+Operator `0x12` (`0x441e67`) is a **value-noise octave generator**, and reading
+it answers how a remaster must handle detail. Its final argument byte is a
+**frequency exponent** `n`:
+
+```asm
+00441e7e  mov ebp, 0x1000          ; base amplitude
+00441e83  mov edx, 1
+00441e88  mov cl, byte ptr [esi]   ; n  (0x05 in the intro's program)
+00441e8a  shl edx, cl              ; lattice step  = 1 << n      (32)
+00441e8c  shr ebp, cl              ; amplitude     = 0x1000 >> n (128)
+00441e8e  call 0x4418f8            ; hash -> random value
+00441e93  mov byte ptr [edi + ebx*4], cl   ; seed the sparse lattice
+00441e96  add bl, dl               ; step x  (8-bit -> wraps at 256)
+00441e98  jne 0x441e8e
+00441e9a  add bh, dl               ; step y  (8-bit -> wraps at 256)
+```
+
+Three things follow, all of which matter for the remaster:
+
+1. **Amplitude is already 1/f.** `amplitude = 0x1000 >> n` against
+   `step = 1 << n` is textbook fBm falloff, so the operator set is built for
+   octave stacking. Output is greyscale (`imul eax, eax, 0x10101` replicates one
+   byte across RGB).
+2. **One invocation = one octave.** There is no outer frequency loop; the loops
+   are the lattice fill and the interpolation. Multi-octave noise is therefore
+   composed at the *program* level (or by one of the other five operators in the
+   `0x10`–`0x15` family — `0x11` takes 10 argument bytes rather than 7, so a
+   multi-octave/turbulence variant is the likely reading, to be confirmed).
+3. **256 is baked into the operator, not just the sampler.** The lattice walk
+   uses **8-bit registers** (`bl`, `bh`) and terminates on 8-bit wraparound;
+   the interpolation loop uses 16-bit `cx`. So the operator itself is hardwired
+   to 256×256.
+
+**Correction to §3.2:** it is the *allocator* that is resolution-parameterised
+(width/height in `EAX`/`EDX`). The noise operator is not. A 4× remaster
+therefore cannot be had by passing a larger size to the original code — it
+requires the reimplementation, which is what we are doing anyway.
+
+#### The octave rule for a 4× remaster
+
+Rendering the same octaves at 1024×1024 yields a *smooth upscale*: the finest
+feature stays 4 px wide. To genuinely remaster:
+
+- **Preserve feature scale:** shift each existing octave's exponent by
+  `log2(4) = 2` (so the intro's `n = 5` becomes `n = 7`), keeping the lattice
+  step the same fraction of the image.
+- **Add detail:** append **2 extra octaves** at the new fine end (exponents
+  `n = 1, 0`) so noise again reaches 1-pixel features, continuing the
+  `0x1000 >> n` amplitude falloff so the new detail enters at the correct
+  (low) energy rather than as visible grain.
+- **Renormalise.** Adding octaves increases the amplitude sum, which shifts
+  contrast and mean brightness. Divide by the sum of amplitudes actually used
+  so the remaster reads as *sharper*, not *different* — otherwise the extra
+  octaves change the look, defeating the point of a faithful restoration.
+- Use **10-bit lattice coordinates** in WGSL in place of the original's 8-bit
+  wraparound, and keep the hash function (`0x4418f8`) bit-exact so the
+  low-frequency octaves reproduce the original's structure rather than merely
+  resembling it.
+
+Keeping the hash exact while extending octaves is what makes the remaster the
+*same* image with more detail: octaves 7…2 reproduce the original's shapes,
+octaves 1…0 are new information the 256×256 original never had room for.
+
 ### 3.3 Runtime shade-tree — `.text:0x4023b7`
 
 A **recursive evaluator over 32-byte nodes** (`ESI` = node). It is the material
@@ -391,7 +456,8 @@ What a *complete* port needs from the binary, and where each piece stands:
 | Scene timeline (full, clock advancing) | needs one longer run | §3.4 caveat |
 | Texture generator VM + operator table | **located, 26 ops disassembled** | §3.1, `texture-ops.txt` |
 | Texture programs (per-texture byte streams) | **extracted** | `texture-programs.txt` |
-| Texture operator *semantics* | **not yet reversed** — the main remaining work | **7** handlers (not 26) |
+| Texture operator *semantics* | `0x12` reversed (value noise); 6 to go | **7** handlers (not 26) |
+| Octave strategy for 4× | **decided** | §3.2b |
 | Shade-tree / material evaluator | characterized | §3.3 |
 | Bump mapping | characterized | §3.3 |
 | Music | **solved** — XM module + JS replayer | `demos/heaven7-webgpu` |
