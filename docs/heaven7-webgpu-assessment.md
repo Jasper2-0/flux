@@ -141,6 +141,37 @@ cylinder/column geometry), Phong + specular, mirror reflections, hard
 shadows, procedural textures, adaptive 1×1/2×2/4×4 subsampling, MMX
 reconstruction + glow, 320×240-ish framebuffer stretched to screen.
 
+### How the adaptive subsampling actually worked
+
+Picard's own making-of page (`www.demoscene.hu/~picard/h7`) documented the
+technique, but it is offline and the Internet Archive is blocked from this
+environment, so the algorithm below is reconstructed from a secondary source
+that studied and reimplemented it (Ralf Jung's "Breaking All the Way Out"
+university raytracer, which cites Heaven 7 as its inspiration) — treat the
+mechanism as accurate in outline but not a verbatim transcription of Picard's
+code:
+
+1. Trace only every 8th pixel in both axes — a sparse grid of 8×8 blocks.
+2. For each 8×8 block, compare the colours already traced at its corners. If
+   they differ by more than a threshold, subdivide into four 4×4 blocks,
+   tracing 5 new rays: the block centre and the four edge midpoints.
+3. Recurse the test per sub-block down to 1×1, or stop early where the corner
+   colours are close enough.
+4. Bilinearly interpolate every pixel that was never traced.
+
+In practice this traces only ~10–20% of the rays for the smooth, mostly
+untextured surfaces Heaven 7 favours, while still resolving the visually
+important discontinuities (geometry silhouettes and shadow edges) by forcing
+subdivision exactly where colours jump. That is the whole reason a per-pixel
+x87 raytracer ran at interactive rates on a Pentium — and precisely the
+constraint a GPU removes.
+
+For a *faithful* restoration this matters in two ways: an "authentic 2000"
+mode should reproduce the interpolation (and its soft, slightly smeared look
+on curved reflections) rather than trace every pixel, and the corner-contrast
+threshold is a knob worth exposing. For a *modern* port it can be dropped
+entirely.
+
 On WebGPU this inverts beautifully:
 
 - **One compute thread per pixel** replaces the entire adaptive-subsampling
