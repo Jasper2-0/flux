@@ -211,6 +211,75 @@ operator naturally.
 
 ---
 
+## 9. Signal path breakdown
+
+V2 is structured **voice → channel → master** with two clock domains: audio DSP runs
+per-sample in frames of 128 samples @ 44.1 kHz (frame length scales with sample rate),
+while *all* modulation — EGs, LFOs, mod matrix, MIDI — updates once per frame (~345 Hz).
+Only the voice amp gain interpolates across a frame. This control-rate stepping is a
+defining part of the V2 sound and must be preserved in a port.
+
+```
+VOICE (mono, ×64)          CHANNEL (stereo, ×16)            MASTER
+┌──────────────────┐       ┌───────────────────────┐        ┌─────────────────┐
+│ Osc1 ─┐          │       │ + AuxA/B receive      │  Aux1─▶│ Reverb ──┐      │
+│ Osc2 ─┼▶ Σ/ring  │       │ DC filter             │  Aux2─▶│ Delay ───┤      │
+│ Osc3 ─┘   │      │       │ Compressor            │        │          ▼      │
+│           ▼      │  amp  │ Bass boost (lo-shelf) │  mix ─▶│ Σ ─ DC filter   │
+│ VCF1 ─▶ VCF2     │──────▶│ Dist ⇄ Chorus/Flanger │───────▶│   Low/High cut  │
+│ (single/ser/par) │  pan  │ (order switchable)    │        │   Sum compressor│
+│ Distortion       │       │ Sends: Aux1 Aux2 A B  │        │        ▼        │
+│ DC filter        │       │ (ch16 = Ronan insert) │        │      output     │
+└──────────────────┘       └───────────────────────┘        └─────────────────┘
+   2×EG  2×LFO  ── mod matrix ──▶ any parameter byte (control rate)
+```
+
+**Voice level (mono).** Three oscillators render *into* a shared mono buffer, which
+enables order-dependent tricks: the ring-mod flag multiplies an oscillator into the sum
+of its predecessors; the FM mode is a sine carrier phase-modulated by *whatever is
+already in the buffer* (so saw, noise, other FM stacks or even the aux buses can be the
+modulator); and two oscillator modes read the global AuxA/AuxB buses — bus feedback into
+a voice. Waveforms: morphable tri/saw ("Color" slides the break point ramp→tri→saw),
+pulse (Color = PW), sine, filtered noise, FM sine, AuxA/B. Tri/saw and pulse are
+anti-aliased by exact per-sample averaging of the ideal waveform (an integrated-waveform
+state machine). Key sync: none / phase reset / full reset. Then: two filters (2-pole
+resonant LP/BP/HP/notch/allpass + Moog-ladder LP/HP models) in single, serial, or
+parallel-with-balance routing; a distortion stage (overdrive / clip / bitcrusher-with-XOR /
+decimator / or a third filter of any mode); DC blocker; Amp-EG-driven amplifier with
+per-frame gain ramping and equal-power pan into the channel buffer.
+
+**Modulation.** Per patch: 2 EGs (attack-delta / decay-mult / sustain *with its own
+rise-or-fall slope* / release-mult, output 0–128), 2 LFOs (saw/tri/pulse/sin/S&H,
+free or key-synced, one-shot "EG mode", polarity +/−/±, up to ~43 Hz), and a
+variable-length mod matrix of `(source, amount, destination)` bytes where destination is
+a **raw byte offset into the patch parameter block** — every voice and channel parameter
+is a mod target. Sources: velocity, note, CC1–7, both EGs, both LFOs. Per frame, patch
+bytes are copied to floats, mods added and clamped to 0–128, and the same `set()` path
+the GUI uses recomputes DSP coefficients. Consequence: the `syVV2`/`syVChan` byte
+layouts are effectively the file-format API — they must stay frozen or every existing
+patch and V2M breaks (the source warns exactly this).
+
+**Channel level (16 parts, stereo).** Voice sum → DC filter → compressor (peak/RMS,
+mono/stereo link, lookahead, auto-gain) → fixed low-shelf bass boost → distortion and
+chorus/flanger (two-tap modulated delay with feedback) in switchable order → four sends:
+Aux1 (mono → global reverb), Aux2 (mono → global delay), AuxA/AuxB (stereo buses other
+channels can receive; channels process 0→15 so sends flow downstream within a frame) →
+channel gain into the mix. **Channel 16 is Ronan's insert point**: the speech synth
+formant-filters that channel's voice output, which is why speech tracks pitch and
+polyphony for free.
+
+**Master.** Reverb (per side: 4 parallel combs + 2 series allpasses with damping,
+Schroeder/Moorer topology, detuned L/R delay lengths, fed from Aux1) and the modulated
+stereo delay (fed from Aux2) join the mix, then DC filter → one-pole low-cut/high-cut →
+sum compressor → out.
+
+**Porting notes from the signal path.** The synth is one mono voice algorithm plus bus
+plumbing — the richness is routing, not module count. Keep the frame-rate modulation
+domain, the frozen parameter layouts, and the deliberate quirks (`BUG_V2_FM_RANGE`
+et al.) exactly as-is; they are the sound.
+
+---
+
 ### Appendix: verification log (this assessment)
 
 Environment: Ubuntu 24.04, g++ 13.3, x86_64.
